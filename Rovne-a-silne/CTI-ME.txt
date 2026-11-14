@@ -1,0 +1,33 @@
+ROVNĚ A SILNĚ – tréninkový plán
+================================
+
+Co je v balíčku
+---------------
+Rovne-a-silne.html   Aplikace s tréninkem: animované ukázky cviků, odškrtávání
+                     sérií, zápis vah, časovač okruhu a přehled týdnů.
+Popis-cviku.html     Přehled všech cviků: k čemu který je, jak ho dělat
+                     a na co si dát pozor. Dá se i vytisknout (Ctrl+P).
+CTI-ME.txt           Tento soubor.
+
+Jak to spustit
+--------------
+1. Rozbal ZIP kamkoli (třeba do Dokumentů).
+2. Dvojklikem otevři Rovne-a-silne.html. Otevře se ve webovém prohlížeči,
+   nic se neinstaluje.
+3. Na internetu není potřeba být. Bez připojení se jen použije jiné písmo.
+
+Kde se ukládají záznamy
+-----------------------
+Odškrtnuté série, váhy a chůze se ukládají v prohlížeči na tomhle počítači.
+- Používej pořád stejný prohlížeč. Jiný prohlížeč nebo jiný počítač začne
+  s prázdným přehledem.
+- Když v prohlížeči vymažeš data webů nebo historii, záznamy se smažou.
+- Soubor nepřejmenovávej a nepřesouvej, jinak ho některé prohlížeče
+  berou jako jinou stránku a záznamy „zmizí“.
+
+Online verze
+------------
+Stejná aplikace je i na claude.ai (odkaz máš v konverzaci s Claudem).
+Tam se záznamy ukládají k tvému účtu, takže je vidíš na každém počítači
+i na telefonu. Záznamy z online verze a z tohoto souboru se navzájem
+nepropojují.

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Upright stick figure over a level line, like the app's figures. Kept inside the 66dp safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,29m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M54,39 L54,60 M54,42 L44,54 M54,42 L64,54 M54,60 L47,77 M54,60 L61,77" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.7"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M37,60 L41,60 M45,60 L49,60 M59,60 L63,60 M67,60 L71,60" />
+</vector>

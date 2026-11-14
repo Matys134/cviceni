@@ -1,0 +1,10 @@
+*.zip
+*.apk
+*.p12
+*.jks
+*.keystore
+local.properties
+.gradle/
+android/build/
+android/app/build/
+.idea/

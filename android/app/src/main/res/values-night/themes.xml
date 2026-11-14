@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark palette from the web app; a non-light theme also makes the WebView report prefers-color-scheme: dark. -->
+    <color name="bg">#0E1312</color>
+    <color name="accent">#3CC7A2</color>
+
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
+</resources>

@@ -1,0 +1,1584 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body style="margin:0">
+<title>Rovně a silně</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one narrow column built for a phone on the floor next to the mat — week strip, then the workout as a stack of exercise cards with a live figure on each. */
+:root {
+  --bg: #EFF2F1;
+  --surface: #FFFFFF;
+  --panel: #E5EAE8;
+  --ink: #131917;
+  --muted: #59645F;
+  --line: #D3DAD7;
+  --accent: #0B7560;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D5ECE5;
+  --weak: #A85F00;
+  --weak-soft: #F5E5CC;
+  --danger: #B3261E;
+  --fig: #131917;
+  --fig-far: #97A39E;
+  --ghost: #C3CCC8;
+  --floor: #AEB9B4;
+  --prop: #7A8883;
+  --prop-fill: #CDD5D2;
+  --band: #0B7560;
+  --f-display: "Archivo", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1312; --surface: #161D1B; --panel: #1C2523; --ink: #E5ECE9; --muted: #98A6A0;
+    --line: #2A3532; --accent: #3CC7A2; --accent-ink: #052019; --accent-soft: #15342B;
+    --weak: #F0A43C; --weak-soft: #3A2A12; --danger: #F2867E;
+    --fig: #E5ECE9; --fig-far: #5A6762; --ghost: #33403C; --floor: #3B4743;
+    --prop: #7E8C87; --prop-fill: #2B3633; --band: #3CC7A2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1312; --surface: #161D1B; --panel: #1C2523; --ink: #E5ECE9; --muted: #98A6A0;
+  --line: #2A3532; --accent: #3CC7A2; --accent-ink: #052019; --accent-soft: #15342B;
+  --weak: #F0A43C; --weak-soft: #3A2A12; --danger: #F2867E;
+  --fig: #E5ECE9; --fig-far: #5A6762; --ghost: #33403C; --floor: #3B4743;
+  --prop: #7E8C87; --prop-fill: #2B3633; --band: #3CC7A2;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.wrap { max-width: 780px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
+.top h1 {
+  font-size: clamp(30px, 7vw, 44px);
+  font-weight: 800;
+  font-stretch: 72%;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+}
+.top h1 span { color: var(--accent); }
+.phase { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.phase b { color: var(--ink); font-family: var(--f-display); font-stretch: 80%; letter-spacing: 0.02em; }
+
+.tabs {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  display: flex; gap: 4px; margin: 18px -16px 0; padding: 8px 16px;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.tabs button {
+  flex: 1 1 0; min-width: 0; border: 0; background: transparent; padding: 9px 6px; border-radius: 8px;
+  font-family: var(--f-display); font-weight: 700; font-stretch: 85%; font-size: 15px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted);
+}
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+
+section.view { padding-top: 18px; display: flex; flex-direction: column; gap: 22px; }
+
+/* Week strip */
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.day {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 7px 4px 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; text-align: center;
+}
+.day.today { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.day.past:not(.today) { background: transparent; }
+.dname { font-family: var(--f-display); font-weight: 700; font-stretch: 80%; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+.dnum { font-size: 12px; color: var(--muted); line-height: 1; }
+.dplan { font-size: 11px; line-height: 1.15; color: var(--muted); min-height: 26px; display: flex; align-items: center; justify-content: center; hyphens: auto; }
+.chips { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; min-height: 26px; align-items: center; }
+.chip {
+  display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-weight: 800; font-size: 13px;
+}
+.chip.s { background: var(--accent-soft); color: var(--accent); }
+.walk {
+  width: 30px; height: 26px; border-radius: 7px; border: 1px dashed var(--line); background: transparent;
+  display: grid; place-items: center; color: var(--muted); padding: 0;
+}
+.walk svg { width: 16px; height: 16px; }
+.walk[aria-pressed="true"] { border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); }
+.week-sum { margin: 8px 2px 0; font-size: 14px; color: var(--muted); }
+
+/* Session head */
+.head-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.head-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.head-card h2 { font-size: 30px; font-weight: 800; font-stretch: 75%; text-transform: uppercase; letter-spacing: 0.01em; line-height: 1; }
+.seg { display: inline-flex; background: var(--panel); border-radius: 9px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; padding: 7px 11px; border-radius: 7px; font-size: 14px; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.seg button:disabled { cursor: not-allowed; opacity: .55; }
+.bar { height: 8px; background: var(--panel); border-radius: 99px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s ease; }
+.prog-txt { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+.note { font-size: 14px; color: var(--muted); margin: 0; }
+.banner {
+  background: var(--accent-soft); color: var(--ink); border-radius: var(--r); padding: 12px 14px; font-size: 15px;
+  display: flex; gap: 10px; align-items: center;
+}
+.banner svg { flex: none; width: 22px; height: 22px; color: var(--accent); }
+
+/* Blocks */
+.block { display: flex; flex-direction: column; gap: 12px; }
+.block-head { display: flex; gap: 12px; align-items: baseline; }
+.block-no {
+  font-family: var(--f-display); font-weight: 800; font-stretch: 70%; font-size: 34px; line-height: 1; color: var(--accent);
+  min-width: 22px;
+}
+.block-head h2 { font-size: 22px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: 0.02em; }
+.block-head p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+
+/* Exercise card */
+.ex {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px;
+  display: grid; grid-template-columns: 1fr; gap: 12px;
+}
+.ex.complete { border-color: var(--accent); }
+@media (min-width: 640px) { .ex { grid-template-columns: 230px minmax(0, 1fr); padding: 14px; gap: 16px; } }
+.fig { background: var(--panel); border-radius: 9px; aspect-ratio: 220 / 140; max-width: 100%; position: relative; overflow: hidden; }
+.fig svg { display: block; width: 100%; height: 100%; }
+.fig[title] { cursor: pointer; }
+.fig.paused::after {
+  content: 'Zastaveno'; position: absolute; right: 8px; top: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--weak); font-family: var(--f-display); font-stretch: 85%;
+}
+.figcol { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.cap { margin: 0; font-size: 14px; line-height: 1.3; min-height: 2.6em; display: flex; gap: 8px; align-items: flex-start; }
+.cap b {
+  flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; margin-top: -1px;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-size: 12px; font-weight: 800;
+}
+.fig .tag {
+  position: absolute; left: 8px; top: 7px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  font-family: var(--f-display); font-weight: 700; font-stretch: 85%;
+}
+.ex-body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.ex-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.ex-head h3 { font-size: 21px; font-weight: 750; font-stretch: 85%; line-height: 1.15; }
+.rx { font-family: var(--f-display); font-weight: 800; font-size: 18px; font-stretch: 85%; color: var(--accent); white-space: nowrap; }
+.side { font-size: 13px; color: var(--muted); }
+.badge {
+  font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink);
+}
+.cues { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; font-size: 15px; }
+.cues li::marker { color: var(--accent); }
+.why { margin: 0; font-size: 15px; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; }
+.why b { color: var(--accent); }
+.mini .mini-why { color: var(--ink); border-top: 1px solid var(--line); padding-top: 6px; }
+.err { margin: 0; font-size: 14px; color: var(--muted); }
+.err strong { color: var(--danger); font-weight: 700; }
+.weak-note { margin: 0; font-size: 14px; color: var(--weak); font-weight: 700; }
+.goals { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0; font-size: 13px; color: var(--muted); }
+.goal { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--panel); color: var(--ink); }
+.goal.weak { background: var(--weak-soft); color: var(--weak); }
+.goal-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+.goal-list b { font-family: var(--f-display); font-stretch: 85%; }
+.log { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-top: 6px; border-top: 1px solid var(--line); margin-top: 2px; }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.pills .lbl { font-size: 13px; color: var(--muted); margin-right: 2px; }
+.pill {
+  min-width: 40px; height: 40px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--surface);
+  font-family: var(--f-display); font-weight: 800; font-size: 16px; padding: 0 10px;
+}
+.pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.pill.weak { border-color: var(--weak); color: var(--weak); font-size: 13px; font-stretch: 85%; }
+.pill.weak[aria-pressed="true"] { background: var(--weak); color: var(--surface); }
+.kg { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
+.kg input {
+  width: 72px; height: 40px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--surface);
+  padding: 0 8px; font-family: var(--f-display); font-weight: 700; font-size: 17px; color: var(--ink);
+}
+.btn {
+  height: 40px; border-radius: 99px; border: 1.5px solid var(--ink); background: transparent; padding: 0 14px;
+  font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.btn.run { background: var(--ink); color: var(--bg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); height: 46px; padding: 0 22px; font-size: 16px; }
+.btn.primary:disabled { opacity: .45; cursor: not-allowed; }
+.btn.quiet { border-color: var(--line); color: var(--muted); }
+.btn.danger { border-color: var(--danger); color: var(--danger); }
+.up { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: var(--muted); }
+.up input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+
+/* Circuit */
+.timer {
+  background: var(--ink); color: var(--bg); border-radius: var(--r); padding: 16px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center;
+}
+.timer .t-phase, .timer .t-name, .timer .t-next { grid-column: 1; }
+.timer .t-phase { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; font-size: 13px; opacity: .75; }
+.timer .t-name { font-family: var(--f-display); font-weight: 800; font-stretch: 80%; font-size: 24px; line-height: 1.1; }
+.timer .t-next { font-size: 14px; opacity: .75; }
+.timer .t-clock { font-family: var(--f-display); font-weight: 800; font-stretch: 75%; font-size: 64px; line-height: 1; grid-column: 2; grid-row: 1 / span 3; }
+.timer.rest .t-clock { color: var(--weak); }
+.timer.work .t-clock { color: var(--accent); }
+.timer .t-ctrl { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.timer .btn { border-color: var(--bg); color: var(--bg); }
+.timer .btn.run { background: var(--bg); color: var(--ink); }
+.timer .rounds { display: flex; gap: 6px; align-items: center; margin-left: auto; font-size: 13px; }
+.timer .pill { height: 34px; min-width: 34px; background: transparent; color: var(--bg); border-color: rgba(255,255,255,.35); }
+.timer .pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.mini {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+}
+.mini.now { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.mini h3 { font-size: 16px; font-weight: 750; font-stretch: 85%; line-height: 1.15; }
+.mini p { margin: 0; font-size: 13px; color: var(--muted); }
+.mini .fig { border-radius: 7px; }
+
+.bonus > summary { list-style: none; cursor: pointer; }
+.bonus > summary::-webkit-details-marker { display: none; }
+.bonus .tog {
+  display: inline-block; vertical-align: middle; margin-left: 6px; padding: 2px 9px; border-radius: 99px; border: 1.5px solid var(--line);
+  font-family: var(--f-body); font-size: 12px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--muted);
+}
+.bonus .tog::before { content: 'Zobrazit'; }
+.bonus[open] .tog::before { content: 'Skrýt'; }
+.finish { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.finish .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* Overview */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.tile b { display: block; font-family: var(--f-display); font-weight: 800; font-stretch: 80%; font-size: 30px; line-height: 1.05; }
+.tile span { font-size: 13px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.card .txt { margin: 0; font-size: 15px; }
+.card h2 { font-size: 20px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: 0.02em; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; }
+td.r, th.r { text-align: right; }
+.cal { max-width: 480px; display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr)); gap: 4px; font-size: 12px; }
+.cal .h { text-align: center; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.cal .wl { color: var(--muted); align-self: center; font-variant-numeric: tabular-nums; }
+.cal .c {
+  aspect-ratio: 1; max-width: 100%; border-radius: 6px; background: var(--panel); position: relative;
+  display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 13px;
+}
+.cal .c.A, .cal .c.B { background: var(--accent); color: var(--accent-ink); }
+.cal .c.S { background: var(--accent-soft); color: var(--accent); }
+.cal .c.fut { background: transparent; border: 1px dashed var(--line); }
+.cal .c.td { outline: 2px solid var(--ink); outline-offset: -2px; }
+.cal .c i { position: absolute; bottom: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--weak); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.hist { display: flex; flex-direction: column; }
+.hrow { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.hrow:last-child { border-bottom: 0; }
+.hrow .when { min-width: 92px; font-variant-numeric: tabular-nums; }
+.hrow .what { font-weight: 700; flex: 1 1 120px; min-width: 0; }
+.hrow .pct { font-variant-numeric: tabular-nums; color: var(--muted); }
+.hrow .btn { height: 32px; font-size: 13px; padding: 0 10px; }
+.empty { color: var(--muted); font-size: 15px; margin: 0; }
+
+/* Weak leg */
+.steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.steps li::marker { font-family: var(--f-display); font-weight: 800; color: var(--accent); }
+.choice { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice button { flex: 1 1 120px; height: 52px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; font-size: 16px; }
+.choice button[aria-pressed="true"] { border-color: var(--weak); background: var(--weak-soft); color: var(--ink); box-shadow: inset 0 0 0 1px var(--weak); }
+.two { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 640px) { .two { grid-template-columns: 260px minmax(0, 1fr); } }
+.list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+
+footer.store { margin-top: 28px; font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+footer.store i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+footer.store.db i { background: var(--accent); }
+footer.store { flex-wrap: wrap; }
+footer.store .link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 700; text-decoration: underline; }
+.card .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+textarea.bk {
+  width: 100%; border: 1.5px solid var(--line); border-radius: 9px; background: var(--bg); color: var(--ink);
+  padding: 8px 10px; font: 13px/1.4 ui-monospace, monospace; resize: vertical;
+}
+
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+
+<div class="wrap" lang="cs">
+  <header class="top">
+    <div>
+      <h1>Rovně <span>a</span> silně</h1>
+      <p class="phase" id="phase"></p>
+    </div>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Sekce">
+    <button role="tab" id="tab-today" data-tab="today" aria-selected="true" aria-controls="v-today">Dnes</button>
+    <button role="tab" id="tab-log" data-tab="log" aria-selected="false" aria-controls="v-log">Přehled</button>
+    <button role="tab" id="tab-weak" data-tab="weak" aria-selected="false" aria-controls="v-weak">Slabší noha</button>
+  </nav>
+  <section class="view" id="v-today" role="tabpanel" aria-labelledby="tab-today"></section>
+  <section class="view" id="v-log" role="tabpanel" aria-labelledby="tab-log" hidden></section>
+  <section class="view" id="v-weak" role="tabpanel" aria-labelledby="tab-weak" hidden></section>
+  <footer class="store" id="store"><i></i><span>Záznamy se ukládají v tomto prohlížeči.</span></footer>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= Exercise catalogue ================= */
+const EX = {
+  stoj1: { name: 'Stoj na jedné noze', why: 'Učí tělo udržet pánev vodorovně, když stojíš na jedné noze, a trénuje rovnováhu kotníku i kyčle. Míří přímo na tvoje vyosení do strany.', rx: '3 × 30 s', side: 'na každou nohu', sets: 3, hold: 30, uni: true, weak: true,
+    cues: ['Pánev drž vodorovně, nepřesouvej boky nad stojnou nohu.', 'Stojná noha zpevněná, koleno lehce povolené, váha na celém chodidle.', 'Až to půjde snadno, zavři oči nebo se postav na polštář.'],
+    err: 'Boky a trup ujíždějí do strany. Přesně to je tvoje vyosení, tak raději zkrať čas a drž pánev rovně.' },
+  pelvdrop: { name: 'Spouštění pánve na schodu', why: 'Nejpřesnější cvik na tvoje vyosení: střední hýžďový sval stojné nohy musí zvednout pánev a udržet ji vodorovně. Podle EMG studií ho zapojí víc než clamshell.', rx: '2 × 12', side: 'na nohu', sets: 2, uni: true, weak: true,
+    cues: ['Postav se bokem na schod jen jednou nohou, druhá visí volně vedle. Rukou se přidrž zdi nebo zábradlí.', 'Stojná noha zůstává natažená. Pomalu spusť volnou stranu pánve o pár centimetrů dolů.', 'Bokem stojné nohy zvedni pánev zpátky do roviny a nahoře vydrž 1 s.'],
+    err: 'Pokrčení stojného kolena nebo úklon trupu. Pohyb je jen v pánvi.' },
+  clam: { name: 'Clamshell (škeble)', why: 'Posiluje střední hýžďový sval a zevní rotátory kyčle. Ty drží pánev v rovině a koleno ve správné ose.', rx: '2 × 15', side: 'na stranu', sets: 2, uni: true, weak: true,
+    cues: ['Lehni si na bok, kolena pokrč zhruba do pravého úhlu, chodidla u sebe.', 'Horní koleno zvedej nahoru, chodidla se nerozpojí.', 'Pánev se nepřeklápí dozadu, pohyb je jen v kyčli.', 'Až bude snadný, dej si nad kolena odporovou gumu.'],
+    err: 'Velký rozsah za cenu otočení pánve. Menší, ale čistý pohyb udělá víc.' },
+  abd: { name: 'Upažování nohy vleže na boku', why: 'Izolovaně posiluje střední hýžďový sval, hlavní sval, který brání propadání pánve a přesouvání boků do strany.', rx: '2 × 12', side: 'na stranu', sets: 2, uni: true, weak: true,
+    cues: ['Spodní noha pokrčená pro stabilitu, horní natažená.', 'Horní nohu zvedej s patou mírně vzadu, špička míří dopředu.', 'Nahoře vydrž 1 s, dolů pomalu.'],
+    err: 'Špička se stáčí ke stropu. Pak pracuje přední strana stehna místo hýždě.' },
+  sideplank: { name: 'Boční plank', why: 'Posiluje boční svaly trupu a hýžďový sval spodní nohy. Učí tělo držet rovnou linii a nenaklánět se do strany.', rx: '2 × 20–30 s', side: 'na stranu', sets: 2, hold: 25, uni: true, weak: true,
+    cues: ['Loket přímo pod ramenem, tělo v jedné linii od hlavy po kotníky.', 'Zvedni boky a tlač spodní bok ke stropu.', 'Lehčí verze: spodní koleno zůstává na zemi.', 'Až zvládneš 30 s: nahoře k tomu pomalu zvedej horní nohu. Podle studií je to nejsilnější cvik na střední hýžďový sval.'],
+    err: 'Propadlé boky nebo zadek vystrčený dozadu.' },
+  bridge: { name: 'Hýžďový most', why: 'Probouzí velký hýžďový sval a zadní stranu stehen, odlehčuje bedrům a připraví boky na silovou část.', rx: '2 × 12', sets: 2,
+    cues: ['Chodidla na šířku boků, paty blízko zadku.', 'Zatni hýždě a zvedni pánev do linie kolena – boky – ramena.', 'Nahoře vydrž 2 s.'],
+    err: 'Zvedání z beder místo z hýždí. Žebra drž dole, neprohýbej se.' },
+
+  chintuck: { name: 'Zásun brady s povyrůstáním', why: 'Probouzí hluboké ohybače krku a vrací hlavu nad ramena. Verze s povyrůstáním temenem nezplošťuje horní část krku jako obyčejný zásun brady. Ve studii u lidí s napřímeným krkem zlepšila zakřivení i bolest.', rx: '2 × 10', side: 'každé drž 3 s', sets: 2,
+    cues: ['Sedni si vzpřímeně, ramena volně dole, pohled vodorovně.', 'Zasuň bradu vodorovně dozadu („dvojitá brada“) a zároveň temenem povyrůst ke stropu.', 'Vydrž 3 s a uvolni. Dělej ho i přes den u počítače, ideálně 10× denně.'],
+    err: 'Kývnutí bradou dolů k hrudníku místo zásunu dozadu. Pohled zůstává vodorovně.' },
+  retract: { name: 'Stažení lopatek s napřímením krku', why: 'Druhá část stejného programu: srovná hrudník, ramena i krk naráz a učí tělo nosit hlavu nad trupem, ne vysunutou dopředu.', rx: '5 × 10 s', sets: 5, hold: 10,
+    cues: ['Vsedě nebo ve stoje se narovnej a lehce zasuň bradu.', 'Stáhni lopatky dozadu a dolů, hrudní kost jde mírně nahoru.', 'Pak hlavu jen lehce zakloň, pohled kousek nad vodorovnou. Vydrž 10 s.'],
+    err: 'Krčení ramen k uším nebo prudký záklon hlavy. Pohyb je malý a nesmí bolet.' },
+  isoext: { name: 'Tlak hlavy do dlaní', why: 'Izometricky posiluje šíjové svaly, které drží krk v přirozeném prohnutí. V randomizované studii vrátil tříměsíční domácí program tohoto cviku normální zakřivení krku většině cvičících.', rx: '5 × 10 s', sets: 5, hold: 10,
+    cues: ['Sedni si vzpřímeně, propletené dlaně polož na zátylek.', 'Zatlač hlavou dozadu do dlaní. Dlaně kladou stejný odpor, takže se hlava nehýbe.', 'Tlač zhruba na polovinu síly a dýchej. Mezi opakováními 10 s pauza.'],
+    err: 'Tlačit naplno nebo u toho zaklánět hlavu. Má to být klidná výdrž bez bolesti.' },
+  quadneck: { name: 'Zvedání hlavy na čtyřech', why: 'Posiluje šíjové svaly v pohybu proti váze hlavy. Podobný cvik ve studii zesílil šíjové svaly a ulevil od bolesti krku.', rx: '2 × 10', sets: 2,
+    cues: ['Klek na čtyřech, dlaně pod rameny, kolena pod boky, záda rovná.', 'Lehce zasuň bradu a pomalu skloň hlavu, pohled ke kolenům.', 'Zvedni hlavu jen do prodloužení zad, pohled na zem kousek před dlaně. Nahoře 2 s.'],
+    err: 'Záklon až ke stropu s vystrčenou bradou. Zvedej jen do linie se zády.' },
+
+  goblet: { name: 'Goblet dřep', why: 'Základní cvik na stehna a hýždě. Jednoručka před hrudníkem pomáhá držet trup vzpřímeně a učí správný dřep.', rx: '3 × 10', sets: 3, kg: true,
+    cues: ['Jednoručku drž svisle u hrudníku, lokty míří dolů.', 'Sedni si mezi paty, kolena jdou ve směru špiček.', 'Paty zůstávají na zemi, hrudník nahoře.'],
+    err: 'Kolena padají dovnitř nebo se zvedají paty.' },
+  slrdl: { name: 'Rumunský mrtvý tah na jedné noze', why: 'Posiluje hýždě a zadní stranu stehna každé nohy zvlášť a zároveň trénuje stabilitu kyčle a kotníku. Jeden z nejlepších cviků na vyrovnání stran.', rx: '3 × 8', side: 'na nohu', sets: 3, kg: true, uni: true, weak: true,
+    cues: ['Jednoručku drž v ruce na straně zvednuté nohy. Stojná noha lehce pokrčená, váha na patě a středu chodidla.', 'Předkláněj se v kyčli, zadní noha jde v jedné linii s trupem.', 'Pánev drž rovně, zvednutý bok se nesmí otáčet ke stropu.'],
+    err: 'Kulatá záda nebo otáčení pánve. Ze začátku se volnou rukou přidrž lavice.' },
+  dbbench: { name: 'Tlak s jednoručkami na lavici', why: 'Posiluje prsní svaly, přední část ramen a tricepsy. S jednoručkami musí každá ruka pracovat sama, takže silnější strana nepomáhá slabší.', rx: '3 × 10', sets: 3, kg: true,
+    cues: ['Lopatky stáhni k sobě a dolů, chodidla pevně na zemi.', 'Spouštěj jednoručky k hrudníku, lokty asi 45° od těla.', 'Vytlač nahoru nad ramena.'],
+    err: 'Lokty roztažené do písmene T nebo odrážení činek od hrudníku.' },
+  dbrow: { name: 'Přítah jednoručky v předklonu', why: 'Posiluje záda (hlavně široký sval zádový a svaly mezi lopatkami) a biceps. Vyvažuje tlakové cviky a zlepšuje držení těla.', rx: '3 × 10', side: 'na stranu', sets: 3, kg: true, uni: true,
+    cues: ['Ruka a koleno na lavici, záda rovná a souběžně s lavicí.', 'Táhni loket k boku, ne ruku k rameni.', 'Nahoře stáhni lopatku, dolů pomalu.'],
+    err: 'Trhání trupem a rotace. Zvol lehčí váhu.' },
+  deadbug: { name: 'Dead bug', why: 'Učí zpevnit střed těla, zatímco se hýbou ruce a nohy. Chrání bedra a zlepšuje koordinaci levé a pravé strany.', rx: '3 × 8', side: 'na stranu', sets: 3, uni: true,
+    cues: ['Bedra přitlač k podložce a drž je tam celou dobu.', 'S výdechem pomalu natáhni opačnou ruku a nohu.', 'Vrať se a vyměň strany.'],
+    err: 'Bedra se zvedají od země. Zkrať rozsah.' },
+
+  split: { name: 'Bulharský dřep', why: 'Silný cvik na stehna a hýždě každé nohy zvlášť. Ukáže rozdíl mezi stranami, pomáhá ho vyrovnat a trénuje stabilitu pánve.', rx: '3 × 8', side: 'na nohu', sets: 3, kg: true, uni: true, weak: true,
+    cues: ['Zadní nárt na lavici, přední chodidlo dost daleko vpředu.', 'Klesej dolů, ne dopředu. Přední koleno míří nad špičku.', 'Pánev drž v rovině, nepadá na stranu.'],
+    err: 'Přední koleno uhýbá dovnitř. První 2 týdny dělej výpad se zadní nohou na zemi.' },
+  hipthrust: { name: 'Hip thrust', why: 'Nejpřímější cvik na velký hýžďový sval. Silné hýždě odlehčují bedrům i kolenům a pomáhají s držením pánve.', rx: '3 × 12', sets: 3, kg: true,
+    cues: ['Spodní okraj lopatek opřený o hranu lavice, jednoručka na pánvi.', 'Tlač přes paty a zvedni boky do vodorovné polohy.', 'Nahoře zatni hýždě, brada lehce k hrudníku.'],
+    err: 'Záklon hlavy a prohnutá bedra místo práce hýždí.' },
+  ohp: { name: 'Tlak nad hlavu vsedě', why: 'Posiluje ramena a tricepsy. Vsedě s opřenými zády je šetrný k bedrům.', rx: '3 × 10', sets: 3, kg: true,
+    cues: ['Opěradlo nastav kolmo, záda opřená, břicho zpevněné.', 'Začni s jednoručkami u ramen.', 'Tlač nad hlavu, dolů pomalu zpátky k ramenům.'],
+    err: 'Záklon v bedrech. Zpevni břicho, případně uber váhu.' },
+  bandrow: { name: 'Veslování s gumou', why: 'Posiluje svaly mezi lopatkami a zadní část ramen. Působí proti shrbenému držení těla.', rx: '3 × 12', sets: 3,
+    cues: ['Gumu ukotvi ve výšce hrudníku (zavřené dveře, noha stolu).', 'Táhni lokty dozadu podél těla, stáhni lopatky.', 'Vracej pomalu, guma nesmí cuknout.'],
+    err: 'Krčení ramen k uším.' },
+  carry: { name: 'Nošení kufru', why: 'Svaly na boku trupu musí celou dobu bránit náklonu k zátěži. Trénuje přesně to, abys stál a chodil rovně.', rx: '3 × 30 s', side: 'na stranu', sets: 3, hold: 30, kg: true, uni: true,
+    cues: ['Jednoručku drž jen v jedné ruce podél těla.', 'Jdi pomalu a rovně, ramena i pánev vodorovně.', 'Nenakláněj se k zátěži ani od ní.'],
+    err: 'Úklon trupu do strany. Přesně proti tomu tenhle cvik trénuje.' },
+
+  c_squat: { name: 'Dřep s jednoručkou', why: 'Velké svaly nohou spálí nejvíc energie a rychle zvednou tep.', fig: 'goblet', circ: true, cue: 'Lehčí váha než v hlavní části, plynulé tempo.' },
+  c_pushup: { name: 'Kliky s rukama na lavici', why: 'Hrudník, ramena a tricepsy, k tomu zpevnění celého trupu.', circ: true, cue: 'Tělo v jedné linii. Čím vyšší opora, tím snazší.' },
+  c_climber: { name: 'Horolezec', why: 'Kardio část okruhu: zvedá tep a zapojuje břicho.', circ: true, cue: 'Dlaně pod rameny, střídavě kolena k hrudníku, boky dole.' },
+  c_lunge: { name: 'Výpady vzad', why: 'Nohy a hýždě. Střídání nohou trénuje i rovnováhu.', circ: true, cue: 'Krok dozadu, obě kolena do pravého úhlu, střídej nohy.' },
+  c_plank: { name: 'Plank', why: 'Zpevnění celého středu těla a chvilka na vydýchání na konci kola.', circ: true, cue: 'Lokty pod rameny, zatni břicho i hýždě, dýchej.' },
+};
+const PLAN = {
+  stab: ['stoj1', 'pelvdrop', 'clam', 'abd', 'sideplank'],
+  stabV1: ['stoj1', 'clam', 'abd', 'sideplank', 'bridge'],
+  neck: ['chintuck', 'retract', 'isoext', 'quadneck'],
+  A: ['goblet', 'slrdl', 'dbbench', 'dbrow', 'deadbug'],
+  B: ['split', 'hipthrust', 'ohp', 'bandrow', 'carry'],
+  circ: ['c_squat', 'c_pushup', 'c_climber', 'c_lunge', 'c_plank'],
+};
+const GOALS = {
+  panev: { name: 'Rovná pánev', weak: true, what: 'Pánev a trup se ve stoji a při chůzi nepřesouvají do strany (vyosení). Posiluje se hlavně střední hýžďový sval a boční svaly trupu.', where: 'Stabilizace, cviky na jednu nohu, nošení kufru' },
+  strany: { name: 'Vyrovnané strany', weak: true, what: 'Slabší noha dožene silnější. Pomáhá jí série navíc a to, že se jí vždy začíná.', where: 'Stoj na jedné noze, mrtvý tah na jedné noze, bulharský dřep' },
+  krk: { name: 'Krční páteř', what: 'Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Posilují se hluboké ohybače krku a šíjové svaly.', where: 'Blok Krk, veslování s gumou' },
+  sila: { name: 'Síla a držení těla', what: 'Silnější nohy, hýždě, záda, hrudník, ramena a střed těla. Vzpřímené držení bez hrbení.', where: 'Silová část A a B' },
+  kondice: { name: 'Kondice a hubnutí', what: 'Víc spálené energie a lepší kondice. Nejvíc tu udělá denní chůze. Na hubnutí má ale největší vliv strava: mírný kalorický deficit a dost bílkovin.', where: 'Denní chůze, bonusový okruh' },
+};
+const EX_GOALS = {
+  stoj1: ['panev', 'strany'], pelvdrop: ['panev', 'strany'], clam: ['panev'], abd: ['panev'], sideplank: ['panev'], bridge: ['sila', 'panev'],
+  chintuck: ['krk'], retract: ['krk', 'sila'], isoext: ['krk'], quadneck: ['krk'],
+  goblet: ['sila'], slrdl: ['strany', 'panev', 'sila'], dbbench: ['sila'], dbrow: ['sila'], deadbug: ['sila'],
+  split: ['strany', 'panev', 'sila'], hipthrust: ['sila'], ohp: ['sila'], bandrow: ['sila', 'krk'], carry: ['panev', 'sila'],
+};
+const TYPE_NAME = { A: 'Trénink A', B: 'Trénink B', S: 'Stabilizace a krk' };
+const WEEK_PLAN = ['trénink', 'chůze', 'trénink', 'chůze + stab.', 'trénink', 'chůze', 'volno'];
+const WORK = 40, REST = 20;
+
+/* ================= Figure engine ================= */
+// Poses: hip point, torso angle t (0 = down, 180 = up, 90 = facing right),
+// feet/hands as targets solved with two-bone IK so limbs keep their length.
+const FLOOR = 130;
+const BASE_L = { thN: 26, shN: 26, thF: 26, shF: 26, uaN: 20, faN: 19, uaF: 20, faF: 19, torso: 38, foot: 9 };
+// hx shifts the head off the neck line (chin tuck / forward head); face: true draws a nose stub so head tilt reads.
+const DEF_POSE = { h: 0, hx: [0, 0], ho: [0, 0], so: [0, 0], kN: 1, kF: 1, eN: -1, eF: -1, toeN: 90, toeF: 90, dbo: 0 };
+
+const FIGS = {
+  stoj1: { cap: ['Stoj na obou nohou, ruce v bok', 'Zvedni nohu, pánev drž na čárkované linii'], arrow: [{at: 'kneeF', o: [-12, 0]}],
+    front: true, foot: 6, tag: 'Zepředu', guide: { at: 'hip', x1: 82, x2: 138 }, hold: [700, 1600], keys: [
+    { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [103, 101], fF: [103, 127], hN: [119, 73], hF: [101, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+    { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [102, 92], fF: [104, 113], hN: [119, 73], hF: [101, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+  ] },
+  pelvdrop: { cap: ['Bokem stojné nohy zvedni pánev zpátky do roviny', 'Pomalu spusť volnou stranu pánve dolů, stojná noha rovná'], arrow: [{at: 'footF', o: [-12, 0]}],
+    front: true, foot: 6, tag: 'Zepředu', guide: { at: 'hip', x1: 82, x2: 138 }, props: [{ k: 'step', x: 108, y: 116, w: 24 }], hold: [900, 900], keys: [
+    { hip: [110, 62], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 88], fN: [117, 114], KF: [103, 90], fF: [103, 117], hN: [119, 60], hF: [101, 60], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+    { hip: [110, 66], t: 180, ho: [7, -4], so: [11, 0], KN: [117, 88], fN: [117, 114], KF: [103, 98], fF: [103, 125], hN: [119, 60], hF: [101, 64], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+  ] },
+  clam: { cap: ['Leh na boku, kolena pokrčená a u sebe', 'Otevři horní koleno, chodidla zůstávají u sebe'], arrow: [{at: 'kneeN', o: [0, -6], bend: -0.3}],
+    lying: true, foot: 6, tag: 'Vleže na boku', hold: [500, 700], keys: [
+    { hip: [128, 119], t: -90, ho: [0, -3], so: [0, -3], KN: [149, 122], fN: [171, 113], KF: [150, 126], fF: [172, 118], hN: [108, 126], hF: [58, 124], EN: [99, 117], EF: [72, 126], toeN: 120, toeF: 120 },
+    { hip: [128, 119], t: -90, ho: [0, -3], so: [0, -3], KN: [143, 97], fN: [171, 112], KF: [150, 126], fF: [172, 118], hN: [108, 126], hF: [58, 124], EN: [99, 117], EF: [72, 126], toeN: 120, toeF: 120 },
+  ] },
+  abd: { cap: ['Leh na boku, horní noha natažená', 'Zvedni horní nohu, špička míří dopředu'], arrow: [{at: 'footN', o: [6, -4], bend: -0.25}],
+    lying: true, foot: 7, tag: 'Vleže na boku', hold: [500, 800], keys: [
+    { hip: [128, 119], t: -90, ho: [0, -3], so: [0, -3], KN: [154, 116], fN: [179, 116], KF: [146, 125], fF: [166, 125], hN: [108, 126], hF: [58, 124], EN: [99, 117], EF: [72, 126], toeN: 90, toeF: 90 },
+    { hip: [128, 119], t: -90, ho: [0, -3], so: [0, -3], KN: [152, 106], fN: [175, 94], KF: [146, 125], fF: [166, 125], hN: [108, 126], hF: [58, 124], EN: [99, 117], EF: [72, 126], toeN: 115, toeF: 90 },
+  ] },
+  sideplank: { cap: ['Opři se o loket, boky na zemi', 'Zvedni boky, tělo v jedné rovné linii'], arrow: [{at: 'hip', o: [6, 0]}],
+    lying: true, foot: 6, tag: 'Zepředu', hold: [600, 1500], keys: [
+    { hip: [119, 123], t: -113, ho: [0, -2.5], so: [0, -2.5], fN: [170, 121], fF: [170, 125], EF: [84, 127], hF: [100, 127], EN: [101, 108], hN: [117, 117] },
+    { hip: [119, 111], t: -100, ho: [0, -2.5], so: [0, -2.5], fN: [170, 121], fF: [170, 125], EF: [82, 127], hF: [98, 127], EN: [100, 101], hN: [117, 106] },
+  ] },
+  bridge: { cap: ['Leh na zádech, chodidla blízko zadku', 'Zatni hýždě a zvedni pánev'], arrow: [{at: 'hip', o: [0, -6]}],
+    lying: true, tag: 'Zboku', hold: [500, 1200], keys: [
+    { hip: [112, 122], t: -90, h: 0, fN: [150, 126], fF: [147, 126], EN: [92, 126], hN: [110, 127], EF: [90, 126], hF: [108, 127] },
+    { hip: [108, 102], t: -61, h: -29, fN: [150, 126], fF: [147, 126], EN: [92, 126], hN: [110, 127], EF: [90, 126], hF: [108, 127] },
+  ] },
+  chintuck: { cap: ['Hlava vysunutá dopředu (tak to nechceme)', 'Zasuň bradu dozadu a temenem povyrůst'], arrow: [{at: 'head', o: [0, -14]}],
+    tag: 'Zboku', face: true, props: [{ k: 'bench', x: 64, y: 100, w: 50 }], hold: [600, 1600], keys: [
+    { hip: [80, 95], t: 176, h: -14, hx: [6, 3], fN: [120, 126], fF: [117, 126], hN: [101, 93], hF: [99, 94] },
+    { hip: [80, 95], t: 178, h: 3, hx: [-2, -2], fN: [120, 126], fF: [117, 126], hN: [101, 93], hF: [99, 94] },
+  ] },
+  retract: { cap: ['Shrbený, hlava vpředu', 'Lopatky dozadu a dolů, hrudník nahoru, hlava nad tělem'], arrow: [{at: 'head', o: [0, -14]}],
+    tag: 'Zboku', face: true, hold: [600, 1800], keys: [
+    { hip: [90, 76], t: 172, h: -12, hx: [4, 2], fN: [100, 126], fF: [84, 126], hN: [104, 75], hF: [102, 76] },
+    { hip: [90, 76], t: 181, h: 7, hx: [-2, -2], fN: [100, 126], fF: [84, 126], hN: [83, 75], hF: [81, 76] },
+  ] },
+  isoext: { cap: ['Dlaně na zátylku', 'Tlač hlavou dozadu do dlaní, hlava se nehýbe'],
+    tag: 'Zboku', face: true, props: [{ k: 'bench', x: 64, y: 100, w: 50 }], hold: [900, 2200], trans: 500, keys: [
+    { hip: [80, 95], t: 178, fN: [120, 126], fF: [117, 126], EN: [100, 50], hN: [75, 41], EF: [98, 51], hF: [74, 42] },
+    { hip: [80, 95], t: 178, hx: [-1, 0], fN: [120, 126], fF: [117, 126], EN: [99, 50], hN: [74, 41], EF: [97, 51], hF: [73, 42] },
+  ] },
+  quadneck: { cap: ['Na čtyřech, hlava dolů, pohled ke kolenům', 'Zvedni hlavu jen do linie se zády'], arrow: [{at: 'head', o: [12, 0], bend: -0.3}],
+    lying: true, face: true, foot: 6, tag: 'Zboku', hold: [600, 1400], keys: [
+    { hip: [82, 102], t: 100, h: -50, KN: [84, 127], fN: [60, 127], KF: [80, 127], fF: [56, 127], toeN: -95, toeF: -95, EN: [120, 111], hN: [121, 127], EF: [118, 111], hF: [119, 127] },
+    { hip: [82, 102], t: 100, h: 6, KN: [84, 127], fN: [60, 127], KF: [80, 127], fF: [56, 127], toeN: -95, toeF: -95, EN: [120, 111], hN: [121, 127], EF: [118, 111], hF: [119, 127] },
+  ] },
+  goblet: { cap: ['Stoj, jednoručka u hrudníku', 'Sedni si mezi paty, hrudník nahoře'], arrow: [{at: 'hip', o: [-14, 0]}],
+    tag: 'Zboku', db: [{ at: 'hN', o: 90 }], hold: [400, 500], keys: [
+    { hip: [100, 75], t: 180, fN: [104, 126], fF: [100, 126], hN: [112, 54], hF: [110, 55] },
+    { hip: [80, 100], t: 160, h: -14, fN: [104, 126], fF: [100, 126], hN: [106, 76], hF: [104, 77] },
+  ] },
+  slrdl: { cap: ['Stoj na jedné noze, činka v ruce', 'Předkloň se v kyčli, volná noha jde dozadu'], arrow: [{at: 'footF', bend: 0.25}],
+    tag: 'Zboku', db: [{ at: 'hF' }], hold: [500, 600], keys: [
+    { hip: [100, 75], t: 180, fN: [102, 126], fF: [92, 121], toeF: 55, hN: [102, 76], hF: [100, 76] },
+    { hip: [96, 78], t: 100, h: -18, fN: [102, 126], fF: [46, 88], toeF: 5, hN: [135, 110], hF: [133, 110] },
+  ] },
+  dbbench: { cap: ['Leh na lavici, činky u hrudníku', 'Vytlač činky nad ramena'], arrow: [{at: 'handN', o: [10, 0]}],
+    tag: 'Zboku', props: [{ k: 'bench', x: 44, y: 101, w: 100 }], db: [{ at: 'hN' }, { at: 'hF' }], hold: [400, 500], keys: [
+    { hip: [118, 96], t: -90, fN: [148, 126], fF: [144, 126], hN: [88, 80], hF: [86, 81] },
+    { hip: [118, 96], t: -90, fN: [148, 126], fF: [144, 126], hN: [82, 58], hF: [80, 59] },
+  ] },
+  dbrow: { cap: ['Ruka a koleno na lavici, činka visí', 'Přitáhni loket k boku'], arrow: [{at: 'handN', o: [10, 0]}],
+    tag: 'Zboku', props: [{ k: 'bench', x: 34, y: 104, w: 94 }], db: [{ at: 'hN' }], hold: [400, 600], keys: [
+    { hip: [78, 78], t: 110, h: 14, KF: [78, 103], fF: [52, 102], toeF: -95, fN: [90, 126], hN: [114, 101], hF: [114.5, 103.5], eF: 1 },
+    { hip: [78, 78], t: 110, h: 14, KF: [78, 103], fF: [52, 102], toeF: -95, fN: [90, 126], hN: [98, 84], hF: [114.5, 103.5], eF: 1 },
+  ] },
+  deadbug: { cap: ['Leh na zádech, ruce nahoru, kolena nad boky', 'Natáhni opačnou ruku a nohu, bedra na zemi'], arrow: [{at: 'handN', o: [0, -6], bend: 0.25}, {at: 'footF', o: [0, -8]}],
+    lying: true, tag: 'Zboku', hold: [500, 700], keys: [
+    { hip: [114, 122], t: -90, KN: [114, 96], fN: [140, 96], KF: [112, 97], fF: [138, 97], hN: [79, 84], hF: [77, 85], toeN: 150, toeF: 150 },
+    { hip: [114, 122], t: -90, KN: [114, 96], fN: [140, 96], KF: [139, 116], fF: [165, 110], hN: [40, 114], hF: [77, 85], toeN: 150, toeF: 100 },
+  ] },
+  split: { cap: ['Zadní nárt na lavici', 'Klesni rovně dolů, přední koleno nad špičkou'], arrow: [{at: 'hip', o: [-12, 0]}],
+    tag: 'Zboku', props: [{ k: 'bench', x: 20, y: 103, w: 50 }], db: [{ at: 'hN', o: 0 }, { at: 'hF', o: 0 }], hold: [400, 500], keys: [
+    { hip: [100, 75], t: 174, fN: [114, 126], fF: [64, 99], toeF: -100, hN: [105, 76], hF: [103, 76] },
+    { hip: [92, 100], t: 168, fN: [114, 126], fF: [64, 99], toeF: -100, hN: [101, 101], hF: [99, 101] },
+  ] },
+  hipthrust: { cap: ['Lopatky o lavici, boky dole', 'Zvedni boky do vodorovné polohy'], arrow: [{at: 'hip', o: [0, -6]}],
+    tag: 'Zboku', props: [{ k: 'bench', x: 18, y: 102, w: 60 }], db: [{ at: 'hN' }], hold: [400, 900], keys: [
+    { hip: [105, 121], t: -126, h: 16, fN: [148, 126], fF: [145, 126], hN: [105, 114], hF: [103, 114] },
+    { hip: [112, 99], t: -90, h: -20, fN: [148, 126], fF: [145, 126], hN: [112, 92], hF: [110, 92] },
+  ] },
+  ohp: { cap: ['Vsedě, činky u ramen', 'Vytlač činky nad hlavu'], arrow: [{at: 'handN', o: [12, 0]}],
+    tag: 'Zboku', props: [{ k: 'bench', x: 64, y: 100, w: 50 }, { k: 'back', x1: 70, y1: 100, x2: 66, y2: 44 }], db: [{ at: 'hN' }, { at: 'hF' }], hold: [400, 500], keys: [
+    { hip: [80, 95], t: 178, fN: [120, 126], fF: [117, 126], hN: [92, 55], hF: [90, 56] },
+    { hip: [80, 95], t: 178, fN: [120, 126], fF: [117, 126], hN: [86, 20], hF: [84, 21] },
+  ] },
+  bandrow: { cap: ['Ruce natažené, guma napnutá', 'Přitáhni lokty dozadu, stáhni lopatky'], arrow: [{at: 'handN', o: [0, -10]}],
+    tag: 'Zboku', props: [{ k: 'door', x: 202 }], band: [202, 62], hold: [400, 600], keys: [
+    { hip: [90, 76], t: 180, fN: [100, 126], fF: [84, 126], hN: [127, 58], hF: [125, 59] },
+    { hip: [90, 76], t: 180, fN: [100, 126], fF: [84, 126], hN: [104, 66], hF: [102, 67] },
+  ] },
+  carry: { cap: ['Jdi pomalu s činkou v jedné ruce, ramena vodorovně'],
+    front: true, foot: 6, tag: 'Zepředu', guide: { at: 'sh', x1: 84, x2: 136 }, db: [{ at: 'hN', o: 0 }], hold: [250, 250, 250, 250], trans: 600, keys: [
+    { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [103, 101], fF: [103, 127], hN: [128, 74], hF: [94, 74], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+    { hip: [110, 74], t: 180, ho: [7, 0], so: [11, 0], KN: [118, 95], fN: [118, 117], KF: [103, 100], fF: [103, 126], hN: [128, 73], hF: [94, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+    { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [103, 101], fF: [103, 127], hN: [128, 74], hF: [94, 74], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+    { hip: [110, 74], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 100], fN: [117, 126], KF: [102, 95], fF: [102, 117], hN: [128, 73], hF: [94, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+  ] },
+  c_pushup: { cap: ['Ruce na lavici, tělo rovně', 'Spusť hrudník k lavici'],
+    tag: 'Zboku', props: [{ k: 'bench', x: 138, y: 104, w: 64 }], hold: [300, 300], keys: [
+    { hip: [119.3, 90.9], t: 131, h: -10, fN: [80, 125], fF: [77, 125], toeN: 60, toeF: 60, hN: [150, 103], hF: [147, 103] },
+    { hip: [125.1, 99.1], t: 120, h: -10, fN: [80, 125], fF: [77, 125], toeN: 60, toeF: 60, hN: [150, 103], hF: [147, 103] },
+  ] },
+  c_climber: { cap: ['Střídej kolena k hrudníku'],
+    tag: 'Zboku', hold: [80, 80, 80, 80], trans: 380, keys: [
+    { hip: [115.2, 103.2], t: 113.6, h: -15, fN: [67.6, 124], fF: [65, 124], toeN: 55, toeF: 55, hN: [150, 127], hF: [147, 127] },
+    { hip: [115.2, 101.2], t: 113.6, h: -15, fN: [120, 118], fF: [65, 124], toeN: 55, toeF: 55, hN: [150, 127], hF: [147, 127] },
+    { hip: [115.2, 103.2], t: 113.6, h: -15, fN: [67.6, 124], fF: [65, 124], toeN: 55, toeF: 55, hN: [150, 127], hF: [147, 127] },
+    { hip: [115.2, 101.2], t: 113.6, h: -15, fN: [67.6, 124], fF: [118, 118], toeN: 55, toeF: 55, hN: [150, 127], hF: [147, 127] },
+  ] },
+  c_lunge: { cap: ['Stoj', 'Krok vzad, obě kolena do pravého úhlu'],
+    tag: 'Zboku', hold: [400, 500], keys: [
+    { hip: [100, 75], t: 180, fN: [100, 126], fF: [104, 126], toeN: 90, hN: [103, 76], hF: [101, 76] },
+    { hip: [90, 102], t: 178, fN: [58, 121], fF: [112, 126], toeN: 35, hN: [94, 103], hF: [92, 103] },
+  ] },
+  c_plank: { cap: ['Drž tělo v rovné linii'],
+    tag: 'Zboku', hold: [1200, 1200], trans: 1400, keys: [
+    { hip: [112.8, 114.6], t: 101.5, h: -12, fN: [62, 124], fF: [59, 124], toeN: 40, toeF: 40, EN: [150, 127], hN: [168, 127], EF: [148, 127], hF: [166, 127] },
+    { hip: [112.8, 113.2], t: 101.5, h: -12, fN: [62, 124], fF: [59, 124], toeN: 40, toeF: 40, EN: [150, 127], hN: [168, 127], EF: [148, 127], hF: [166, 127] },
+  ] },
+};
+
+const rad = a => a * Math.PI / 180;
+const dirv = a => [Math.sin(rad(a)), Math.cos(rad(a))];
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+
+function ik(A, C, a, b, s) {
+  const dx = C[0] - A[0], dy = C[1] - A[1];
+  const d0 = Math.hypot(dx, dy) || 0.001;
+  const ux = dx / d0, uy = dy / d0;
+  const d = Math.min(Math.max(d0, Math.abs(a - b) + 0.5), a + b - 0.01);
+  const al = Math.acos(Math.max(-1, Math.min(1, (a * a + d * d - b * b) / (2 * a * d))));
+  const th = -s * al;
+  const rx = ux * Math.cos(th) - uy * Math.sin(th), ry = ux * Math.sin(th) + uy * Math.cos(th);
+  const B = [A[0] + a * rx, A[1] + a * ry];
+  const ex = C[0] - B[0], ey = C[1] - B[1], e = Math.hypot(ex, ey) || 1;
+  return [B, [B[0] + b * ex / e, B[1] + b * ey / e]];
+}
+
+function lerp(a, b, t) {
+  if (typeof a === 'number' && typeof b === 'number') return a + (b - a) * t;
+  if (Array.isArray(a) && Array.isArray(b)) return a.map((v, i) => v + (b[i] - v) * t);
+  if (a && b && typeof a === 'object') { const o = {}; for (const k in a) o[k] = lerp(a[k], b[k], t); return o; }
+  return a;
+}
+function lerpPose(a, b, t) { const o = {}; for (const k in a) o[k] = (k in b) ? lerp(a[k], b[k], t) : a[k]; return o; }
+
+function normalize(def) {
+  if (def._keys) return def._keys;
+  def._keys = def.keys.map(k => {
+    const p = Object.assign({}, DEF_POSE, k);
+    p.L = Object.assign({}, BASE_L, def.foot != null ? { foot: def.foot } : null, k.L || {});
+    if (!p.fF) p.fF = p.fN; if (!p.hF) p.hF = p.hN;
+    return p;
+  });
+  return def._keys;
+}
+
+function solve(p) {
+  const L = p.L, td = dirv(p.t);
+  const neck = [p.hip[0] + L.torso * td[0], p.hip[1] + L.torso * td[1]];
+  const hd = dirv(p.t + p.h);
+  const head = add([neck[0] + 11 * hd[0], neck[1] + 11 * hd[1]], p.hx);
+  const hipN = add(p.hip, p.ho), hipF = sub(p.hip, p.ho);
+  const shN = add(neck, p.so), shF = sub(neck, p.so);
+  const leg = (hip, foot, K, a, b, s, toe) => {
+    let knee, ank;
+    if (K) { knee = K; ank = foot; } else { [knee, ank] = ik(hip, foot, a, b, s); }
+    const tv = dirv(toe);
+    return [hip, knee, ank, [ank[0] + L.foot * tv[0], ank[1] + L.foot * tv[1]]];
+  };
+  const arm = (sh, hand, E, a, b, s) => {
+    if (E) return [sh, E, hand];
+    const [el, h] = ik(sh, hand, a, b, s);
+    return [sh, el, h];
+  };
+  return {
+    neck, head, hipN, hipF, shN, shF, face: dirv(p.t + p.h - 90),
+    legN: leg(hipN, p.fN, p.KN, L.thN, L.shN, p.kN, p.toeN),
+    legF: leg(hipF, p.fF, p.KF, L.thF, L.shF, p.kF, p.toeF),
+    armN: arm(shN, p.hN, p.EN, L.uaN, L.faN, p.eN),
+    armF: arm(shF, p.hF, p.EF, L.uaF, L.faF, p.eF),
+    dbo: p.dbo,
+  };
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+function mk(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const pts = arr => arr.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+
+function drawProps(svg, def) {
+  const g = mk('g', {}, svg);
+  if (def.lying) mk('rect', { x: 30, y: FLOOR - 2, width: 160, height: 3, rx: 1.5, fill: 'var(--prop-fill)' }, g);
+  for (const pr of def.props || []) {
+    if (pr.k === 'bench') {
+      mk('rect', { x: pr.x + 6, y: pr.y + 4, width: 4, height: FLOOR - pr.y - 4, fill: 'var(--prop)' }, g);
+      mk('rect', { x: pr.x + pr.w - 10, y: pr.y + 4, width: 4, height: FLOOR - pr.y - 4, fill: 'var(--prop)' }, g);
+      mk('rect', { x: pr.x, y: pr.y, width: pr.w, height: 6, rx: 2, fill: 'var(--prop)' }, g);
+    } else if (pr.k === 'back') {
+      mk('line', { x1: pr.x1, y1: pr.y1, x2: pr.x2, y2: pr.y2, stroke: 'var(--prop)', 'stroke-width': 6, 'stroke-linecap': 'round' }, g);
+    } else if (pr.k === 'step') {
+      mk('rect', { x: pr.x, y: pr.y, width: pr.w, height: FLOOR - pr.y, rx: 1.5, fill: 'var(--prop-fill)', stroke: 'var(--prop)', 'stroke-width': 1.5 }, g);
+    } else if (pr.k === 'door') {
+      mk('rect', { x: pr.x, y: 14, width: 10, height: FLOOR - 14, fill: 'var(--prop-fill)', stroke: 'var(--prop)', 'stroke-width': 1.5 }, g);
+    }
+  }
+  mk('line', { x1: 6, y1: FLOOR + 1.5, x2: 214, y2: FLOOR + 1.5, stroke: 'var(--floor)', 'stroke-width': 2, 'stroke-linecap': 'round' }, g);
+}
+
+function buildBody(svg, def, ghost) {
+  const g = mk('g', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, svg);
+  const near = ghost ? 'var(--ghost)' : 'var(--fig)';
+  const far = ghost ? 'var(--ghost)' : (def.front ? 'var(--fig)' : 'var(--fig-far)');
+  const el = {};
+  if (def.band && !ghost) {
+    el.bandF = mk('line', { stroke: 'var(--band)', 'stroke-width': 1.8 }, g);
+    el.bandN = mk('line', { stroke: 'var(--band)', 'stroke-width': 1.8 }, g);
+  }
+  el.legF = mk('polyline', { stroke: far, 'stroke-width': 5.5 }, g);
+  el.armF = mk('polyline', { stroke: far, 'stroke-width': 4.8 }, g);
+  const dbs = [];
+  for (const d of def.db || []) if (d.at === 'hF') dbs.push(Object.assign({ el: mkDb(g, ghost) }, d));
+  el.torso = mk('line', { stroke: near, 'stroke-width': 7 }, g);
+  if (def.front) {
+    el.pelvis = mk('line', { stroke: near, 'stroke-width': 6 }, g);
+    el.shoulders = mk('line', { stroke: near, 'stroke-width': 6 }, g);
+  }
+  el.legN = mk('polyline', { stroke: near, 'stroke-width': 5.5 }, g);
+  el.armN = mk('polyline', { stroke: near, 'stroke-width': 4.8 }, g);
+  for (const d of def.db || []) if (d.at === 'hN') dbs.push(Object.assign({ el: mkDb(g, ghost) }, d));
+  el.head = mk('circle', { r: 8, fill: near, stroke: 'none' }, g);
+  if (def.face) el.face = mk('line', { stroke: near, 'stroke-width': 3.2 }, g);
+  if (def.guide && !ghost) el.guide = mk('line', { stroke: 'var(--accent)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4' }, g);
+  el.dbs = dbs;
+  return el;
+}
+function mkDb(parent, ghost) {
+  const g = mk('g', { fill: ghost ? 'var(--ghost)' : 'var(--prop)', stroke: 'none' }, parent);
+  mk('rect', { x: -7, y: -1.5, width: 14, height: 3, rx: 1.5 }, g);
+  mk('rect', { x: -10, y: -5.5, width: 4.5, height: 11, rx: 1.5 }, g);
+  mk('rect', { x: 5.5, y: -5.5, width: 4.5, height: 11, rx: 1.5 }, g);
+  return g;
+}
+
+function paint(el, def, s) {
+  el.legN.setAttribute('points', pts(s.legN));
+  el.legF.setAttribute('points', pts(s.legF));
+  el.armN.setAttribute('points', pts(s.armN));
+  el.armF.setAttribute('points', pts(s.armF));
+  const hipMid = [(s.hipN[0] + s.hipF[0]) / 2, (s.hipN[1] + s.hipF[1]) / 2];
+  setLine(el.torso, hipMid, s.neck);
+  if (el.pelvis) { setLine(el.pelvis, s.hipF, s.hipN); setLine(el.shoulders, s.shF, s.shN); }
+  el.head.setAttribute('cx', s.head[0].toFixed(1));
+  el.head.setAttribute('cy', s.head[1].toFixed(1));
+  if (el.face) setLine(el.face, add(s.head, [s.face[0] * 6, s.face[1] * 6]), add(s.head, [s.face[0] * 10.5, s.face[1] * 10.5]));
+  for (const d of el.dbs) {
+    const hand = d.at === 'hN' ? s.armN[2] : s.armF[2];
+    const o = d.o != null ? d.o : s.dbo;
+    d.el.setAttribute('transform', `translate(${hand[0].toFixed(1)} ${hand[1].toFixed(1)}) rotate(${o})`);
+  }
+  if (el.bandN) {
+    setLine(el.bandN, def.band, s.armN[2]);
+    setLine(el.bandF, def.band, s.armF[2]);
+  }
+  if (el.guide) {
+    const y = def.guide.at === 'sh' ? (s.shN[1] + s.shF[1]) / 2 : (s.hipN[1] + s.hipF[1]) / 2;
+    el.guide.setAttribute('x1', def.guide.x1); el.guide.setAttribute('x2', def.guide.x2);
+    el.guide.setAttribute('y1', y.toFixed(1)); el.guide.setAttribute('y2', y.toFixed(1));
+  }
+}
+function setLine(l, a, b) {
+  l.setAttribute('x1', a[0].toFixed(1)); l.setAttribute('y1', a[1].toFixed(1));
+  l.setAttribute('x2', b[0].toFixed(1)); l.setAttribute('y2', b[1].toFixed(1));
+}
+
+// Dashed arrow along the main movement (start pose -> end pose), drawn behind the figure.
+const JOINT = {
+  hip: s => [(s.hipN[0] + s.hipF[0]) / 2, (s.hipN[1] + s.hipF[1]) / 2], hipF: s => s.hipF, head: s => s.head,
+  handN: s => s.armN[2], handF: s => s.armF[2], kneeN: s => s.legN[1], kneeF: s => s.legF[1], footN: s => s.legN[2], footF: s => s.legF[2],
+};
+function drawArrows(svg, def, keys) {
+  if (!def.arrow || keys.length < 2) return;
+  const s0 = solve(keys[0]), s1 = solve(keys[1]);
+  for (const a of def.arrow) {
+    const p0 = add(JOINT[a.at](s0), a.o || [0, 0]), p1 = add(JOINT[a.at](s1), a.o || [0, 0]);
+    const d = sub(p1, p0), bend = a.bend || 0;
+    if (Math.hypot(d[0], d[1]) < 6) continue;
+    const c = [(p0[0] + p1[0]) / 2 - d[1] * bend, (p0[1] + p1[1]) / 2 + d[0] * bend];
+    const B = t => [0, 1].map(k => (1 - t) ** 2 * p0[k] + 2 * (1 - t) * t * c[k] + t * t * p1[k]);
+    const line = [];
+    for (let t = 0.12; t < 0.9; t += 0.06) line.push(B(t));
+    const e = B(0.88), u = sub(e, B(0.8)), ul = Math.hypot(u[0], u[1]) || 1, ux = u[0] / ul, uy = u[1] / ul;
+    const g = mk('g', { fill: 'var(--accent)' }, svg);
+    mk('polyline', { points: pts(line), fill: 'none', stroke: 'var(--accent)', 'stroke-width': 1.7, 'stroke-dasharray': '3 2.5', 'stroke-linecap': 'round' }, g);
+    mk('path', { d: `M${(e[0] + ux * 4.5).toFixed(1)},${(e[1] + uy * 4.5).toFixed(1)} L${(e[0] - uy * 3.2).toFixed(1)},${(e[1] + ux * 3.2).toFixed(1)} L${(e[0] + uy * 3.2).toFixed(1)},${(e[1] - ux * 3.2).toFixed(1)}Z` }, g);
+  }
+}
+
+const ease = t => 0.5 - 0.5 * Math.cos(Math.PI * t);
+const SLOW = 1.35;
+// Returns [pose, phase]; phase is the key being held or moved towards, so its caption describes what is happening now.
+function poseAt(def, ms) {
+  const keys = normalize(def), n = keys.length;
+  const trans = (def.trans || 950) * SLOW;
+  const holds = keys.map((_, i) => ((def.hold && def.hold[i] != null) ? def.hold[i] : 450) * SLOW);
+  const total = holds.reduce((a, h) => a + h + trans, 0);
+  let t = ms % total;
+  for (let i = 0; i < n; i++) {
+    if (t < holds[i]) return [keys[i], i];
+    t -= holds[i];
+    if (t < trans) return [lerpPose(keys[i], keys[(i + 1) % n], ease(t / trans)), (i + 1) % n];
+    t -= trans;
+  }
+  return [keys[0], 0];
+}
+
+const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+const liveFigs = new Set();
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+  for (const en of entries) if (en.target._fig) en.target._fig.visible = en.isIntersecting;
+}, { rootMargin: '80px' }) : null;
+
+function mountFig(host, figId) {
+  const def = FIGS[figId];
+  if (!def) return;
+  host.textContent = '';
+  const svg = mk('svg', { viewBox: def.lying ? '22 33 176 112' : '0 0 220 140', 'aria-hidden': 'true', focusable: 'false' }, host);
+  drawProps(svg, def);
+  const keys = normalize(def);
+  drawArrows(svg, def, keys);
+  const peakI = Math.min(1, keys.length - 1);
+  if (reduceMotion.matches) {
+    const gh = buildBody(svg, def, true);
+    paint(gh, def, solve(keys[peakI]));
+  }
+  const body = buildBody(svg, def, false);
+  paint(body, def, solve(keys[0]));
+  if (def.tag) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = def.tag; host.appendChild(t); }
+  // Step caption lives under the figure (only on full exercise cards, which wrap the figure in .figcol).
+  const col = host.closest('.figcol');
+  let cap = null;
+  if (col && def.cap) {
+    cap = col.querySelector('.cap') || col.appendChild(document.createElement('p'));
+    cap.className = 'cap';
+    cap.setAttribute('aria-live', 'off');
+  }
+  const setCap = i => {
+    if (!cap) return;
+    const txt = def.cap[i] || def.cap[0];
+    cap.innerHTML = def.cap.length > 1 ? `<b>${i + 1}</b><span>${txt}</span>` : `<span>${txt}</span>`;
+  };
+  setCap(reduceMotion.matches ? peakI : 0);
+  if (!reduceMotion.matches) {
+    const f = { host, def, body, visible: !io, clock: 0, phase: 0, paused: false, setCap };
+    host._fig = f;
+    host.title = 'Klepnutím animaci zastavíš nebo znovu spustíš';
+    host.onclick = () => { f.paused = !f.paused; host.classList.toggle('paused', f.paused); };
+    liveFigs.add(f);
+    if (io) io.observe(host);
+  }
+}
+let lastTs = null;
+function loop(ts) {
+  const dt = lastTs == null ? 0 : Math.min(ts - lastTs, 100);
+  lastTs = ts;
+  for (const f of liveFigs) {
+    if (!f.host.isConnected) { liveFigs.delete(f); if (io) io.unobserve(f.host); continue; }
+    if (!f.visible || f.paused) continue;
+    f.clock += dt;
+    const [p, i] = poseAt(f.def, f.clock);
+    paint(f.body, f.def, solve(p));
+    if (i !== f.phase) { f.phase = i; f.setCap(i); }
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+function mountAll(root) { root.querySelectorAll('[data-fig]').forEach(h => mountFig(h, h.dataset.fig)); }
+
+/* ================= Dates ================= */
+const pad = n => String(n).padStart(2, '0');
+const ds = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const pd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const today = () => ds(new Date());
+const addDays = (s, n) => { const d = pd(s); d.setDate(d.getDate() + n); return ds(d); };
+const mondayOf = s => { const d = pd(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return ds(d); };
+const daysBetween = (a, b) => Math.round((pd(b) - pd(a)) / 864e5);
+const DN = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
+const dow = s => (pd(s).getDay() + 6) % 7;
+const fmtShort = s => { const d = pd(s); return d.getDate() + '. ' + (d.getMonth() + 1) + '.'; };
+const fmtDay = s => DN[dow(s)] + ' ' + fmtShort(s);
+
+/* ================= State & storage ================= */
+// Set when running inside the Android app (see android/…/MainActivity.java: share, keepAwake, version, checkUpdate).
+const APP = window.Android && typeof window.Android.version === 'function' ? window.Android : null;
+const LS_KEY = 'rovne-silne-v1';
+const blank = () => ({ v: 1, settings: { weak: null, start: null }, sessions: [], walks: {} });
+let state = blank();
+try { const raw = localStorage.getItem(LS_KEY); if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) state = Object.assign(blank(), o); } } catch (e) {}
+
+let dbRef = null, saveTimer = null, writing = false, dirty = false, mode = 'local';
+function writeLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
+function save() {
+  writeLocal();
+  if (dbRef) { clearTimeout(saveTimer); saveTimer = setTimeout(flush, 700); }
+}
+async function flush(retried) {
+  if (!dbRef) return;
+  if (writing) { dirty = true; return; }
+  writing = true;
+  try {
+    await dbRef.set(JSON.parse(JSON.stringify(state)));
+  } catch (e) {
+    const code = e && e.code;
+    if (code === 'unavailable' && !retried) { writing = false; setTimeout(() => flush(true), 1200 + Math.random() * 800); return; }
+    if (code === 'invalid_argument' || code === 'revoked' || code === 'not_granted' || code === 'capability_disabled') { dbRef = null; setMode('denied'); }
+  }
+  writing = false;
+  if (dirty) { dirty = false; flush(); }
+}
+function setMode(m) {
+  mode = m;
+  const f = document.getElementById('store');
+  f.className = 'store' + (m === 'db' ? ' db' : '');
+  f.querySelector('span').textContent =
+    m === 'db' ? 'Záznamy se ukládají k tvému účtu, takže je uvidíš na každém zařízení.'
+    : m === 'denied' ? 'Do účtu se teď ukládat nedá. Záznamy zůstávají v tomto prohlížeči.'
+    : APP ? 'Záznamy se ukládají v telefonu. Zálohu uděláš v Přehledu.'
+    : 'Záznamy se ukládají v tomto prohlížeči.';
+}
+function merge(local, remote) {
+  const out = Object.assign(blank(), remote);
+  const byId = new Map();
+  for (const s of remote.sessions || []) byId.set(s.id, s);
+  for (const s of local.sessions || []) { const r = byId.get(s.id); if (!r || (s.u || 0) > (r.u || 0)) byId.set(s.id, s); }
+  out.sessions = [...byId.values()].sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : (a.u || 0) - (b.u || 0));
+  out.walks = Object.assign({}, local.walks || {}, remote.walks || {});
+  out.settings = Object.assign({}, local.settings || {}, remote.settings || {});
+  if (!out.settings.weak && local.settings && local.settings.weak) out.settings.weak = local.settings.weak;
+  const starts = [local.settings && local.settings.start, remote.settings && remote.settings.start].filter(Boolean).sort();
+  out.settings.start = starts[0] || null;
+  return out;
+}
+async function connect() {
+  const c = window.claude;
+  if (!c || typeof c.use !== 'function') return;
+  let db = null, user = null;
+  try { [db, user] = await Promise.all([c.use('db'), c.use('user')]); } catch (e) { return; }
+  if (!db || !user) return;
+  let uid = null;
+  try { uid = await user.id(); } catch (e) {}
+  if (!uid) return;
+  let ref, snap;
+  try { ref = db.doc('data/users/' + uid + '/tracker'); snap = await ref.get(); } catch (e) { return; }
+  const remote = snap.exists ? snap.data() : null;
+  const hasLocal = state.sessions.length || Object.keys(state.walks).length || state.settings.weak;
+  if (remote && remote.v === 1) state = merge(state, JSON.parse(JSON.stringify(remote)));
+  dbRef = ref;
+  setMode('db');
+  writeLocal();
+  if (hasLocal) flush();
+  cur = null;
+  renderAll();
+}
+
+/* ================= Session logic ================= */
+let cur = null;
+const sid = () => 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function weekNo() {
+  const st = state.settings.start;
+  if (!st) return 1;
+  return Math.max(1, Math.floor(daysBetween(mondayOf(st), mondayOf(today())) / 7) + 1);
+}
+const roundsTarget = () => weekNo() >= 4 ? 3 : 2;
+function nextType() {
+  const fin = state.sessions.filter(s => s.done && (s.type === 'A' || s.type === 'B'));
+  if (!fin.length) return 'A';
+  const last = fin.reduce((a, b) => (b.d > a.d || (b.d === a.d && (b.u || 0) > (a.u || 0))) ? b : a);
+  return last.type === 'A' ? 'B' : 'A';
+}
+function newDraft(type) {
+  return { id: sid(), d: today(), type: type || nextType(), neck: true, opt: true, sets: {}, extra: {}, w: {}, up: {}, rounds: 0, rt: roundsTarget(), done: false, u: Date.now(), _draft: true };
+}
+function ensureCur() {
+  const open = state.sessions.find(s => s.d === today() && !s.done);
+  if (open) { cur = open; return; }
+  if (!cur || !cur._draft || cur.d !== today()) cur = newDraft();
+}
+function touch() {
+  cur.u = Date.now();
+  if (cur._draft) {
+    cur.ex = exList(cur);
+    delete cur._draft;
+    cur.rt = roundsTarget();
+    state.sessions.push(cur);
+    if (!state.settings.start) state.settings.start = cur.d;
+  }
+  save();
+}
+// Sessions saved before the neck block existed have no `neck` flag, so their percentages stay as they were.
+// Saved sessions keep their own exercise list (`ex`), so later plan changes don't rewrite history.
+// Older sessions without it were done with the first stabilization set (with the bridge).
+function exList(s) {
+  if (s.ex) return s.ex;
+  const stab = s._draft ? PLAN.stab : PLAN.stabV1;
+  const neck = s.neck ? PLAN.neck : [];
+  return s.type === 'S' ? [...stab, ...neck] : [...stab, ...neck, ...PLAN[s.type]];
+}
+function prog(s) {
+  let done = 0, total = 0;
+  const weak = !!state.settings.weak;
+  for (const id of exList(s)) {
+    const e = EX[id];
+    total += e.sets; done += Math.min(s.sets[id] || 0, e.sets);
+    if (weak && e.weak) { total += 1; if (s.extra[id]) done += 1; }
+  }
+  // Since the circuit became optional (`opt`), its rounds no longer count towards completion.
+  if (s.type !== 'S' && !s.opt) { const rt = s.rt || 2; total += rt; done += Math.min(s.rounds || 0, rt); }
+  return { done, total, pct: total ? Math.round(done / total * 100) : 0 };
+}
+const hasProgress = s => Object.values(s.sets).some(v => v > 0) || Object.values(s.extra).some(Boolean) || (s.rounds || 0) > 0 || Object.keys(s.w).length > 0;
+function lastInfo(id) {
+  let best = null;
+  for (const s of state.sessions) {
+    if (s === cur || s.w[id] == null) continue;
+    if (!best || s.d > best.d || (s.d === best.d && (s.u || 0) > (best.u || 0))) best = s;
+  }
+  return best ? { kg: best.w[id], d: best.d, up: !!best.up[id] } : null;
+}
+const weakWord = () => state.settings.weak === 'L' ? 'levou' : state.settings.weak === 'R' ? 'pravou' : null;
+const fmtKg = v => (Math.round(v * 10) / 10).toString().replace('.', ',');
+
+/* ================= Audio, wake lock ================= */
+let actx = null;
+function beep(freq, dur, vol) {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = freq; o.type = 'sine';
+    g.gain.setValueAtTime(vol || 0.15, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + dur);
+  } catch (e) {}
+}
+let wake = null;
+async function keepAwake(on) {
+  if (APP) { try { APP.keepAwake(!!on); } catch (e) {} return; }
+  try {
+    if (on && !wake && navigator.wakeLock) wake = await navigator.wakeLock.request('screen');
+    if (!on && wake) { await wake.release(); wake = null; }
+  } catch (e) { wake = null; }
+}
+
+/* ================= Icons ================= */
+const ICON_WALK = '<svg viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="5" cy="5.2" rx="2.3" ry="3.4" fill="currentColor"/><ellipse cx="5.2" cy="10.6" rx="1.5" ry="1.2" fill="currentColor"/><ellipse cx="11" cy="7.2" rx="2.3" ry="3.4" fill="currentColor"/><ellipse cx="10.8" cy="12.6" rx="1.5" ry="1.2" fill="currentColor"/></svg>';
+const ICON_OK = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="var(--accent-soft)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ================= Header ================= */
+function renderHeader() {
+  const n = weekNo();
+  const txt = n <= 2 ? 'Učíš se techniku. Nech si 2–3 opakování v záloze.'
+    : n === 3 ? 'Přidávej opakování, a když zvládneš o 2 víc, přidej váhu.'
+    : 'Opakování nahoru, pak váha. Bonusový okruh má teď 3 kola.';
+  document.getElementById('phase').innerHTML = `<b>Týden ${n}</b> · ${txt}`;
+}
+
+/* ================= Today ================= */
+function weekStripHTML() {
+  const mon = mondayOf(today()), td = today();
+  let cells = '', trainings = 0, walks = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(mon, i);
+    const done = state.sessions.filter(s => s.d === d && s.done);
+    trainings += done.filter(s => s.type !== 'S').length;
+    if (state.walks[d]) walks++;
+    const chips = done.map(s => `<span class="chip${s.type === 'S' ? ' s' : ''}" title="${TYPE_NAME[s.type]}">${s.type}</span>`).join('');
+    cells += `<div class="day${d === td ? ' today' : ''}${d < td ? ' past' : ''}">
+      <span class="dname">${DN[i]}</span><span class="dnum">${fmtShort(d)}</span>
+      ${chips ? `<span class="chips">${chips}</span>` : `<span class="dplan">${WEEK_PLAN[i]}</span>`}
+      <button class="walk" data-act="walk" data-d="${d}" aria-pressed="${!!state.walks[d]}" aria-label="Chůze ${DN[i]} ${fmtShort(d)}" title="Chůze">${ICON_WALK}</button>
+    </div>`;
+  }
+  return `<div><div class="week">${cells}</div>
+    <p class="week-sum">Tento týden: <b class="num">${trainings}/3</b> tréninků · chůze <b class="num">${walks}×</b>. Ikonou chodidel si označ dny s chůzí.</p></div>`;
+}
+
+function exCardHTML(id) {
+  const e = EX[id], last = lastInfo(id), ww = weakWord();
+  const weakOn = !!state.settings.weak && e.weak;
+  let sideNote = '';
+  if (e.uni) {
+    sideNote = weakOn ? `<p class="weak-note">Začni ${ww} (slabší) stranou a přidej jí jednu sérii navíc.</p>`
+      : ww ? `<p class="note">Začni ${ww} stranou, ať jsou obě strany stejně.</p>`
+      : `<p class="note">Začni levou stranou, dokud nevíš, která je slabší.</p>`;
+  }
+  let pills = '<span class="lbl">Série</span>';
+  for (let i = 0; i < e.sets; i++) pills += `<button class="pill" data-act="set" data-ex="${id}" data-i="${i}" aria-pressed="false" aria-label="Série ${i + 1}">${i + 1}</button>`;
+  if (weakOn) pills += `<button class="pill weak" data-act="extra" data-ex="${id}" aria-pressed="false" aria-label="Série navíc pro slabší stranu">+1 slabší</button>`;
+  const kg = e.kg ? `<label class="kg">Váha <input id="kg-${id}" data-kg="${id}" inputmode="decimal" type="text" placeholder="kg" value="${cur.w[id] != null ? fmtKg(cur.w[id]) : last ? fmtKg(last.kg) : ''}"> kg${last ? `<span>· minule ${fmtKg(last.kg)}</span>` : ''}</label>` : '';
+  const hold = e.hold ? `<button class="btn" data-act="hold" data-sec="${e.hold}">Odpočet ${e.hold} s</button>` : '';
+  const up = e.kg ? `<label class="up"><input type="checkbox" id="up-${id}" data-up="${id}"> Šlo to ve všech sériích o 2 opakování víc. Příště přidej váhu.</label>` : '';
+  const badge = last && last.up ? '<span class="badge">Přidej váhu</span>' : '';
+  return `<article class="ex" id="ex-${id}">
+    <div class="figcol"><div class="fig" data-fig="${e.fig || id}" role="img" aria-label="Animace cviku ${esc(e.name)}"></div></div>
+    <div class="ex-body">
+      <div class="ex-head"><h3>${e.name}</h3><span class="rx">${e.rx}</span>${e.side ? `<span class="side">${e.side}</span>` : ''}${badge}</div>
+      ${EX_GOALS[id] ? `<p class="goals">Zlepšuje: ${EX_GOALS[id].map(g => `<span class="goal${GOALS[g].weak ? ' weak' : ''}">${GOALS[g].name}</span>`).join('')}</p>` : ''}
+      <p class="why"><b>K čemu:</b> ${e.why}</p>
+      <ul class="cues">${e.cues.map(c => `<li>${c}</li>`).join('')}</ul>
+      <p class="err"><strong>Pozor:</strong> ${e.err}</p>
+      ${sideNote}
+      <div class="log"><div class="pills">${pills}</div>${kg}${hold}</div>
+      ${up}
+    </div>
+  </article>`;
+}
+
+function blockHTML(no, title, sub, ids) {
+  return `<section class="block">
+    <div class="block-head"><span class="block-no">${no}</span><div><h2>${title}</h2><p>${sub}</p></div></div>
+    ${ids.map(exCardHTML).join('')}
+  </section>`;
+}
+
+// Optional finisher: collapsed by default, opened when already started today.
+function circuitHTML() {
+  const rt = cur.rt || roundsTarget();
+  let rp = '';
+  for (let i = 0; i < rt; i++) rp += `<button class="pill" data-act="round" data-i="${i}" aria-pressed="false" aria-label="Kolo ${i + 1}">${i + 1}</button>`;
+  return `<details class="block bonus"${(cur.rounds || 0) > 0 ? ' open' : ''}>
+    <summary class="block-head"><span class="block-no">+</span><div><h2>Bonus: okruh <span class="tog"></span></h2><p>Volitelný, do procent se nepočítá. Dej si ho, jen když máš energii. ${WORK} s cvičíš, ${REST} s pauza, ${rt} kola, asi ${rt * 5} min.</p></div></summary>
+    <div class="timer" id="timer">
+      <span class="t-phase" id="t-phase">Připraveno</span>
+      <span class="t-name" id="t-name">${EX[PLAN.circ[0]].name}</span>
+      <span class="t-next" id="t-next">Kolo 1 z ${rt} · cvik 1 z 5</span>
+      <span class="t-clock num" id="t-clock">0:40</span>
+      <div class="t-ctrl">
+        <button class="btn run" data-act="c-start" id="c-start">Spustit okruh</button>
+        <button class="btn" data-act="c-reset">Od začátku</button>
+        <span class="rounds">Kola ${rp}</span>
+      </div>
+    </div>
+    <div class="mini-grid">
+      ${PLAN.circ.map((id, i) => `<div class="mini" id="mini-${i}">
+        <div class="fig" data-fig="${EX[id].fig || id}" role="img" aria-label="Animace cviku ${esc(EX[id].name)}"></div>
+        <h3>${EX[id].name}</h3><p>${EX[id].cue}</p><p class="mini-why">${EX[id].why}</p></div>`).join('')}
+    </div>
+  </details>`;
+}
+
+let finishConfirm = false;
+function renderToday() {
+  ensureCur();
+  stopCircuit(true);
+  const v = document.getElementById('v-today');
+  const td = today();
+  const doneToday = state.sessions.filter(s => s.d === td && s.done);
+  const banner = doneToday.length ? `<div class="banner">${ICON_OK}<span>Dnes hotovo: ${doneToday.map(s => `${TYPE_NAME[s.type]} (${prog(s).pct} %)`).join(', ')}. Další na řadě je ${TYPE_NAME[nextType()]}.</span></div>` : '';
+  const locked = hasProgress(cur);
+  const seg = ['A', 'B', 'S'].map(t => `<button data-act="type" data-type="${t}" aria-pressed="${cur.type === t}" ${locked && cur.type !== t ? 'disabled' : ''}>${t === 'S' ? 'Stabilizace' : t}</button>`).join('');
+  let html = weekStripHTML() + banner + `
+    <section class="head-card">
+      <div class="head-row"><h2 id="sess-title">${TYPE_NAME[cur.type]}</h2><div class="seg" role="group" aria-label="Typ tréninku">${seg}</div></div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="prog-txt"><span id="prog-txt"></span><span>${cur.type === 'S' ? (cur.neck ? 'asi 17 min' : 'asi 10 min') : cur.opt ? `asi 45 min, s okruhem +${(cur.rt || roundsTarget()) * 5} min` : (cur.neck ? 'asi 55 min' : 'asi 45–50 min')}</span></div>
+      <p class="note">${locked ? 'Typ tréninku se dá změnit jen před první odškrtnutou sérií.' : `Navrženo podle posledního tréninku. ${cur.type === 'S' ? 'Krátká verze na dny s chůzí.' : 'Odškrtávej série, jak je děláš.'}`}</p>
+    </section>`;
+  let no = 1;
+  const stabIds = exList(cur).filter(id => PLAN.stab.includes(id) || PLAN.stabV1.includes(id));
+  html += blockHTML(no++, 'Stabilizace', 'Na začátku každého tréninku, asi 10 min. Hlavní práce na vyosení, nepřeskakuj ji.', stabIds);
+  if (cur.neck) html += blockHTML(no++, 'Krk', 'Asi 7 min, na napřímenou krční páteř. Pomalu a bez bolesti. Při brnění rukou nebo závrati přestaň.', PLAN.neck);
+  if (cur.type !== 'S') {
+    html += blockHTML(no++, cur.type === 'A' ? 'Silová část A' : 'Silová část B', '3 série, mezi sériemi 60–90 s pauza. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.', PLAN[cur.type]);
+    html += circuitHTML();
+  }
+  html += `<section class="finish" id="finish"></section>`;
+  v.innerHTML = html;
+  mountAll(v);
+  updateToday();
+}
+
+function updateToday() {
+  const v = document.getElementById('v-today');
+  const p = prog(cur);
+  const bar = document.getElementById('bar');
+  if (bar) bar.style.width = p.pct + '%';
+  const pt = document.getElementById('prog-txt');
+  if (pt) pt.textContent = `${p.done} z ${p.total} ${cur.opt || cur.type === 'S' ? 'sérií' : 'sérií a kol'} · ${p.pct} %`;
+  for (const id of exList(cur)) {
+    const n = cur.sets[id] || 0;
+    const card = document.getElementById('ex-' + id);
+    if (!card) continue;
+    card.querySelectorAll('[data-act="set"]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i < n)));
+    const ex = card.querySelector('[data-act="extra"]');
+    if (ex) ex.setAttribute('aria-pressed', String(!!cur.extra[id]));
+    const upEl = card.querySelector('[data-up]');
+    if (upEl) upEl.checked = !!cur.up[id];
+    const e = EX[id];
+    const full = n >= e.sets && (!(state.settings.weak && e.weak) || cur.extra[id]);
+    card.classList.toggle('complete', full);
+  }
+  v.querySelectorAll('[data-act="round"]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i < (cur.rounds || 0))));
+  const f = document.getElementById('finish');
+  if (f) {
+    if (finishConfirm) {
+      f.innerHTML = `<p class="note">Zahodit dnešní záznam ${TYPE_NAME[cur.type]}? Odškrtnuté série se smažou.</p>
+        <div class="row"><button class="btn danger" data-act="discard-yes">Zahodit</button><button class="btn quiet" data-act="discard-no">Ponechat</button></div>`;
+    } else {
+      f.innerHTML = `<p class="note">${p.done ? `Máš hotovo ${p.pct} %. Dokončený trénink se uloží do přehledu a příště se nabídne ${cur.type === 'S' ? TYPE_NAME[nextType()] : TYPE_NAME[cur.type === 'A' ? 'B' : 'A']}.` : 'Až odškrtneš první sérii, trénink se začne ukládat.'}</p>
+        <div class="row"><button class="btn primary" data-act="finish" ${p.done ? '' : 'disabled'}>Dokončit trénink</button>${hasProgress(cur) ? '<button class="btn quiet" data-act="discard">Zahodit záznam</button>' : ''}</div>`;
+    }
+  }
+}
+
+/* ---- hold countdown ---- */
+// Seconds to get into position before a hold or the circuit starts counting.
+const PREP = 3;
+let holdT = null;
+function startHold(btn) {
+  if (holdT) { clearInterval(holdT.iv); holdT.btn.textContent = `Odpočet ${holdT.sec} s`; holdT.btn.classList.remove('run'); const same = holdT.btn === btn; holdT = null; if (same) return; }
+  const sec = +btn.dataset.sec, start = Date.now() + PREP * 1000, end = start + sec * 1000;
+  let lastPrep = -1, started = false;
+  btn.classList.add('run');
+  const tick = () => {
+    const now = Date.now();
+    if (now < start) {
+      const p = Math.ceil((start - now) / 1000);
+      btn.textContent = `Připrav se… ${p}`;
+      if (p !== lastPrep) { lastPrep = p; beep(520, 0.08, 0.1); }
+      return;
+    }
+    if (!started) { started = true; beep(880, 0.3); }
+    const left = Math.max(0, Math.ceil((end - now) / 1000));
+    btn.textContent = `Zbývá 0:${pad(left)}`;
+    if (left <= 0) {
+      clearInterval(holdT.iv); beep(880, 0.5, 0.2);
+      btn.textContent = 'Hotovo, další strana'; btn.classList.remove('run');
+      const b = btn; setTimeout(() => { if (b.isConnected && !b.classList.contains('run')) b.textContent = `Odpočet ${sec} s`; }, 4000);
+      holdT = null;
+    }
+  };
+  holdT = { btn, sec, iv: setInterval(tick, 200) };
+  tick();
+}
+
+/* ---- circuit timer ---- */
+// prepEnd: while set, the timer is in the get-ready countdown before (re)starting the current phase.
+const CT = { running: false, phase: 'work', idx: 0, round: 0, left: WORK, endAt: 0, prepEnd: 0, iv: null, lastBeep: -1 };
+function ctPaint() {
+  const tm = document.getElementById('timer');
+  if (!tm) return;
+  const rt = cur.rt || roundsTarget();
+  const e = EX[PLAN.circ[CT.idx]];
+  const prep = CT.running && CT.prepEnd ? Math.max(1, Math.ceil((CT.prepEnd - Date.now()) / 1000)) : 0;
+  const sec = prep || Math.max(0, Math.ceil(CT.left));
+  tm.className = 'timer' + (prep ? ' rest' : CT.running || CT.started ? (CT.phase === 'work' ? ' work' : ' rest') : '');
+  document.getElementById('t-clock').textContent = Math.floor(sec / 60) + ':' + pad(sec % 60);
+  if (prep) {
+    document.getElementById('t-phase').textContent = 'Připrav se';
+    document.getElementById('t-name').textContent = (CT.phase === 'work' ? '' : 'Další: ') + e.name;
+    document.getElementById('t-next').textContent = `Kolo ${CT.round + 1} z ${rt} · cvik ${CT.idx + 1} z 5`;
+  } else if (CT.finished) {
+    document.getElementById('t-phase').textContent = 'Hotovo';
+    document.getElementById('t-name').textContent = 'Okruh dokončen';
+    document.getElementById('t-next').textContent = `${rt} kola za tebou. Dokonči trénink dole.`;
+  } else if (CT.phase === 'work') {
+    document.getElementById('t-phase').textContent = CT.started ? (CT.running ? 'Cvič' : 'Pauza (zastaveno)') : 'Připraveno';
+    document.getElementById('t-name').textContent = e.name;
+    document.getElementById('t-next').textContent = `Kolo ${CT.round + 1} z ${rt} · cvik ${CT.idx + 1} z 5`;
+  } else {
+    document.getElementById('t-phase').textContent = CT.running ? 'Odpočinek' : 'Pauza (zastaveno)';
+    document.getElementById('t-name').textContent = 'Další: ' + EX[PLAN.circ[CT.idx]].name;
+    document.getElementById('t-next').textContent = `Kolo ${CT.round + 1} z ${rt}`;
+  }
+  const sb = document.getElementById('c-start');
+  if (sb) sb.textContent = CT.finished ? 'Znovu' : CT.running ? 'Zastavit' : CT.started ? 'Pokračovat' : 'Spustit okruh';
+  document.querySelectorAll('.mini').forEach((m, i) => m.classList.toggle('now', CT.started && !CT.finished && i === CT.idx));
+}
+function ctTick() {
+  if (CT.prepEnd) {
+    const p = Math.ceil((CT.prepEnd - Date.now()) / 1000);
+    if (p > 0) {
+      if (p !== CT.lastBeep) { CT.lastBeep = p; beep(520, 0.08, 0.1); }
+      ctPaint(); return;
+    }
+    CT.prepEnd = 0; CT.lastBeep = -1;
+    CT.endAt = Date.now() + CT.left * 1000;
+    beep(880, 0.35);
+  }
+  CT.left = (CT.endAt - Date.now()) / 1000;
+  const s = Math.ceil(CT.left);
+  if (s <= 3 && s >= 1 && s !== CT.lastBeep) { CT.lastBeep = s; beep(520, 0.08, 0.1); }
+  if (CT.left <= 0) {
+    const rt = cur.rt || roundsTarget();
+    if (CT.phase === 'work') {
+      const lastOne = CT.idx === 4 && CT.round === rt - 1;
+      if (lastOne) {
+        CT.round++; finishRound(CT.round);
+        CT.running = false; CT.finished = true; CT.left = 0; clearInterval(CT.iv); keepAwake(false);
+        beep(880, 0.6, 0.2); ctPaint(); return;
+      }
+      CT.phase = 'rest'; CT.left = REST;
+      if (CT.idx === 4) { CT.idx = 0; CT.round++; finishRound(CT.round); } else CT.idx++;
+      beep(440, 0.35);
+    } else {
+      CT.phase = 'work'; CT.left = WORK; beep(880, 0.35);
+    }
+    CT.endAt = Date.now() + CT.left * 1000; CT.lastBeep = -1;
+  }
+  ctPaint();
+}
+function finishRound(n) {
+  if ((cur.rounds || 0) < n) { cur.rounds = n; touch(); updateToday(); }
+}
+function startCircuit() {
+  if (CT.finished) resetCircuit();
+  if (CT.running) { stopCircuit(); ctPaint(); return; }
+  CT.running = true; CT.started = true;
+  CT.prepEnd = Date.now() + PREP * 1000; CT.lastBeep = -1;
+  clearInterval(CT.iv); CT.iv = setInterval(ctTick, 200);
+  keepAwake(true);
+  ctTick();
+}
+function stopCircuit(silent) {
+  if (CT.running && !CT.prepEnd) { CT.left = Math.max(0, (CT.endAt - Date.now()) / 1000); }
+  CT.running = false; CT.prepEnd = 0; clearInterval(CT.iv); keepAwake(false);
+  if (silent) resetCircuit(true);
+}
+function resetCircuit(noPaint) {
+  clearInterval(CT.iv);
+  Object.assign(CT, { running: false, started: false, finished: false, phase: 'work', idx: 0, round: 0, left: WORK, prepEnd: 0, lastBeep: -1 });
+  keepAwake(false);
+  if (!noPaint) ctPaint();
+}
+
+/* ---- events ---- */
+const vToday = document.getElementById('v-today');
+vToday.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  const act = b.dataset.act, id = b.dataset.ex;
+  if (act === 'set') {
+    const i = +b.dataset.i, n = cur.sets[id] || 0;
+    cur.sets[id] = n === i + 1 ? i : i + 1;
+    touch(); updateToday(); refreshTypeLock();
+  } else if (act === 'extra') {
+    cur.extra[id] = !cur.extra[id]; touch(); updateToday(); refreshTypeLock();
+  } else if (act === 'round') {
+    const i = +b.dataset.i, n = cur.rounds || 0;
+    cur.rounds = n === i + 1 ? i : i + 1; touch(); updateToday(); refreshTypeLock();
+  } else if (act === 'type') {
+    if (hasProgress(cur)) return;
+    cur.type = b.dataset.type; renderToday();
+  } else if (act === 'walk') {
+    const d = b.dataset.d;
+    if (state.walks[d]) delete state.walks[d]; else state.walks[d] = true;
+    save();
+    const strip = vToday.querySelector('.week').parentElement;
+    strip.outerHTML = weekStripHTML();
+    renderLog();
+  } else if (act === 'hold') {
+    startHold(b);
+  } else if (act === 'c-start') {
+    startCircuit();
+  } else if (act === 'c-reset') {
+    resetCircuit();
+  } else if (act === 'finish') {
+    for (const ex of exList(cur)) if (EX[ex].kg && (cur.sets[ex] || 0) > 0 && cur.w[ex] == null) { const l = lastInfo(ex); if (l) cur.w[ex] = l.kg; }
+    cur.done = true; touch();
+    cur = null; finishConfirm = false;
+    renderAll();
+    window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+  } else if (act === 'discard') {
+    finishConfirm = true; updateToday();
+  } else if (act === 'discard-no') {
+    finishConfirm = false; updateToday();
+  } else if (act === 'discard-yes') {
+    state.sessions = state.sessions.filter(s => s !== cur);
+    const t = cur.type; cur = newDraft(t); finishConfirm = false; save();
+    if (!state.sessions.length) state.settings.start = null;
+    renderAll();
+  }
+});
+function refreshTypeLock() {
+  const locked = hasProgress(cur);
+  vToday.querySelectorAll('[data-act="type"]').forEach(b => { b.disabled = locked && b.dataset.type !== cur.type; });
+}
+vToday.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.dataset.kg) {
+    const id = t.dataset.kg, v = parseFloat(String(t.value).replace(',', '.'));
+    if (isNaN(v) || v < 0) delete cur.w[id]; else cur.w[id] = Math.round(v * 10) / 10;
+    touch(); updateToday(); refreshTypeLock();
+  } else if (t.dataset.up) {
+    cur.up[t.dataset.up] = t.checked; if (!t.checked) delete cur.up[t.dataset.up];
+    touch(); updateToday(); refreshTypeLock();
+  }
+});
+
+/* ================= Overview ================= */
+let delConfirm = null;
+function renderLog() {
+  const v = document.getElementById('v-log');
+  const td = today(), mon = mondayOf(td);
+  const done = state.sessions.filter(s => s.done);
+  const thisWeek = done.filter(s => s.d >= mon && s.type !== 'S').length;
+  let walksWeek = 0; for (let i = 0; i < 7; i++) if (state.walks[addDays(mon, i)]) walksWeek++;
+  const tiles = `<div class="tiles">
+    <div class="tile"><b class="num">${weekNo()}.</b><span>týden programu</span></div>
+    <div class="tile"><b class="num">${thisWeek}/3</b><span>tréninky tento týden</span></div>
+    <div class="tile"><b class="num">${walksWeek}/7</b><span>dny s chůzí tento týden</span></div>
+    <div class="tile"><b class="num">${done.length}</b><span>dokončených tréninků celkem</span></div>
+  </div>`;
+
+  let cal = '<div class="cal"><span></span>' + DN.map(d => `<span class="h">${d}</span>`).join('');
+  for (let w = 7; w >= 0; w--) {
+    const m = addDays(mon, -7 * w);
+    cal += `<span class="wl">${fmtShort(m)}</span>`;
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(m, i);
+      const ss = done.filter(s => s.d === d);
+      const main = ss.find(s => s.type !== 'S') || ss[0];
+      const cls = ['c', main ? main.type : '', d > td ? 'fut' : '', d === td ? 'td' : ''].filter(Boolean).join(' ');
+      const label = ss.map(s => s.type).join('');
+      cal += `<span class="${cls}" title="${fmtDay(d)}${ss.length ? ': ' + ss.map(s => TYPE_NAME[s.type]).join(', ') : ''}${state.walks[d] ? ', chůze' : ''}">${label}${state.walks[d] ? '<i></i>' : ''}</span>`;
+    }
+  }
+  cal += '</div>';
+
+  const weighted = Object.keys(EX).filter(id => EX[id].kg);
+  const wRows = weighted.map(id => {
+    const l = lastInfo(id);
+    return `<tr><td>${EX[id].name}</td><td class="r num">${l ? fmtKg(l.kg) + ' kg' : '–'}</td><td class="num">${l ? fmtShort(l.d) : ''}</td><td>${l && l.up ? '<span class="badge">Přidej váhu</span>' : ''}</td></tr>`;
+  }).join('');
+
+  const list = [...state.sessions].sort((a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : (b.u || 0) - (a.u || 0)).slice(0, 30);
+  const rows = list.length ? list.map(s => {
+    const p = prog(s);
+    const conf = delConfirm === s.id;
+    return `<div class="hrow"><span class="when">${fmtDay(s.d)}</span><span class="what">${TYPE_NAME[s.type]}${s.opt && s.rounds ? ' + okruh' : ''}${s.done ? '' : ' · rozdělaný'}</span><span class="pct">${p.pct} %</span>
+      ${conf ? `<button class="btn danger" data-del-yes="${s.id}">Smazat</button><button class="btn quiet" data-del-no="1">Zpět</button>` : `<button class="btn quiet" data-del="${s.id}" aria-label="Smazat záznam ${fmtDay(s.d)}">Smazat</button>`}</div>`;
+  }).join('') : '<p class="empty">Zatím tu nic není. Jakmile v záložce Dnes odškrtneš první sérii, trénink se tu objeví.</p>';
+
+  const goals = `<section class="card"><h2>Co plánem zlepšujeme</h2>
+      <ul class="goal-list">${Object.values(GOALS).map(g => `<li><span class="goal${g.weak ? ' weak' : ''}">${g.name}</span> ${g.what} <span class="note">Kde: ${g.where}.</span></li>`).join('')}</ul>
+      <p class="note">U každého cviku v záložce Dnes je napsané, který z cílů zlepšuje.</p>
+    </section>`;
+  const neck = `<section class="card"><h2>Napřímená krční páteř</h2>
+      <p class="txt">Zdravý krk je při pohledu z boku mírně prohnutý dopředu (lordóza). Když je napřímený, hlava často ujíždí dopředu a šíjové svaly jsou přetížené a zároveň slabé. Blok Krk proto posiluje hluboké ohybače krku (zásun brady) a šíjové svaly (tlak do dlaní, zvedání hlavy). Právě takové cviky ve studiích zakřivení zlepšovaly, výsledek se ale ukázal až po 3 měsících pravidelného cvičení.</p>
+      <p class="txt">Napřímený krk často vůbec nebolí a tvar na rentgenu sám o bolesti moc neříká. Když ti ho našel lékař, ukaž mu tyhle cviky, ať je případně upraví.</p>
+      <p class="txt"><b>K lékaři nebo fyzioterapeutovi hned, když:</b></p>
+      <ul class="list">
+        <li>bolest, brnění nebo slabost vystřelují do ramene či ruky,</li>
+        <li>se ti při cvičení točí hlava, rozmazává vidění nebo přijde silná bolest hlavy,</li>
+        <li>krk začal bolet po úrazu (pád, autonehoda),</li>
+        <li>se bolest po 2 týdnech cvičení zhoršuje.</li>
+      </ul>
+    </section>`;
+  v.innerHTML = tiles + goals + neck + `
+    <section class="card"><h2>Posledních 8 týdnů</h2>
+      <div class="scroll">${cal}</div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Trénink A nebo B</span><span><i style="background:var(--accent-soft)"></i>Stabilizace a krk</span><span><i style="background:var(--weak);border-radius:50%"></i>Chůze</span></div>
+    </section>
+    <section class="card"><h2>Rozvrh týdne</h2>
+      <div class="scroll"><table><thead><tr><th>Den</th><th>Plán</th></tr></thead><tbody>
+        <tr><td>Pondělí</td><td>Trénink (A a B se střídají)</td></tr>
+        <tr><td>Úterý</td><td>Chůze</td></tr>
+        <tr><td>Středa</td><td>Trénink</td></tr>
+        <tr><td>Čtvrtek</td><td>Chůze a krátká stabilizace</td></tr>
+        <tr><td>Pátek</td><td>Trénink</td></tr>
+        <tr><td>Sobota</td><td>Chůze</td></tr>
+        <tr><td>Neděle</td><td>Volno</td></tr>
+      </tbody></table></div>
+      <p class="note">Dny si klidně posuň, jen mezi silovými tréninky nech aspoň den pauzu. Cíl pro chůzi: 8–10 tisíc kroků denně.</p>
+    </section>
+    <section class="card"><h2>Aktuální váhy</h2>
+      <div class="scroll"><table><thead><tr><th>Cvik</th><th class="r">Naposledy</th><th>Kdy</th><th></th></tr></thead><tbody>${wRows}</tbody></table></div>
+      <p class="note">Jakmile zvládneš všechny série o 2 opakování víc, přidej váhu a vrať se na původní počet opakování.</p>
+    </section>
+    <section class="card"><h2>Historie</h2><div class="hist">${rows}</div></section>` + backupHTML();
+}
+
+/* ---- backup: copy all records as text between devices ---- */
+let backup = null, backupMsg = '';
+function backupHTML() {
+  const body = backup === 'export'
+    ? `<textarea class="bk" id="bk-out" readonly rows="5" aria-label="Záloha záznamů">${esc(JSON.stringify(state))}</textarea>
+      <div class="row"><button class="btn" data-bk="copy">Kopírovat</button>${APP ? '<button class="btn" data-bk="share">Sdílet</button>' : ''}<button class="btn quiet" data-bk="close">Zavřít</button></div>`
+    : backup === 'import'
+    ? `<textarea class="bk" id="bk-in" rows="5" placeholder="Sem vlož zkopírovanou zálohu" aria-label="Vložit zálohu"></textarea>
+      <div class="row"><button class="btn" data-bk="load">Načíst zálohu</button><button class="btn quiet" data-bk="close">Zavřít</button></div>`
+    : '<div class="row"><button class="btn" data-bk="export">Exportovat</button><button class="btn" data-bk="import">Importovat</button></div>';
+  return `<section class="card"><h2>Záloha záznamů</h2>
+      <p class="note">Přenese tréninky, váhy a chůzi mezi telefonem, počítačem a verzí na claude.ai. Na jednom zařízení dej Exportovat a zkopírovaný text vlož na druhém přes Importovat. Nic se nesmaže, záznamy se spojí.</p>
+      ${body}${backupMsg ? `<p class="note" role="status">${backupMsg}</p>` : ''}
+    </section>`;
+}
+function backupAction(act) {
+  backupMsg = '';
+  if (act === 'export' || act === 'import') backup = act;
+  else if (act === 'close') backup = null;
+  else if (act === 'copy') {
+    const ta = document.getElementById('bk-out');
+    ta.select();
+    const done = () => { backupMsg = 'Zkopírováno. Teď to vlož na druhém zařízení přes Importovat.'; renderLog(); };
+    if (navigator.clipboard) navigator.clipboard.writeText(ta.value).then(done, () => { try { document.execCommand('copy'); done(); } catch (e) {} });
+    else { try { document.execCommand('copy'); done(); } catch (e) {} }
+    return;
+  } else if (act === 'share') {
+    try { APP.share(JSON.stringify(state)); } catch (e) {}
+    return;
+  } else if (act === 'load') {
+    let o = null;
+    try { o = JSON.parse(document.getElementById('bk-in').value.trim()); } catch (e) {}
+    if (!o || o.v !== 1 || !Array.isArray(o.sessions)) { backupMsg = 'Tohle nevypadá jako záloha z této aplikace. Zkopíruj celý text z Exportovat.'; renderLog(); return; }
+    const before = state.sessions.length;
+    state = merge(o, state);
+    save(); cur = null; backup = null;
+    backupMsg = `Hotovo. Nových tréninků: ${state.sessions.length - before}.`;
+    renderAll();
+    return;
+  }
+  renderLog();
+}
+document.getElementById('v-log').addEventListener('click', ev => {
+  const t = ev.target.closest('button');
+  if (!t) return;
+  if (t.dataset.bk) { backupAction(t.dataset.bk); return; }
+  if (t.dataset.del) { delConfirm = t.dataset.del; renderLog(); }
+  else if (t.dataset.delNo) { delConfirm = null; renderLog(); }
+  else if (t.dataset.delYes) {
+    const id = t.dataset.delYes;
+    state.sessions = state.sessions.filter(s => s.id !== id);
+    if (cur && cur.id === id) cur = null;
+    if (!state.sessions.length) state.settings.start = null;
+    delConfirm = null; save(); renderAll();
+  }
+});
+
+/* ================= Weak leg ================= */
+function renderWeak() {
+  const v = document.getElementById('v-weak');
+  const w = state.settings.weak;
+  v.innerHTML = `
+    <section class="card">
+      <h2>Která noha je slabší?</h2>
+      <div class="two">
+        <div class="fig" data-fig="stoj1" role="img" aria-label="Animace stoje na jedné noze zepředu, pánev zůstává ve vodorovné linii"></div>
+        <ol class="steps">
+          <li>Postav se naboso před zrcadlo, ruce v bok.</li>
+          <li>Zvedni jednu nohu a vydrž 30 s. Sleduj, jestli se pánev drží na čárkované linii, nebo se boky přesouvají do strany.</li>
+          <li>Na stejné noze udělej 5 pomalých podřepů. Hlídej, jestli koleno neuhýbá dovnitř.</li>
+          <li>Totéž zopakuj na druhé noze.</li>
+          <li>Slabší je noha, na které se víc vyosuješ do strany, víc se třeseš nebo ti uhýbá koleno.</li>
+        </ol>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Tvoje slabší noha</h2>
+      <div class="choice" role="group" aria-label="Slabší noha">
+        <button data-weak="" aria-pressed="${!w}">Zatím nevím</button>
+        <button data-weak="L" aria-pressed="${w === 'L'}">Levá</button>
+        <button data-weak="R" aria-pressed="${w === 'R'}">Pravá</button>
+      </div>
+      <p class="note">${w ? `Nastaveno: <b>${w === 'L' ? 'levá' : 'pravá'}</b>. U cviků na jednu nohu začínáš touto stranou a přibyla jí jedna série navíc (oranžové tlačítko „+1 slabší“).` : 'Dokud nevíš, cvič obě strany stejně a začínej levou. Až to zjistíš, vyber stranu a plán přidá slabší noze sérii navíc.'}</p>
+    </section>
+    <section class="card">
+      <h2>Kdy zajít k fyzioterapeutovi</h2>
+      <ul class="list">
+        <li>Když tě něco bolí (koleno, kyčel, záda, kotník).</li>
+        <li>Když jsi na té noze dřív měl úraz, třeba podvrtnutý kotník.</li>
+        <li>Když se rovnováha ani po 6–8 týdnech nezlepší.</li>
+        <li>Když máš podezření na rozdílnou délku nohou nebo problém s chodidlem.</li>
+      </ul>
+    </section>`;
+  mountAll(v);
+}
+document.getElementById('v-weak').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-weak]');
+  if (!b) return;
+  state.settings.weak = b.dataset.weak || null;
+  save(); renderAll();
+});
+
+/* ================= Tabs ================= */
+const TABS = ['today', 'log', 'weak'];
+function showTab(t) {
+  for (const k of TABS) {
+    document.getElementById('v-' + k).hidden = k !== t;
+    document.getElementById('tab-' + k).setAttribute('aria-selected', String(k === t));
+  }
+  try { localStorage.setItem(LS_KEY + '-tab', t); } catch (e) {}
+}
+document.querySelector('.tabs').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-tab]');
+  if (b) { showTab(b.dataset.tab); window.scrollTo({ top: 0 }); }
+});
+
+function renderAll() { renderHeader(); renderToday(); renderLog(); renderWeak(); }
+
+let startTab = 'today';
+try { const t = localStorage.getItem(LS_KEY + '-tab'); if (TABS.includes(t)) startTab = t; } catch (e) {}
+const hashTab = (location.hash || '').slice(1);
+if (TABS.includes(hashTab)) startTab = hashTab;
+renderAll();
+showTab(startTab);
+connect();
+if (APP) {
+  setMode('local');
+  const v = document.createElement('span');
+  v.innerHTML = `· Verze ${esc(APP.version())} · <button class="link" id="upd">Zkontrolovat aktualizace</button>`;
+  document.getElementById('store').appendChild(v);
+  document.getElementById('upd').addEventListener('click', () => APP.checkUpdate());
+}
+
+// Refresh "today" when the date rolls over while the page stays open.
+let lastDay = today();
+setInterval(() => { if (today() !== lastDay) { lastDay = today(); if (!CT.running) { cur = null; renderAll(); } } }, 60000);
+})();
+</script>
+
+</body>
+</html>

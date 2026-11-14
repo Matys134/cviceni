@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body style="margin:0">
+<title>Popis cviků</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one narrow column built for a phone on the floor next to the mat — week strip, then the workout as a stack of exercise cards with a live figure on each. */
+:root {
+  --bg: #EFF2F1;
+  --surface: #FFFFFF;
+  --panel: #E5EAE8;
+  --ink: #131917;
+  --muted: #59645F;
+  --line: #D3DAD7;
+  --accent: #0B7560;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D5ECE5;
+  --weak: #A85F00;
+  --weak-soft: #F5E5CC;
+  --danger: #B3261E;
+  --fig: #131917;
+  --fig-far: #97A39E;
+  --ghost: #C3CCC8;
+  --floor: #AEB9B4;
+  --prop: #7A8883;
+  --prop-fill: #CDD5D2;
+  --band: #0B7560;
+  --f-display: "Archivo", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1312; --surface: #161D1B; --panel: #1C2523; --ink: #E5ECE9; --muted: #98A6A0;
+    --line: #2A3532; --accent: #3CC7A2; --accent-ink: #052019; --accent-soft: #15342B;
+    --weak: #F0A43C; --weak-soft: #3A2A12; --danger: #F2867E;
+    --fig: #E5ECE9; --fig-far: #5A6762; --ghost: #33403C; --floor: #3B4743;
+    --prop: #7E8C87; --prop-fill: #2B3633; --band: #3CC7A2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1312; --surface: #161D1B; --panel: #1C2523; --ink: #E5ECE9; --muted: #98A6A0;
+  --line: #2A3532; --accent: #3CC7A2; --accent-ink: #052019; --accent-soft: #15342B;
+  --weak: #F0A43C; --weak-soft: #3A2A12; --danger: #F2867E;
+  --fig: #E5ECE9; --fig-far: #5A6762; --ghost: #33403C; --floor: #3B4743;
+  --prop: #7E8C87; --prop-fill: #2B3633; --band: #3CC7A2;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.wrap { max-width: 780px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
+.top h1 {
+  font-size: clamp(30px, 7vw, 44px);
+  font-weight: 800;
+  font-stretch: 72%;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+}
+.top h1 span { color: var(--accent); }
+.phase { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.phase b { color: var(--ink); font-family: var(--f-display); font-stretch: 80%; letter-spacing: 0.02em; }
+
+.tabs {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  display: flex; gap: 4px; margin: 18px -16px 0; padding: 8px 16px;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.tabs button {
+  flex: 1 1 0; min-width: 0; border: 0; background: transparent; padding: 9px 6px; border-radius: 8px;
+  font-family: var(--f-display); font-weight: 700; font-stretch: 85%; font-size: 15px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted);
+}
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+
+section.view { padding-top: 18px; display: flex; flex-direction: column; gap: 22px; }
+
+/* Week strip */
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.day {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 7px 4px 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; text-align: center;
+}
+.day.today { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.day.past:not(.today) { background: transparent; }
+.dname { font-family: var(--f-display); font-weight: 700; font-stretch: 80%; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+.dnum { font-size: 12px; color: var(--muted); line-height: 1; }
+.dplan { font-size: 11px; line-height: 1.15; color: var(--muted); min-height: 26px; display: flex; align-items: center; justify-content: center; hyphens: auto; }
+.chips { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; min-height: 26px; align-items: center; }
+.chip {
+  display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-weight: 800; font-size: 13px;
+}
+.chip.s { background: var(--accent-soft); color: var(--accent); }
+.walk {
+  width: 30px; height: 26px; border-radius: 7px; border: 1px dashed var(--line); background: transparent;
+  display: grid; place-items: center; color: var(--muted); padding: 0;
+}
+.walk svg { width: 16px; height: 16px; }
+.walk[aria-pressed="true"] { border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); }
+.week-sum { margin: 8px 2px 0; font-size: 14px; color: var(--muted); }
+
+/* Session head */
+.head-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.head-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.head-card h2 { font-size: 30px; font-weight: 800; font-stretch: 75%; text-transform: uppercase; letter-spacing: 0.01em; line-height: 1; }
+.seg { display: inline-flex; background: var(--panel); border-radius: 9px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; padding: 7px 11px; border-radius: 7px; font-size: 14px; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.seg button:disabled { cursor: not-allowed; opacity: .55; }
+.bar { height: 8px; background: var(--panel); border-radius: 99px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s ease; }
+.prog-txt { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+.note { font-size: 14px; color: var(--muted); margin: 0; }
+.banner {
+  background: var(--accent-soft); color: var(--ink); border-radius: var(--r); padding: 12px 14px; font-size: 15px;
+  display: flex; gap: 10px; align-items: center;
+}
+.banner svg { flex: none; width: 22px; height: 22px; color: var(--accent); }
+
+/* Blocks */
+.block { display: flex; flex-direction: column; gap: 12px; }
+.block-head { display: flex; gap: 12px; align-items: baseline; }
+.block-no {
+  font-family: var(--f-display); font-weight: 800; font-stretch: 70%; font-size: 34px; line-height: 1; color: var(--accent);
+  min-width: 22px;
+}
+.block-head h2 { font-size: 22px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: 0.02em; }
+.block-head p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+
+/* Exercise card */
+.ex {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px;
+  display: grid; grid-template-columns: 1fr; gap: 12px;
+}
+.ex.complete { border-color: var(--accent); }
+@media (min-width: 640px) { .ex { grid-template-columns: 230px minmax(0, 1fr); padding: 14px; gap: 16px; } }
+.fig { background: var(--panel); border-radius: 9px; aspect-ratio: 220 / 140; max-width: 100%; position: relative; overflow: hidden; }
+.fig svg { display: block; width: 100%; height: 100%; }
+.fig .tag {
+  position: absolute; left: 8px; top: 7px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  font-family: var(--f-display); font-weight: 700; font-stretch: 85%;
+}
+.ex-body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.ex-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.ex-head h3 { font-size: 21px; font-weight: 750; font-stretch: 85%; line-height: 1.15; }
+.rx { font-family: var(--f-display); font-weight: 800; font-size: 18px; font-stretch: 85%; color: var(--accent); white-space: nowrap; }
+.side { font-size: 13px; color: var(--muted); }
+.badge {
+  font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink);
+}
+.cues { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; font-size: 15px; }
+.cues li::marker { color: var(--accent); }
+.why { margin: 0; font-size: 15px; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; }
+.why b { color: var(--accent); }
+.mini .mini-why { color: var(--ink); border-top: 1px solid var(--line); padding-top: 6px; }
+.err { margin: 0; font-size: 14px; color: var(--muted); }
+.err strong { color: var(--danger); font-weight: 700; }
+.weak-note { margin: 0; font-size: 14px; color: var(--weak); font-weight: 700; }
+.log { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-top: 6px; border-top: 1px solid var(--line); margin-top: 2px; }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.pills .lbl { font-size: 13px; color: var(--muted); margin-right: 2px; }
+.pill {
+  min-width: 40px; height: 40px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--surface);
+  font-family: var(--f-display); font-weight: 800; font-size: 16px; padding: 0 10px;
+}
+.pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.pill.weak { border-color: var(--weak); color: var(--weak); font-size: 13px; font-stretch: 85%; }
+.pill.weak[aria-pressed="true"] { background: var(--weak); color: var(--surface); }
+.kg { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
+.kg input {
+  width: 72px; height: 40px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--surface);
+  padding: 0 8px; font-family: var(--f-display); font-weight: 700; font-size: 17px; color: var(--ink);
+}
+.btn {
+  height: 40px; border-radius: 99px; border: 1.5px solid var(--ink); background: transparent; padding: 0 14px;
+  font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.btn.run { background: var(--ink); color: var(--bg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); height: 46px; padding: 0 22px; font-size: 16px; }
+.btn.primary:disabled { opacity: .45; cursor: not-allowed; }
+.btn.quiet { border-color: var(--line); color: var(--muted); }
+.btn.danger { border-color: var(--danger); color: var(--danger); }
+.up { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: var(--muted); }
+.up input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+
+/* Circuit */
+.timer {
+  background: var(--ink); color: var(--bg); border-radius: var(--r); padding: 16px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center;
+}
+.timer .t-phase, .timer .t-name, .timer .t-next { grid-column: 1; }
+.timer .t-phase { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; font-size: 13px; opacity: .75; }
+.timer .t-name { font-family: var(--f-display); font-weight: 800; font-stretch: 80%; font-size: 24px; line-height: 1.1; }
+.timer .t-next { font-size: 14px; opacity: .75; }
+.timer .t-clock { font-family: var(--f-display); font-weight: 800; font-stretch: 75%; font-size: 64px; line-height: 1; grid-column: 2; grid-row: 1 / span 3; }
+.timer.rest .t-clock { color: var(--weak); }
+.timer.work .t-clock { color: var(--accent); }
+.timer .t-ctrl { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.timer .btn { border-color: var(--bg); color: var(--bg); }
+.timer .btn.run { background: var(--bg); color: var(--ink); }
+.timer .rounds { display: flex; gap: 6px; align-items: center; margin-left: auto; font-size: 13px; }
+.timer .pill { height: 34px; min-width: 34px; background: transparent; color: var(--bg); border-color: rgba(255,255,255,.35); }
+.timer .pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.mini {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+}
+.mini.now { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.mini h3 { font-size: 16px; font-weight: 750; font-stretch: 85%; line-height: 1.15; }
+.mini p { margin: 0; font-size: 13px; color: var(--muted); }
+.mini .fig { border-radius: 7px; }
+
+.finish { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.finish .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* Overview */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.tile b { display: block; font-family: var(--f-display); font-weight: 800; font-stretch: 80%; font-size: 30px; line-height: 1.05; }
+.tile span { font-size: 13px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.card h2 { font-size: 20px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: 0.02em; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; }
+td.r, th.r { text-align: right; }
+.cal { max-width: 480px; display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr)); gap: 4px; font-size: 12px; }
+.cal .h { text-align: center; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.cal .wl { color: var(--muted); align-self: center; font-variant-numeric: tabular-nums; }
+.cal .c {
+  aspect-ratio: 1; max-width: 100%; border-radius: 6px; background: var(--panel); position: relative;
+  display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 13px;
+}
+.cal .c.A, .cal .c.B { background: var(--accent); color: var(--accent-ink); }
+.cal .c.S { background: var(--accent-soft); color: var(--accent); }
+.cal .c.fut { background: transparent; border: 1px dashed var(--line); }
+.cal .c.td { outline: 2px solid var(--ink); outline-offset: -2px; }
+.cal .c i { position: absolute; bottom: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--weak); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.hist { display: flex; flex-direction: column; }
+.hrow { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.hrow:last-child { border-bottom: 0; }
+.hrow .when { min-width: 92px; font-variant-numeric: tabular-nums; }
+.hrow .what { font-weight: 700; flex: 1 1 120px; min-width: 0; }
+.hrow .pct { font-variant-numeric: tabular-nums; color: var(--muted); }
+.hrow .btn { height: 32px; font-size: 13px; padding: 0 10px; }
+.empty { color: var(--muted); font-size: 15px; margin: 0; }
+
+/* Weak leg */
+.steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.steps li::marker { font-family: var(--f-display); font-weight: 800; color: var(--accent); }
+.choice { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice button { flex: 1 1 120px; height: 52px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; font-size: 16px; }
+.choice button[aria-pressed="true"] { border-color: var(--weak); background: var(--weak-soft); color: var(--ink); box-shadow: inset 0 0 0 1px var(--weak); }
+.two { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 640px) { .two { grid-template-columns: 260px minmax(0, 1fr); } }
+.list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+
+footer.store { margin-top: 28px; font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+footer.store i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+footer.store.db i { background: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+
+.top p { margin: 8px 0 0; color: var(--muted); max-width: 62ch; }
+.view { display: flex; flex-direction: column; gap: 26px; padding-top: 22px; }
+.ex { display: flex; flex-direction: column; gap: 8px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--panel); color: var(--muted); }
+.tag.weak { background: var(--weak-soft); color: var(--weak); }
+.goals { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0; font-size: 13px; color: var(--muted); }
+.goal { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--panel); color: var(--ink); }
+.goal.weak { background: var(--weak-soft); color: var(--weak); }
+.intro li .goal { margin-right: 4px; }
+.how { margin: 0; font-size: 15px; }
+.intro { display: flex; flex-direction: column; gap: 10px; }
+.intro h2 { font-size: 20px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: .02em; }
+.intro ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+@media print { .ex, .card { break-inside: avoid; } body { background: #fff; } }
+</style>
+<div class="wrap" lang="cs">
+  <header class="top">
+    <h1>Popis <span>cviků</span></h1>
+    <p>K čemu je který cvik v plánu Rovně a silně, jak ho dělat a na co si dát pozor. Animované ukázky najdeš v aplikaci Rovne-a-silne.html.</p>
+  </header>
+  <div class="view">
+    <section class="card intro">
+      <h2>Co chceme zlepšit</h2>
+      <ul>
+        <li><span class="goal weak">Rovná pánev</span> Pánev a trup se ve stoji a při chůzi nepřesouvají do strany (vyosení). Na to míří hlavně stabilizace, cviky na jednu nohu a nošení kufru.</li>
+        <li><span class="goal weak">Vyrovnané strany</span> Slabší noha dožene silnější. Pomáhá jí série navíc a to, že se jí vždy začíná.</li>
+        <li><span class="goal">Krční páteř</span> Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Na to míří blok Krk a veslování s gumou.</li>
+        <li><span class="goal">Síla a držení těla</span> Silnější nohy, hýždě, záda, hrudník, ramena a střed těla. Vzpřímené držení bez hrbení.</li>
+        <li><span class="goal">Kondice a hubnutí</span> Víc spálené energie a lepší kondice. Nejvíc tu udělá denní chůze, bonusový okruh je navíc. Největší vliv na hubnutí má ale strava.</li>
+      </ul>
+      <p style="margin:0;color:var(--muted);font-size:14px">U každého cviku níže je napsané, který z těchto cílů zlepšuje.</p>
+    </section>
+    <section class="card intro">
+      <h2>Jak plán funguje</h2>
+      <ul>
+        <li><b>3 tréninky týdně</b> (A a B se střídají), mezi nimi chůze 8–10 tisíc kroků denně.</li>
+        <li>Každý trénink začíná <b>stabilizací</b>. Ta cílí na vyosení do strany: posiluje střední hýžďový sval a boční svaly trupu, které drží pánev v rovině.</li>
+        <li>Hned po ní přijde <b>blok Krk</b> (asi 7 minut) na napřímenou krční páteř: posiluje hluboké ohybače krku a šíjové svaly.</li>
+        <li><b>Silová část</b> buduje svaly celého těla. Cviky na jednu nohu vyrovnávají rozdíl mezi stranami.</li>
+        <li><b>Okruh na konci</b> je volitelný bonus na dny, kdy máš energii. Do splnění tréninku se nepočítá. Kalorie nejlíp přidá chůze a na hubnutí nejvíc rozhoduje strava: mírný kalorický deficit a dost bílkovin.</li>
+        <li>Slabší stranou vždy začínej a přidej jí jednu sérii navíc.</li>
+        <li>Postup: když zvládneš ve všech sériích o 2 opakování víc, přidej váhu. Ostrá bolest znamená stop.</li>
+      </ul>
+    </section>
+    <section class="block">
+  <div class="block-head"><span class="block-no">1</span><div><h2>Stabilizace</h2><p>Na začátku každého tréninku, asi 10 minut.</p></div></div>
+  <article class="ex">
+  <div class="ex-head"><h3>Stoj na jedné noze</h3><span class="rx">3 × 30 s na každou nohu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span><span class="goal weak">Vyrovnané strany</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span></div>
+  <p class="why"><b>K čemu:</b> Učí tělo udržet pánev vodorovně, když stojíš na jedné noze, a trénuje rovnováhu kotníku i kyčle. Míří přímo na tvoje vyosení do strany.</p>
+  <ul class="cues"><li>Pánev drž vodorovně, nepřesouvej boky nad stojnou nohu.</li><li>Stojná noha zpevněná, koleno lehce povolené, váha na celém chodidle.</li><li>Až to půjde snadno, zavři oči nebo se postav na polštář.</li></ul><p class="err"><strong>Pozor:</strong> Boky a trup ujíždějí do strany. Přesně to je tvoje vyosení, tak raději zkrať čas a drž pánev rovně.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Spouštění pánve na schodu</h3><span class="rx">2 × 12 na nohu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span><span class="goal weak">Vyrovnané strany</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">schod</span></div>
+  <p class="why"><b>K čemu:</b> Nejpřesnější cvik na tvoje vyosení: střední hýžďový sval stojné nohy musí zvednout pánev a udržet ji vodorovně. Podle EMG studií ho zapojí víc než clamshell.</p>
+  <ul class="cues"><li>Postav se bokem na schod jen jednou nohou, druhá visí volně vedle. Rukou se přidrž zdi nebo zábradlí.</li><li>Stojná noha zůstává natažená. Pomalu spusť volnou stranu pánve o pár centimetrů dolů.</li><li>Bokem stojné nohy zvedni pánev zpátky do roviny a nahoře vydrž 1 s.</li></ul><p class="err"><strong>Pozor:</strong> Pokrčení stojného kolena nebo úklon trupu. Pohyb je jen v pánvi.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Clamshell (škeble)</h3><span class="rx">2 × 15 na stranu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span></div>
+  <p class="why"><b>K čemu:</b> Posiluje střední hýžďový sval a zevní rotátory kyčle. Ty drží pánev v rovině a koleno ve správné ose.</p>
+  <ul class="cues"><li>Lehni si na bok, kolena pokrč zhruba do pravého úhlu, chodidla u sebe.</li><li>Horní koleno zvedej nahoru, chodidla se nerozpojí.</li><li>Pánev se nepřeklápí dozadu, pohyb je jen v kyčli.</li><li>Až bude snadný, dej si nad kolena odporovou gumu.</li></ul><p class="err"><strong>Pozor:</strong> Velký rozsah za cenu otočení pánve. Menší, ale čistý pohyb udělá víc.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Upažování nohy vleže na boku</h3><span class="rx">2 × 12 na stranu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span></div>
+  <p class="why"><b>K čemu:</b> Izolovaně posiluje střední hýžďový sval, hlavní sval, který brání propadání pánve a přesouvání boků do strany.</p>
+  <ul class="cues"><li>Spodní noha pokrčená pro stabilitu, horní natažená.</li><li>Horní nohu zvedej s patou mírně vzadu, špička míří dopředu.</li><li>Nahoře vydrž 1 s, dolů pomalu.</li></ul><p class="err"><strong>Pozor:</strong> Špička se stáčí ke stropu. Pak pracuje přední strana stehna místo hýždě.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Boční plank</h3><span class="rx">2 × 20–30 s na stranu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span></div>
+  <p class="why"><b>K čemu:</b> Posiluje boční svaly trupu a hýžďový sval spodní nohy. Učí tělo držet rovnou linii a nenaklánět se do strany.</p>
+  <ul class="cues"><li>Loket přímo pod ramenem, tělo v jedné linii od hlavy po kotníky.</li><li>Zvedni boky a tlač spodní bok ke stropu.</li><li>Lehčí verze: spodní koleno zůstává na zemi.</li><li>Až zvládneš 30 s: nahoře k tomu pomalu zvedej horní nohu. Podle studií je to nejsilnější cvik na střední hýžďový sval.</li></ul><p class="err"><strong>Pozor:</strong> Propadlé boky nebo zadek vystrčený dozadu.</p>
+</article>
+</section>
+    <section class="block">
+  <div class="block-head"><span class="block-no">2</span><div><h2>Krk</h2><p>Po stabilizaci, asi 7 minut. Pomalu a bez bolesti. Při brnění rukou nebo závrati přestaň.</p></div></div>
+  <article class="ex">
+  <div class="ex-head"><h3>Zásun brady s povyrůstáním</h3><span class="rx">2 × 10, každé drž 3 s</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span></p>
+  <div class="tags"><span class="tag">i přes den u počítače</span></div>
+  <p class="why"><b>K čemu:</b> Probouzí hluboké ohybače krku a vrací hlavu nad ramena. Verze s povyrůstáním temenem nezplošťuje horní část krku jako obyčejný zásun brady. Ve studii u lidí s napřímeným krkem zlepšila zakřivení i bolest.</p>
+  <ul class="cues"><li>Sedni si vzpřímeně, ramena volně dole, pohled vodorovně.</li><li>Zasuň bradu vodorovně dozadu („dvojitá brada“) a zároveň temenem povyrůst ke stropu.</li><li>Vydrž 3 s a uvolni. Dělej ho i přes den u počítače, ideálně 10× denně.</li></ul><p class="err"><strong>Pozor:</strong> Kývnutí bradou dolů k hrudníku místo zásunu dozadu. Pohled zůstává vodorovně.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Stažení lopatek s napřímením krku</h3><span class="rx">5 × 10 s</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span><span class="goal">Síla a držení těla</span></p>
+  <p class="why"><b>K čemu:</b> Druhá část stejného programu: srovná hrudník, ramena i krk naráz a učí tělo nosit hlavu nad trupem, ne vysunutou dopředu.</p>
+  <ul class="cues"><li>Vsedě nebo ve stoje se narovnej a lehce zasuň bradu.</li><li>Stáhni lopatky dozadu a dolů, hrudní kost jde mírně nahoru.</li><li>Pak hlavu jen lehce zakloň, pohled kousek nad vodorovnou. Vydrž 10 s.</li></ul><p class="err"><strong>Pozor:</strong> Krčení ramen k uším nebo prudký záklon hlavy. Pohyb je malý a nesmí bolet.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Tlak hlavy do dlaní</h3><span class="rx">5 × 10 s</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span></p>
+  <p class="why"><b>K čemu:</b> Izometricky posiluje šíjové svaly, které drží krk v přirozeném prohnutí. V randomizované studii vrátil tříměsíční domácí program tohoto cviku normální zakřivení krku většině cvičících.</p>
+  <ul class="cues"><li>Sedni si vzpřímeně, propletené dlaně polož na zátylek.</li><li>Zatlač hlavou dozadu do dlaní. Dlaně kladou stejný odpor, takže se hlava nehýbe.</li><li>Tlač zhruba na polovinu síly a dýchej. Mezi opakováními 10 s pauza.</li></ul><p class="err"><strong>Pozor:</strong> Tlačit naplno nebo u toho zaklánět hlavu. Má to být klidná výdrž bez bolesti.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Zvedání hlavy na čtyřech</h3><span class="rx">2 × 10</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span></p>
+  <p class="why"><b>K čemu:</b> Posiluje šíjové svaly v pohybu proti váze hlavy. Podobný cvik ve studii zesílil šíjové svaly a ulevil od bolesti krku.</p>
+  <ul class="cues"><li>Klek na čtyřech, dlaně pod rameny, kolena pod boky, záda rovná.</li><li>Lehce zasuň bradu a pomalu skloň hlavu, pohled ke kolenům.</li><li>Zvedni hlavu jen do prodloužení zad, pohled na zem kousek před dlaně. Nahoře 2 s.</li></ul><p class="err"><strong>Pozor:</strong> Záklon až ke stropu s vystrčenou bradou. Zvedej jen do linie se zády.</p>
+</article>
+</section>
+    <section class="block">
+  <div class="block-head"><span class="block-no">3</span><div><h2>Silová část A</h2><p>3 série, mezi sériemi 60–90 s pauza.</p></div></div>
+  <article class="ex">
+  <div class="ex-head"><h3>Goblet dřep</h3><span class="rx">3 × 10</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Základní cvik na stehna a hýždě. Jednoručka před hrudníkem pomáhá držet trup vzpřímeně a učí správný dřep.</p>
+  <ul class="cues"><li>Jednoručku drž svisle u hrudníku, lokty míří dolů.</li><li>Sedni si mezi paty, kolena jdou ve směru špiček.</li><li>Paty zůstávají na zemi, hrudník nahoře.</li></ul><p class="err"><strong>Pozor:</strong> Kolena padají dovnitř nebo se zvedají paty.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Rumunský mrtvý tah na jedné noze</h3><span class="rx">3 × 8 na nohu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal weak">Vyrovnané strany</span><span class="goal weak">Rovná pánev</span><span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Posiluje hýždě a zadní stranu stehna každé nohy zvlášť a zároveň trénuje stabilitu kyčle a kotníku. Jeden z nejlepších cviků na vyrovnání stran.</p>
+  <ul class="cues"><li>Jednoručku drž v ruce na straně zvednuté nohy. Stojná noha lehce pokrčená, váha na patě a středu chodidla.</li><li>Předkláněj se v kyčli, zadní noha jde v jedné linii s trupem.</li><li>Pánev drž rovně, zvednutý bok se nesmí otáčet ke stropu.</li></ul><p class="err"><strong>Pozor:</strong> Kulatá záda nebo otáčení pánve. Ze začátku se volnou rukou přidrž lavice.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Tlak s jednoručkami na lavici</h3><span class="rx">3 × 10</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Posiluje prsní svaly, přední část ramen a tricepsy. S jednoručkami musí každá ruka pracovat sama, takže silnější strana nepomáhá slabší.</p>
+  <ul class="cues"><li>Lopatky stáhni k sobě a dolů, chodidla pevně na zemi.</li><li>Spouštěj jednoručky k hrudníku, lokty asi 45° od těla.</li><li>Vytlač nahoru nad ramena.</li></ul><p class="err"><strong>Pozor:</strong> Lokty roztažené do písmene T nebo odrážení činek od hrudníku.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Přítah jednoručky v předklonu</h3><span class="rx">3 × 10 na stranu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Posiluje záda (hlavně široký sval zádový a svaly mezi lopatkami) a biceps. Vyvažuje tlakové cviky a zlepšuje držení těla.</p>
+  <ul class="cues"><li>Ruka a koleno na lavici, záda rovná a souběžně s lavicí.</li><li>Táhni loket k boku, ne ruku k rameni.</li><li>Nahoře stáhni lopatku, dolů pomalu.</li></ul><p class="err"><strong>Pozor:</strong> Trhání trupem a rotace. Zvol lehčí váhu.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Dead bug</h3><span class="rx">3 × 8 na stranu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span></div>
+  <p class="why"><b>K čemu:</b> Učí zpevnit střed těla, zatímco se hýbou ruce a nohy. Chrání bedra a zlepšuje koordinaci levé a pravé strany.</p>
+  <ul class="cues"><li>Bedra přitlač k podložce a drž je tam celou dobu.</li><li>S výdechem pomalu natáhni opačnou ruku a nohu.</li><li>Vrať se a vyměň strany.</li></ul><p class="err"><strong>Pozor:</strong> Bedra se zvedají od země. Zkrať rozsah.</p>
+</article>
+</section>
+    <section class="block">
+  <div class="block-head"><span class="block-no">4</span><div><h2>Silová část B</h2><p>3 série, mezi sériemi 60–90 s pauza.</p></div></div>
+  <article class="ex">
+  <div class="ex-head"><h3>Bulharský dřep</h3><span class="rx">3 × 8 na nohu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal weak">Vyrovnané strany</span><span class="goal weak">Rovná pánev</span><span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Silný cvik na stehna a hýždě každé nohy zvlášť. Ukáže rozdíl mezi stranami, pomáhá ho vyrovnat a trénuje stabilitu pánve.</p>
+  <ul class="cues"><li>Zadní nárt na lavici, přední chodidlo dost daleko vpředu.</li><li>Klesej dolů, ne dopředu. Přední koleno míří nad špičku.</li><li>Pánev drž v rovině, nepadá na stranu.</li></ul><p class="err"><strong>Pozor:</strong> Přední koleno uhýbá dovnitř. První 2 týdny dělej výpad se zadní nohou na zemi.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Hip thrust</h3><span class="rx">3 × 12</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Nejpřímější cvik na velký hýžďový sval. Silné hýždě odlehčují bedrům i kolenům a pomáhají s držením pánve.</p>
+  <ul class="cues"><li>Spodní okraj lopatek opřený o hranu lavice, jednoručka na pánvi.</li><li>Tlač přes paty a zvedni boky do vodorovné polohy.</li><li>Nahoře zatni hýždě, brada lehce k hrudníku.</li></ul><p class="err"><strong>Pozor:</strong> Záklon hlavy a prohnutá bedra místo práce hýždí.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Tlak nad hlavu vsedě</h3><span class="rx">3 × 10</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Posiluje ramena a tricepsy. Vsedě s opřenými zády je šetrný k bedrům.</p>
+  <ul class="cues"><li>Opěradlo nastav kolmo, záda opřená, břicho zpevněné.</li><li>Začni s jednoručkami u ramen.</li><li>Tlač nad hlavu, dolů pomalu zpátky k ramenům.</li></ul><p class="err"><strong>Pozor:</strong> Záklon v bedrech. Zpevni břicho, případně uber váhu.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Veslování s gumou</h3><span class="rx">3 × 12</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span><span class="goal">Krční páteř</span></p>
+  <p class="why"><b>K čemu:</b> Posiluje svaly mezi lopatkami a zadní část ramen. Působí proti shrbenému držení těla.</p>
+  <ul class="cues"><li>Gumu ukotvi ve výšce hrudníku (zavřené dveře, noha stolu).</li><li>Táhni lokty dozadu podél těla, stáhni lopatky.</li><li>Vracej pomalu, guma nesmí cuknout.</li></ul><p class="err"><strong>Pozor:</strong> Krčení ramen k uším.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Nošení kufru</h3><span class="rx">3 × 30 s na stranu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span><span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Svaly na boku trupu musí celou dobu bránit náklonu k zátěži. Trénuje přesně to, abys stál a chodil rovně.</p>
+  <ul class="cues"><li>Jednoručku drž jen v jedné ruce podél těla.</li><li>Jdi pomalu a rovně, ramena i pánev vodorovně.</li><li>Nenakláněj se k zátěži ani od ní.</li></ul><p class="err"><strong>Pozor:</strong> Úklon trupu do strany. Přesně proti tomu tenhle cvik trénuje.</p>
+</article>
+</section>
+    <section class="block">
+  <div class="block-head"><span class="block-no">+</span><div><h2>Bonus: okruh</h2><p>Volitelný, jen když máš energii. 40 s cvičení, 20 s pauza, 2 kola (od 4. týdne 3 kola).</p></div></div>
+  <article class="ex">
+  <div class="ex-head"><h3>Dřep s jednoručkou</h3><span class="rx">40 s práce, 20 s pauza</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Kondice a hubnutí</span><span class="goal">Síla a držení těla</span></p>
+  <p class="why"><b>K čemu:</b> Velké svaly nohou spálí nejvíc energie a rychle zvednou tep.</p>
+  <p class="how"><b>Jak na to:</b> Lehčí váha než v hlavní části, plynulé tempo.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Kliky s rukama na lavici</h3><span class="rx">40 s práce, 20 s pauza</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Kondice a hubnutí</span><span class="goal">Síla a držení těla</span></p>
+  <p class="why"><b>K čemu:</b> Hrudník, ramena a tricepsy, k tomu zpevnění celého trupu.</p>
+  <p class="how"><b>Jak na to:</b> Tělo v jedné linii. Čím vyšší opora, tím snazší.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Horolezec</h3><span class="rx">40 s práce, 20 s pauza</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Kondice a hubnutí</span></p>
+  <p class="why"><b>K čemu:</b> Kardio část okruhu: zvedá tep a zapojuje břicho.</p>
+  <p class="how"><b>Jak na to:</b> Dlaně pod rameny, střídavě kolena k hrudníku, boky dole.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Výpady vzad</h3><span class="rx">40 s práce, 20 s pauza</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Kondice a hubnutí</span><span class="goal">Síla a držení těla</span></p>
+  <p class="why"><b>K čemu:</b> Nohy a hýždě. Střídání nohou trénuje i rovnováhu.</p>
+  <p class="how"><b>Jak na to:</b> Krok dozadu, obě kolena do pravého úhlu, střídej nohy.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Plank</h3><span class="rx">40 s práce, 20 s pauza</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Kondice a hubnutí</span><span class="goal">Síla a držení těla</span></p>
+  <p class="why"><b>K čemu:</b> Zpevnění celého středu těla a chvilka na vydýchání na konci kola.</p>
+  <p class="how"><b>Jak na to:</b> Lokty pod rameny, zatni břicho i hýždě, dýchej.</p>
+</article>
+</section>
+    <section class="card intro">
+      <h2>Kdy zajít k fyzioterapeutovi</h2>
+      <ul>
+        <li>Když tě něco bolí (koleno, kyčel, záda, kotník).</li>
+        <li>Když jsi na té noze dřív měl úraz, třeba podvrtnutý kotník.</li>
+        <li>Když se rovnováha ani po 6–8 týdnech nezlepší.</li>
+        <li>Když máš podezření na rozdílnou délku nohou nebo problém s chodidlem.</li>
+      </ul>
+      <h2>Kvůli krku hned, když</h2>
+      <ul>
+        <li>bolest, brnění nebo slabost vystřelují do ramene či ruky,</li>
+        <li>se ti při cvičení točí hlava, rozmazává vidění nebo přijde silná bolest hlavy,</li>
+        <li>krk začal bolet po úrazu (pád, autonehoda),</li>
+        <li>se bolest po 2 týdnech cvičení zhoršuje.</li>
+      </ul>
+    </section>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Version comes from the git tag in CI (v1.2.3 -> name 1.2.3, code 10203); local builds get 0.0.0.
+def versionNameEnv = System.getenv('VERSION_NAME') ?: '0.0.0'
+def versionCodeEnv = (System.getenv('VERSION_CODE') ?: '1') as int
+
+android {
+    namespace 'cz.matys.rovneasilne'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'cz.matys.rovneasilne'
+        minSdk 26
+        targetSdk 34
+        versionCode versionCodeEnv
+        versionName versionNameEnv
+        // GitHub repository the app checks for new releases.
+        buildConfigField 'String', 'UPDATE_REPO', '"Matys134/cviceni"'
+    }
+
+    signingConfigs {
+        release {
+            def ks = System.getenv('KEYSTORE_FILE')
+            if (ks) {
+                storeFile file(ks)
+                storeType 'pkcs12'
+                storePassword System.getenv('KEYSTORE_PASSWORD')
+                keyAlias System.getenv('KEY_ALIAS')
+                keyPassword System.getenv('KEYSTORE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig System.getenv('KEYSTORE_FILE') ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    // The web app itself is the single source: the same files as the ZIP and the claude.ai version.
+    sourceSets {
+        main {
+            assets.srcDirs = ['../../Rovne-a-silne']
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+}
