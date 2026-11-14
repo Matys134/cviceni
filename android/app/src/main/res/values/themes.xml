@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Colours match the web app's light palette (--bg, --accent). -->
+    <!-- Colours match the web app's light palette (bg, accent tokens). -->
     <color name="bg">#EFF2F1</color>
     <color name="accent">#0B7560</color>
     <color name="icon_bg">#0B7560</color>
