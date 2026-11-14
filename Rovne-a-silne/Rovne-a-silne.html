@@ -348,7 +348,10 @@ const EX = {
   stoj1: { name: 'Stoj na jedné noze', why: 'Učí tělo udržet pánev vodorovně, když stojíš na jedné noze, a trénuje rovnováhu kotníku i kyčle. Míří přímo na tvoje vyosení do strany.', rx: '3 × 30 s', side: 'na každou nohu', sets: 3, hold: 30, uni: true, weak: true,
     cues: ['Pánev drž vodorovně, nepřesouvej boky nad stojnou nohu.', 'Stojná noha zpevněná, koleno lehce povolené, váha na celém chodidle.', 'Až to půjde snadno, zavři oči nebo se postav na polštář.'],
     err: 'Boky a trup ujíždějí do strany. Přesně to je tvoje vyosení, tak raději zkrať čas a drž pánev rovně.' },
-  pelvdrop: { name: 'Spouštění pánve na schodu', why: 'Nejpřesnější cvik na tvoje vyosení: střední hýžďový sval stojné nohy musí zvednout pánev a udržet ji vodorovně. Podle EMG studií ho zapojí víc než clamshell.', rx: '2 × 12', side: 'na nohu', sets: 2, uni: true, weak: true,
+  slsit: { name: 'Dřep na jedné noze na lavici', why: 'Dřep na jedné noze patří podle EMG studií k cvikům, které nejvíc zapojí střední hýžďový sval. Ten musí celou dobu držet pánev vodorovně a koleno v ose. Stačí k tomu lavice nebo židle.', rx: '2 × 6', side: 'na nohu', sets: 2, uni: true, weak: true,
+    cues: ['Postav se na jednu nohu zády k lavici, druhou natáhni kousek nad zemí dopředu, ruce před sebe.', 'Pomalu si sedni na kraj lavice. Koleno míří nad špičku, pánev drž rovně.', 'Hned se přes patu zase postav, bez houpání. Když to nejde, dej si na lavici polštář, ať je sed výš, nebo si pomoz špičkou druhé nohy.'],
+    err: 'Koleno uhýbá dovnitř nebo se pánev na straně volné nohy propadá. Zvol vyšší sed a jdi pomaleji.' },
+  pelvdrop: { retired: true, name: 'Spouštění pánve na schodu', why: 'Nejpřesnější cvik na tvoje vyosení: střední hýžďový sval stojné nohy musí zvednout pánev a udržet ji vodorovně. Podle EMG studií ho zapojí víc než clamshell.', rx: '2 × 12', side: 'na nohu', sets: 2, uni: true, weak: true,
     cues: ['Postav se bokem na schod jen jednou nohou, druhá visí volně vedle. Rukou se přidrž zdi nebo zábradlí.', 'Stojná noha zůstává natažená. Pomalu spusť volnou stranu pánve o pár centimetrů dolů.', 'Bokem stojné nohy zvedni pánev zpátky do roviny a nahoře vydrž 1 s.'],
     err: 'Pokrčení stojného kolena nebo úklon trupu. Pohyb je jen v pánvi.' },
   clam: { name: 'Clamshell (škeble)', why: 'Posiluje střední hýžďový sval a zevní rotátory kyčle. Ty drží pánev v rovině a koleno ve správné ose.', rx: '2 × 15', side: 'na stranu', sets: 2, uni: true, weak: true,
@@ -396,7 +399,10 @@ const EX = {
   split: { name: 'Bulharský dřep', why: 'Silný cvik na stehna a hýždě každé nohy zvlášť. Ukáže rozdíl mezi stranami, pomáhá ho vyrovnat a trénuje stabilitu pánve.', rx: '3 × 8', side: 'na nohu', sets: 3, kg: true, uni: true, weak: true,
     cues: ['Zadní nárt na lavici, přední chodidlo dost daleko vpředu.', 'Klesej dolů, ne dopředu. Přední koleno míří nad špičku.', 'Pánev drž v rovině, nepadá na stranu.'],
     err: 'Přední koleno uhýbá dovnitř. První 2 týdny dělej výpad se zadní nohou na zemi.' },
-  hipthrust: { name: 'Hip thrust', why: 'Nejpřímější cvik na velký hýžďový sval. Silné hýždě odlehčují bedrům i kolenům a pomáhají s držením pánve.', rx: '3 × 12', sets: 3, kg: true,
+  sltrust: { name: 'Hip thrust na jedné noze', why: 'Nejpřímější cvik na velký hýžďový sval, jen bez činky: váhu nese jedna noha, takže je těžký i bez zátěže. Navíc trénuje každou stranu zvlášť a učí udržet pánev rovně.', rx: '3 × 10', side: 'na nohu', sets: 3, uni: true, weak: true,
+    cues: ['Spodní okraj lopatek opři o hranu lavice, chodidlo stojné nohy pod kolenem, druhou nohu pokrč a zvedni.', 'Zatlač patou a zvedni boky do vodorovné polohy. Nahoře zatni hýždě a vydrž 1 s.', 'Až zvládneš 3 × 15, dej si nahoře 2 s pauzu nebo polož jednoručku na stojnou stranu pánve.'],
+    err: 'Pánev se na straně zvednuté nohy propadá nebo se prohýbáš v bedrech. Žebra drž dole, brada lehce k hrudníku.' },
+  hipthrust: { retired: true, name: 'Hip thrust', why: 'Nejpřímější cvik na velký hýžďový sval. Silné hýždě odlehčují bedrům i kolenům a pomáhají s držením pánve.', rx: '3 × 12', sets: 3, kg: true,
     cues: ['Spodní okraj lopatek opřený o hranu lavice, jednoručka na pánvi.', 'Tlač přes paty a zvedni boky do vodorovné polohy.', 'Nahoře zatni hýždě, brada lehce k hrudníku.'],
     err: 'Záklon hlavy a prohnutá bedra místo práce hýždí.' },
   ohp: { name: 'Tlak nad hlavu vsedě', why: 'Posiluje ramena a tricepsy. Vsedě s opřenými zády je šetrný k bedrům.', rx: '3 × 10', sets: 3, kg: true,
@@ -416,25 +422,26 @@ const EX = {
   c_plank: { name: 'Plank', why: 'Zpevnění celého středu těla a chvilka na vydýchání na konci kola.', circ: true, cue: 'Lokty pod rameny, zatni břicho i hýždě, dýchej.' },
 };
 const PLAN = {
-  stab: ['stoj1', 'pelvdrop', 'clam', 'abd', 'sideplank'],
+  stab: ['stoj1', 'slsit', 'clam', 'abd', 'sideplank'],
   stabV1: ['stoj1', 'clam', 'abd', 'sideplank', 'bridge'],
   neck: ['chintuck', 'retract', 'isoext', 'quadneck'],
   A: ['goblet', 'slrdl', 'dbbench', 'dbrow', 'deadbug'],
-  B: ['split', 'hipthrust', 'ohp', 'bandrow', 'carry'],
+  B: ['split', 'sltrust', 'ohp', 'bandrow', 'carry'],
+  BV1: ['split', 'hipthrust', 'ohp', 'bandrow', 'carry'],
   circ: ['c_squat', 'c_pushup', 'c_climber', 'c_lunge', 'c_plank'],
 };
 const GOALS = {
   panev: { name: 'Rovná pánev', weak: true, what: 'Pánev a trup se ve stoji a při chůzi nepřesouvají do strany (vyosení). Posiluje se hlavně střední hýžďový sval a boční svaly trupu.', where: 'Stabilizace, cviky na jednu nohu, nošení kufru' },
-  strany: { name: 'Vyrovnané strany', weak: true, what: 'Slabší noha dožene silnější. Pomáhá jí série navíc a to, že se jí vždy začíná.', where: 'Stoj na jedné noze, mrtvý tah na jedné noze, bulharský dřep' },
+  strany: { name: 'Vyrovnané strany', weak: true, what: 'Slabší noha dožene silnější. Pomáhá jí série navíc a to, že se jí vždy začíná.', where: 'Cviky na jednu nohu: stoj, dřep a mrtvý tah na jedné noze, bulharský dřep, hip thrust na jedné noze' },
   krk: { name: 'Krční páteř', what: 'Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Posilují se hluboké ohybače krku a šíjové svaly.', where: 'Blok Krk, veslování s gumou' },
   sila: { name: 'Síla a držení těla', what: 'Silnější nohy, hýždě, záda, hrudník, ramena a střed těla. Vzpřímené držení bez hrbení.', where: 'Silová část A a B' },
   kondice: { name: 'Kondice a hubnutí', what: 'Víc spálené energie a lepší kondice. Nejvíc tu udělá denní chůze. Na hubnutí má ale největší vliv strava: mírný kalorický deficit a dost bílkovin.', where: 'Denní chůze, bonusový okruh' },
 };
 const EX_GOALS = {
-  stoj1: ['panev', 'strany'], pelvdrop: ['panev', 'strany'], clam: ['panev'], abd: ['panev'], sideplank: ['panev'], bridge: ['sila', 'panev'],
+  stoj1: ['panev', 'strany'], slsit: ['panev', 'strany'], pelvdrop: ['panev', 'strany'], clam: ['panev'], abd: ['panev'], sideplank: ['panev'], bridge: ['sila', 'panev'],
   chintuck: ['krk'], retract: ['krk', 'sila'], isoext: ['krk'], quadneck: ['krk'],
   goblet: ['sila'], slrdl: ['strany', 'panev', 'sila'], dbbench: ['sila'], dbrow: ['sila'], deadbug: ['sila'],
-  split: ['strany', 'panev', 'sila'], hipthrust: ['sila'], ohp: ['sila'], bandrow: ['sila', 'krk'], carry: ['panev', 'sila'],
+  split: ['strany', 'panev', 'sila'], sltrust: ['sila', 'strany', 'panev'], hipthrust: ['sila'], ohp: ['sila'], bandrow: ['sila', 'krk'], carry: ['panev', 'sila'],
 };
 const TYPE_NAME = { A: 'Trénink A', B: 'Trénink B', S: 'Stabilizace a krk' };
 const WEEK_PLAN = ['trénink', 'chůze', 'trénink', 'chůze + stab.', 'trénink', 'chůze', 'volno'];
@@ -453,6 +460,11 @@ const FIGS = {
     front: true, foot: 6, tag: 'Zepředu', guide: { at: 'hip', x1: 82, x2: 138 }, hold: [700, 1600], keys: [
     { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [103, 101], fF: [103, 127], hN: [119, 73], hF: [101, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
     { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [102, 92], fF: [104, 113], hN: [119, 73], hF: [101, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
+  ] },
+  slsit: { cap: ['Vstaň přes patu stojné nohy, koleno nad špičkou', 'Pomalu si sedni na kraj lavice, pánev drž rovně'], arrow: [{at: 'hip', o: [-14, 0]}],
+    tag: 'Zboku', props: [{ k: 'bench', x: 46, y: 98, w: 40 }], hold: [500, 600], keys: [
+    { hip: [100, 75], t: 180, fN: [102, 126], KF: [110, 99], fF: [128, 112], toeF: 60, hN: [136, 46], hF: [134, 47] },
+    { hip: [80, 95], t: 155, h: -8, fN: [102, 126], KF: [105, 90], fF: [130, 101], toeF: 60, hN: [131, 63], hF: [129, 64] },
   ] },
   pelvdrop: { cap: ['Bokem stojné nohy zvedni pánev zpátky do roviny', 'Pomalu spusť volnou stranu pánve dolů, stojná noha rovná'], arrow: [{at: 'footF', o: [-12, 0]}],
     front: true, foot: 6, tag: 'Zepředu', guide: { at: 'hip', x1: 82, x2: 138 }, props: [{ k: 'step', x: 108, y: 116, w: 24 }], hold: [900, 900], keys: [
@@ -528,6 +540,11 @@ const FIGS = {
     tag: 'Zboku', props: [{ k: 'bench', x: 20, y: 103, w: 50 }], db: [{ at: 'hN', o: 0 }, { at: 'hF', o: 0 }], hold: [400, 500], keys: [
     { hip: [100, 75], t: 174, fN: [114, 126], fF: [64, 99], toeF: -100, hN: [105, 76], hF: [103, 76] },
     { hip: [92, 100], t: 168, fN: [114, 126], fF: [64, 99], toeF: -100, hN: [101, 101], hF: [99, 101] },
+  ] },
+  sltrust: { cap: ['Lopatky o lavici, jedna noha nahoře, boky dole', 'Zatlač patou a zvedni boky do roviny, pánev nepadá'], arrow: [{at: 'hip', o: [0, -8]}],
+    tag: 'Zboku', props: [{ k: 'bench', x: 18, y: 102, w: 60 }], hold: [400, 900], keys: [
+    { hip: [105, 121], t: -126, h: 16, fN: [148, 126], KF: [119, 100], fF: [143, 109], toeF: 60, EN: [70, 104], hN: [88, 104], EF: [68, 104], hF: [86, 104] },
+    { hip: [112, 99], t: -90, h: -20, fN: [148, 126], KF: [124, 76], fF: [149, 84], toeF: 70, EN: [70, 104], hN: [88, 104], EF: [68, 104], hF: [86, 104] },
   ] },
   hipthrust: { cap: ['Lopatky o lavici, boky dole', 'Zvedni boky do vodorovné polohy'], arrow: [{at: 'hip', o: [0, -6]}],
     tag: 'Zboku', props: [{ k: 'bench', x: 18, y: 102, w: 60 }], db: [{ at: 'hN' }], hold: [400, 900], keys: [
@@ -959,13 +976,16 @@ function touch() {
 }
 // Sessions saved before the neck block existed have no `neck` flag, so their percentages stay as they were.
 // Saved sessions keep their own exercise list (`ex`), so later plan changes don't rewrite history.
-// Older sessions without it were done with the first stabilization set (with the bridge).
+// Older sessions without it were done with the first plan (bridge in stabilization, two-leg hip thrust in B).
 function exList(s) {
   if (s.ex) return s.ex;
   const stab = s._draft ? PLAN.stab : PLAN.stabV1;
   const neck = s.neck ? PLAN.neck : [];
-  return s.type === 'S' ? [...stab, ...neck] : [...stab, ...neck, ...PLAN[s.type]];
+  const main = s.type === 'B' && !s._draft ? PLAN.BV1 : PLAN[s.type];
+  return s.type === 'S' ? [...stab, ...neck] : [...stab, ...neck, ...main];
 }
+// Every exercise that has ever been in the stabilization block, so old and open sessions render in the right block.
+const STAB_ALL = ['stoj1', 'slsit', 'pelvdrop', 'clam', 'abd', 'sideplank', 'bridge'];
 function prog(s) {
   let done = 0, total = 0;
   const weak = !!state.settings.weak;
@@ -1127,11 +1147,13 @@ function renderToday() {
       <p class="note">${locked ? 'Typ tréninku se dá změnit jen před první odškrtnutou sérií.' : `Navrženo podle posledního tréninku. ${cur.type === 'S' ? 'Krátká verze na dny s chůzí.' : 'Odškrtávej série, jak je děláš.'}`}</p>
     </section>`;
   let no = 1;
-  const stabIds = exList(cur).filter(id => PLAN.stab.includes(id) || PLAN.stabV1.includes(id));
+  const list = exList(cur);
+  const stabIds = list.filter(id => STAB_ALL.includes(id));
+  const mainIds = list.filter(id => !STAB_ALL.includes(id) && !PLAN.neck.includes(id));
   html += blockHTML(no++, 'Stabilizace', 'Na začátku každého tréninku, asi 10 min. Hlavní práce na vyosení, nepřeskakuj ji.', stabIds);
   if (cur.neck) html += blockHTML(no++, 'Krk', 'Asi 7 min, na napřímenou krční páteř. Pomalu a bez bolesti. Při brnění rukou nebo závrati přestaň.', PLAN.neck);
   if (cur.type !== 'S') {
-    html += blockHTML(no++, cur.type === 'A' ? 'Silová část A' : 'Silová část B', '3 série, mezi sériemi 60–90 s pauza. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.', PLAN[cur.type]);
+    html += blockHTML(no++, cur.type === 'A' ? 'Silová část A' : 'Silová část B', '3 série, mezi sériemi 60–90 s pauza. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.', mainIds);
     html += circuitHTML();
   }
   html += `<section class="finish" id="finish"></section>`;
@@ -1388,7 +1410,7 @@ function renderLog() {
   }
   cal += '</div>';
 
-  const weighted = Object.keys(EX).filter(id => EX[id].kg);
+  const weighted = Object.keys(EX).filter(id => EX[id].kg && !EX[id].retired);
   const wRows = weighted.map(id => {
     const l = lastInfo(id);
     return `<tr><td>${EX[id].name}</td><td class="r num">${l ? fmtKg(l.kg) + ' kg' : '–'}</td><td class="num">${l ? fmtShort(l.d) : ''}</td><td>${l && l.up ? '<span class="badge">Přidej váhu</span>' : ''}</td></tr>`;
