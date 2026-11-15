@@ -257,6 +257,8 @@ section.view { padding-top: 18px; display: flex; flex-direction: column; gap: 22
 }
 .bonus .tog::before { content: 'Zobrazit'; }
 .bonus[open] .tog::before { content: 'Skrýt'; }
+.pair { display: flex; flex-direction: column; gap: 10px; border-left: 3px solid var(--accent); padding-left: 10px; }
+.pair-h { margin: 0; font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
 .finish { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
 .finish .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
@@ -513,18 +515,24 @@ const EX = {
   c_plank: { name: 'Plank', why: 'Zpevnění celého středu těla a chvilka na vydýchání na konci kola.', circ: true, cue: 'Lokty pod rameny, zatni břicho i hýždě, dýchej.' },
 };
 const PLAN = {
-  stab: ['stoj1', 'slsit', 'clam', 'abd', 'sideplank'],
+  // Short warm-up with the two highest-activation gluteus medius exercises; the single-leg lifts do the rest.
+  stab: ['abd', 'sideplank'],
   stabV1: ['stoj1', 'clam', 'abd', 'sideplank', 'bridge'],
-  neck: ['chintuck', 'retract', 'isoext', 'quadneck'],
-  A: ['goblet', 'slrdl', 'dbbench', 'dbrow', 'deadbug'],
-  B: ['split', 'sltrust', 'ohp', 'bandrow', 'carry'],
+  // The two neck exercises with the best evidence, done in the rests of the strength part.
+  neck: ['chintuck', 'isoext'],
+  neckV1: ['chintuck', 'retract', 'isoext', 'quadneck'],
+  // Strength in pairs (see PAIR): a set of one, straight into a set of the other, then rest.
+  A: ['goblet', 'dbrow', 'slrdl', 'dbbench', 'deadbug'],
+  B: ['split', 'ohp', 'sltrust', 'bandrow', 'carry'],
   BV1: ['split', 'hipthrust', 'ohp', 'bandrow', 'carry'],
   circ: ['c_squat', 'c_pushup', 'c_climber', 'c_lunge', 'c_plank'],
 };
+// Strength pairs that don't tire the same muscles, so they can be alternated with one rest per round.
+const PAIR = { goblet: 'dbrow', slrdl: 'dbbench', split: 'ohp', sltrust: 'bandrow' };
 const GOALS = {
-  panev: { name: 'Rovná pánev', weak: true, what: 'Pánev a trup se ve stoji a při chůzi nepřesouvají do strany (vyosení). Posiluje se hlavně střední hýžďový sval a boční svaly trupu.', where: 'Stabilizace, cviky na jednu nohu, nošení kufru' },
-  strany: { name: 'Vyrovnané strany', weak: true, what: 'Slabší noha dožene silnější. Pomáhá jí série navíc a to, že se jí vždy začíná.', where: 'Cviky na jednu nohu: stoj, dřep a mrtvý tah na jedné noze, bulharský dřep, hip thrust na jedné noze' },
-  krk: { name: 'Krční páteř', what: 'Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Posilují se hluboké ohybače krku a šíjové svaly.', where: 'Blok Krk, veslování s gumou' },
+  panev: { name: 'Rovná pánev', weak: true, what: 'Pánev a trup se ve stoji a při chůzi nepřesouvají do strany (vyosení). Posiluje se hlavně střední hýžďový sval a boční svaly trupu.', where: 'Rozcvička (upažování a boční plank), cviky na jednu nohu, nošení kufru' },
+  strany: { name: 'Vyrovnané strany', weak: true, what: 'Slabší noha dožene silnější. Pomáhá jí série navíc a to, že se jí vždy začíná.', where: 'Mrtvý tah na jedné noze, bulharský dřep, hip thrust na jedné noze' },
+  krk: { name: 'Krční páteř', what: 'Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Posilují se hluboké ohybače krku a šíjové svaly.', where: 'Krk v pauzách silové části, veslování s gumou' },
   sila: { name: 'Síla a držení těla', what: 'Silnější nohy, hýždě, záda, hrudník, ramena a střed těla. Vzpřímené držení bez hrbení.', where: 'Silová část A a B' },
   kondice: { name: 'Kondice a hubnutí', what: 'Víc spálené energie a lepší kondice. Nejvíc tu udělá denní chůze. Na hubnutí má ale největší vliv strava: mírný kalorický deficit a dost bílkovin.', where: 'Denní chůze, bonusový okruh' },
 };
@@ -534,7 +542,7 @@ const EX_GOALS = {
   goblet: ['sila'], slrdl: ['strany', 'panev', 'sila'], dbbench: ['sila'], dbrow: ['sila'], deadbug: ['sila'],
   split: ['strany', 'panev', 'sila'], sltrust: ['sila', 'strany', 'panev'], hipthrust: ['sila'], ohp: ['sila'], bandrow: ['sila', 'krk'], carry: ['panev', 'sila'],
 };
-const TYPE_NAME = { A: 'Trénink A', B: 'Trénink B', S: 'Stabilizace a krk' };
+const TYPE_NAME = { A: 'Trénink A', B: 'Trénink B', S: 'Pánev a krk' };
 const WEEK_PLAN = ['trénink', 'chůze', 'trénink', 'chůze + stab.', 'trénink', 'chůze', 'volno'];
 const WORK = 40, REST = 20;
 
@@ -1048,7 +1056,7 @@ function nextType() {
   return last.type === 'A' ? 'B' : 'A';
 }
 function newDraft(type) {
-  return { id: sid(), d: today(), type: type || nextType(), neck: true, opt: true, sets: {}, extra: {}, w: {}, up: {}, rounds: 0, rt: roundsTarget(), done: false, u: Date.now(), _draft: true };
+  return { id: sid(), d: today(), type: type || nextType(), neck: true, opt: true, pv: 3, sets: {}, extra: {}, w: {}, up: {}, rounds: 0, rt: roundsTarget(), done: false, u: Date.now(), _draft: true };
 }
 function ensureCur() {
   const open = state.sessions.find(s => s.d === today() && !s.done);
@@ -1072,12 +1080,13 @@ function touch() {
 function exList(s) {
   if (s.ex) return s.ex;
   const stab = s._draft ? PLAN.stab : PLAN.stabV1;
-  const neck = s.neck ? PLAN.neck : [];
+  const neck = s.neck ? (s._draft ? PLAN.neck : PLAN.neckV1) : [];
   const main = s.type === 'B' && !s._draft ? PLAN.BV1 : PLAN[s.type];
   return s.type === 'S' ? [...stab, ...neck] : [...stab, ...neck, ...main];
 }
 // Every exercise that has ever been in the stabilization block, so old and open sessions render in the right block.
 const STAB_ALL = ['stoj1', 'slsit', 'pelvdrop', 'clam', 'abd', 'sideplank', 'bridge'];
+const NECK_ALL = ['chintuck', 'retract', 'isoext', 'quadneck'];
 function prog(s) {
   let done = 0, total = 0;
   const weak = !!state.settings.weak;
@@ -1189,9 +1198,18 @@ function exCardHTML(id) {
 }
 
 function blockHTML(no, title, sub, ids) {
+  // Consecutive PAIR partners are wrapped together so it's clear they alternate.
+  let cards = '', pairNo = 0;
+  for (let i = 0; i < ids.length; i++) {
+    if (PAIR[ids[i]] && ids[i + 1] === PAIR[ids[i]]) {
+      pairNo++;
+      cards += `<div class="pair"><p class="pair-h">Dvojice ${pairNo}: série jednoho, hned série druhého, pak pauza</p>${exCardHTML(ids[i])}${exCardHTML(ids[i + 1])}</div>`;
+      i++;
+    } else cards += exCardHTML(ids[i]);
+  }
   return `<section class="block">
     <div class="block-head"><span class="block-no">${no}</span><div><h2>${title}</h2><p>${sub}</p></div></div>
-    ${ids.map(exCardHTML).join('')}
+    ${cards}
   </section>`;
 }
 
@@ -1230,22 +1248,32 @@ function renderToday() {
   const doneToday = state.sessions.filter(s => s.d === td && s.done);
   const banner = doneToday.length ? `<div class="banner">${ICON_OK}<span>Dnes hotovo: ${doneToday.map(s => `${TYPE_NAME[s.type]} (${prog(s).pct} %)`).join(', ')}. Další na řadě je ${TYPE_NAME[nextType()]}.</span></div>` : '';
   const locked = hasProgress(cur);
-  const seg = ['A', 'B', 'S'].map(t => `<button data-act="type" data-type="${t}" aria-pressed="${cur.type === t}" ${locked && cur.type !== t ? 'disabled' : ''}>${t === 'S' ? 'Stabilizace' : t}</button>`).join('');
+  const seg = ['A', 'B', 'S'].map(t => `<button data-act="type" data-type="${t}" aria-pressed="${cur.type === t}" ${locked && cur.type !== t ? 'disabled' : ''}>${t === 'S' ? 'Krátký' : t}</button>`).join('');
   let html = weekStripHTML() + banner + `
     <section class="head-card">
       <div class="head-row"><h2 id="sess-title">${TYPE_NAME[cur.type]}</h2><div class="seg" role="group" aria-label="Typ tréninku">${seg}</div></div>
       <div class="bar"><i id="bar"></i></div>
-      <div class="prog-txt"><span id="prog-txt"></span><span>${cur.type === 'S' ? (cur.neck ? 'asi 17 min' : 'asi 10 min') : cur.opt ? `asi 45 min, s okruhem +${(cur.rt || roundsTarget()) * 5} min` : (cur.neck ? 'asi 55 min' : 'asi 45–50 min')}</span></div>
+      <div class="prog-txt"><span id="prog-txt"></span><span>${cur.type === 'S' ? (cur.pv >= 3 ? 'asi 8 min' : cur.neck ? 'asi 17 min' : 'asi 10 min') : cur.pv >= 3 ? `asi 35 min, s okruhem +${(cur.rt || roundsTarget()) * 5} min` : cur.opt ? `asi 45 min, s okruhem +${(cur.rt || roundsTarget()) * 5} min` : (cur.neck ? 'asi 55 min' : 'asi 45–50 min')}</span></div>
       <p class="note">${locked ? 'Typ tréninku se dá změnit jen před první odškrtnutou sérií.' : `Navrženo podle posledního tréninku. ${cur.type === 'S' ? 'Krátká verze na dny s chůzí.' : 'Odškrtávej série, jak je děláš.'}`}</p>
     </section>`;
   let no = 1;
   const list = exList(cur);
   const stabIds = list.filter(id => STAB_ALL.includes(id));
-  const mainIds = list.filter(id => !STAB_ALL.includes(id) && !PLAN.neck.includes(id));
-  html += blockHTML(no++, 'Stabilizace', 'Na začátku každého tréninku, asi 10 min. Hlavní práce na vyosení, nepřeskakuj ji.', stabIds);
-  if (cur.neck) html += blockHTML(no++, 'Krk', 'Asi 7 min, na napřímenou krční páteř. Pomalu a bez bolesti. Při brnění rukou nebo závrati přestaň.', PLAN.neck);
-  if (cur.type !== 'S') {
-    html += blockHTML(no++, cur.type === 'A' ? 'Silová část A' : 'Silová část B', '3 série, mezi sériemi 60–90 s pauza. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.', mainIds);
+  const neckIds = list.filter(id => NECK_ALL.includes(id));
+  const mainIds = list.filter(id => !STAB_ALL.includes(id) && !NECK_ALL.includes(id));
+  const v3 = cur.pv >= 3;
+  html += v3
+    ? blockHTML(no++, 'Rozcvička: pánev', 'Asi 5 min. Dva cviky, které podle studií nejvíc zapojí střední hýžďový sval. Střídej je: upažování, plank, druhá strana, a ještě jednou.', stabIds)
+    : blockHTML(no++, 'Stabilizace', 'Na začátku každého tréninku, asi 10 min. Hlavní práce na vyosení, nepřeskakuj ji.', stabIds);
+  const neckBlock = () => v3
+    ? blockHTML(no++, cur.type === 'S' ? 'Krk' : 'Krk do pauz', cur.type === 'S' ? 'Asi 3 min. Zásun brady klidně dělej i přes den u počítače.' : 'Žádný čas navíc: v každé pauze silové části udělej jednu sérii krku. Zásun brady klidně i přes den u počítače.', neckIds)
+    : blockHTML(no++, 'Krk', 'Asi 7 min, na napřímenou krční páteř. Pomalu a bez bolesti. Při brnění rukou nebo závrati přestaň.', neckIds);
+  if (cur.type === 'S') { if (neckIds.length) html += neckBlock(); }
+  else {
+    html += blockHTML(no++, cur.type === 'A' ? 'Silová část A' : 'Silová část B', v3
+      ? '3 série. Cviky jdou ve dvojicích: série prvního, hned série druhého, pak 60–90 s pauza a v ní jedna série krku. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.'
+      : '3 série, mezi sériemi 60–90 s pauza. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.', mainIds);
+    if (neckIds.length) html += neckBlock();
     html += circuitHTML();
   }
   html += `<section class="finish" id="finish"></section>`;
@@ -1521,7 +1549,7 @@ function renderLog() {
       <p class="note">U každého cviku v záložce Dnes je napsané, který z cílů zlepšuje.</p>
     </section>`;
   const neck = `<section class="card"><h2>Napřímená krční páteř</h2>
-      <p class="txt">Zdravý krk je při pohledu z boku mírně prohnutý dopředu (lordóza). Když je napřímený, hlava často ujíždí dopředu a šíjové svaly jsou přetížené a zároveň slabé. Blok Krk proto posiluje hluboké ohybače krku (zásun brady) a šíjové svaly (tlak do dlaní, zvedání hlavy). Právě takové cviky ve studiích zakřivení zlepšovaly, výsledek se ale ukázal až po 3 měsících pravidelného cvičení.</p>
+      <p class="txt">Zdravý krk je při pohledu z boku mírně prohnutý dopředu (lordóza). Když je napřímený, hlava často ujíždí dopředu a šíjové svaly jsou přetížené a zároveň slabé. Plán proto posiluje hluboké ohybače krku (zásun brady) a šíjové svaly (tlak hlavy do dlaní), tedy dva cviky, které ve studiích zakřivení zlepšovaly nejvíc. Děláš je v pauzách silové části, takže nezaberou čas navíc. Výsledek se ve studiích ukázal až po 3 měsících pravidelného cvičení.</p>
       <p class="txt">Napřímený krk často vůbec nebolí a tvar na rentgenu sám o bolesti moc neříká. Když ti ho našel lékař, ukaž mu tyhle cviky, ať je případně upraví.</p>
       <p class="txt"><b>K lékaři nebo fyzioterapeutovi hned, když:</b></p>
       <ul class="list">

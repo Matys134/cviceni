@@ -301,6 +301,8 @@ footer.store.db i { background: var(--accent); }
 .intro h2 { font-size: 20px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: .02em; }
 .intro ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
 @media print { .ex, .card { break-inside: avoid; } body { background: #fff; } }
+.pair { display: flex; flex-direction: column; gap: 10px; border-left: 3px solid var(--accent); padding-left: 10px; }
+.pair-h { margin: 0; font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
 </style>
 <div class="wrap" lang="cs">
   <header class="top">
@@ -311,9 +313,9 @@ footer.store.db i { background: var(--accent); }
     <section class="card intro">
       <h2>Co chceme zlepšit</h2>
       <ul>
-        <li><span class="goal weak">Rovná pánev</span> Pánev a trup se ve stoji a při chůzi nepřesouvají do strany (vyosení). Na to míří hlavně stabilizace, cviky na jednu nohu a nošení kufru.</li>
+        <li><span class="goal weak">Rovná pánev</span> Pánev a trup se ve stoji a při chůzi nepřesouvají do strany (vyosení). Na to míří rozcvička na pánev, cviky na jednu nohu a nošení kufru.</li>
         <li><span class="goal weak">Vyrovnané strany</span> Slabší noha dožene silnější. Pomáhá jí série navíc a to, že se jí vždy začíná.</li>
-        <li><span class="goal">Krční páteř</span> Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Na to míří blok Krk a veslování s gumou.</li>
+        <li><span class="goal">Krční páteř</span> Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Na to míří cviky na krk v pauzách a veslování s gumou.</li>
         <li><span class="goal">Síla a držení těla</span> Silnější nohy, hýždě, záda, hrudník, ramena a střed těla. Vzpřímené držení bez hrbení.</li>
         <li><span class="goal">Kondice a hubnutí</span> Víc spálené energie a lepší kondice. Nejvíc tu udělá denní chůze, bonusový okruh je navíc. Největší vliv na hubnutí má ale strava.</li>
       </ul>
@@ -323,38 +325,17 @@ footer.store.db i { background: var(--accent); }
       <h2>Jak plán funguje</h2>
       <ul>
         <li><b>3 tréninky týdně</b> (A a B se střídají), mezi nimi chůze 8–10 tisíc kroků denně.</li>
-        <li>Každý trénink začíná <b>stabilizací</b>. Ta cílí na vyosení do strany: posiluje střední hýžďový sval a boční svaly trupu, které drží pánev v rovině.</li>
-        <li>Hned po ní přijde <b>blok Krk</b> (asi 7 minut) na napřímenou krční páteř: posiluje hluboké ohybače krku a šíjové svaly.</li>
-        <li><b>Silová část</b> buduje svaly celého těla. Cviky na jednu nohu vyrovnávají rozdíl mezi stranami.</li>
+        <li>Každý trénink začíná krátkou <b>rozcvičkou na pánev</b> (5 minut): upažování vleže a boční plank, dva cviky, které podle EMG studií nejvíc zapojí střední hýžďový sval.</li>
+        <li><b>Krk</b> nezabere čas navíc: zásun brady a tlak hlavy do dlaní děláš v pauzách silové části.</li>
+        <li><b>Silová část</b> je hlavní a buduje svaly celého těla. Cviky jdou ve dvojicích, aby trénink trval asi 35 minut. Cviky na jednu nohu zároveň trénují rovnou pánev a vyrovnávají strany.</li>
         <li><b>Okruh na konci</b> je volitelný bonus na dny, kdy máš energii. Do splnění tréninku se nepočítá. Kalorie nejlíp přidá chůze a na hubnutí nejvíc rozhoduje strava: mírný kalorický deficit a dost bílkovin.</li>
         <li>Slabší stranou vždy začínej a přidej jí jednu sérii navíc.</li>
         <li>Postup: když zvládneš ve všech sériích o 2 opakování víc, přidej váhu. Ostrá bolest znamená stop.</li>
       </ul>
     </section>
     <section class="block">
-  <div class="block-head"><span class="block-no">1</span><div><h2>Stabilizace</h2><p>Na začátku každého tréninku, asi 10 minut.</p></div></div>
+  <div class="block-head"><span class="block-no">1</span><div><h2>Rozcvička: pánev</h2><p>Na začátku každého tréninku, asi 5 minut. Střídej: upažování, plank, druhá strana, a ještě jednou.</p></div></div>
   <article class="ex">
-  <div class="ex-head"><h3>Stoj na jedné noze</h3><span class="rx">3 × 30 s na každou nohu</span></div>
-  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span><span class="goal weak">Vyrovnané strany</span></p>
-  <div class="tags"><span class="tag">každá strana zvlášť</span></div>
-  <p class="why"><b>K čemu:</b> Učí tělo udržet pánev vodorovně, když stojíš na jedné noze, a trénuje rovnováhu kotníku i kyčle. Míří přímo na tvoje vyosení do strany.</p>
-  <ul class="cues"><li>Pánev drž vodorovně, nepřesouvej boky nad stojnou nohu.</li><li>Stojná noha zpevněná, koleno lehce povolené, váha na celém chodidle.</li><li>Až to půjde snadno, zavři oči nebo se postav na polštář.</li></ul><p class="err"><strong>Pozor:</strong> Boky a trup ujíždějí do strany. Přesně to je tvoje vyosení, tak raději zkrať čas a drž pánev rovně.</p>
-</article>
-<article class="ex">
-  <div class="ex-head"><h3>Dřep na jedné noze na lavici</h3><span class="rx">2 × 6 na nohu</span></div>
-  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span><span class="goal weak">Vyrovnané strany</span></p>
-  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">lavice nebo židle</span></div>
-  <p class="why"><b>K čemu:</b> Dřep na jedné noze patří podle EMG studií k cvikům, které nejvíc zapojí střední hýžďový sval. Ten musí celou dobu držet pánev vodorovně a koleno v ose. Stačí k tomu lavice nebo židle.</p>
-  <ul class="cues"><li>Postav se na jednu nohu zády k lavici, druhou natáhni kousek nad zemí dopředu, ruce před sebe.</li><li>Pomalu si sedni na kraj lavice. Koleno míří nad špičku, pánev drž rovně.</li><li>Hned se přes patu zase postav, bez houpání. Když to nejde, dej si na lavici polštář, ať je sed výš, nebo si pomoz špičkou druhé nohy.</li></ul><p class="err"><strong>Pozor:</strong> Koleno uhýbá dovnitř nebo se pánev na straně volné nohy propadá. Zvol vyšší sed a jdi pomaleji.</p>
-</article>
-<article class="ex">
-  <div class="ex-head"><h3>Clamshell (škeble)</h3><span class="rx">2 × 15 na stranu</span></div>
-  <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span></p>
-  <div class="tags"><span class="tag">každá strana zvlášť</span></div>
-  <p class="why"><b>K čemu:</b> Posiluje střední hýžďový sval a zevní rotátory kyčle. Ty drží pánev v rovině a koleno ve správné ose.</p>
-  <ul class="cues"><li>Lehni si na bok, kolena pokrč zhruba do pravého úhlu, chodidla u sebe.</li><li>Horní koleno zvedej nahoru, chodidla se nerozpojí.</li><li>Pánev se nepřeklápí dozadu, pohyb je jen v kyčli.</li><li>Až bude snadný, dej si nad kolena odporovou gumu.</li></ul><p class="err"><strong>Pozor:</strong> Velký rozsah za cenu otočení pánve. Menší, ale čistý pohyb udělá víc.</p>
-</article>
-<article class="ex">
   <div class="ex-head"><h3>Upažování nohy vleže na boku</h3><span class="rx">2 × 12 na stranu</span></div>
   <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span></p>
   <div class="tags"><span class="tag">každá strana zvlášť</span></div>
@@ -370,42 +351,24 @@ footer.store.db i { background: var(--accent); }
 </article>
 </section>
     <section class="block">
-  <div class="block-head"><span class="block-no">2</span><div><h2>Krk</h2><p>Po stabilizaci, asi 7 minut. Pomalu a bez bolesti. Při brnění rukou nebo závrati přestaň.</p></div></div>
-  <article class="ex">
-  <div class="ex-head"><h3>Zásun brady s povyrůstáním</h3><span class="rx">2 × 10, každé drž 3 s</span></div>
-  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span></p>
-  <div class="tags"><span class="tag">i přes den u počítače</span></div>
-  <p class="why"><b>K čemu:</b> Probouzí hluboké ohybače krku a vrací hlavu nad ramena. Verze s povyrůstáním temenem nezplošťuje horní část krku jako obyčejný zásun brady. Ve studii u lidí s napřímeným krkem zlepšila zakřivení i bolest.</p>
-  <ul class="cues"><li>Sedni si vzpřímeně, ramena volně dole, pohled vodorovně.</li><li>Zasuň bradu vodorovně dozadu („dvojitá brada“) a zároveň temenem povyrůst ke stropu.</li><li>Vydrž 3 s a uvolni. Dělej ho i přes den u počítače, ideálně 10× denně.</li></ul><p class="err"><strong>Pozor:</strong> Kývnutí bradou dolů k hrudníku místo zásunu dozadu. Pohled zůstává vodorovně.</p>
-</article>
+  <div class="block-head"><span class="block-no">2</span><div><h2>Silová část A</h2><p>3 série ve dvojicích: série prvního cviku, hned série druhého, pak 60–90 s pauza a v ní jedna série krku.</p></div></div>
+  <div class="pair"><p class="pair-h">Dvojice: série jednoho, hned série druhého, pak pauza</p>
 <article class="ex">
-  <div class="ex-head"><h3>Stažení lopatek s napřímením krku</h3><span class="rx">5 × 10 s</span></div>
-  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span><span class="goal">Síla a držení těla</span></p>
-  <p class="why"><b>K čemu:</b> Druhá část stejného programu: srovná hrudník, ramena i krk naráz a učí tělo nosit hlavu nad trupem, ne vysunutou dopředu.</p>
-  <ul class="cues"><li>Vsedě nebo ve stoje se narovnej a lehce zasuň bradu.</li><li>Stáhni lopatky dozadu a dolů, hrudní kost jde mírně nahoru.</li><li>Pak hlavu jen lehce zakloň, pohled kousek nad vodorovnou. Vydrž 10 s.</li></ul><p class="err"><strong>Pozor:</strong> Krčení ramen k uším nebo prudký záklon hlavy. Pohyb je malý a nesmí bolet.</p>
-</article>
-<article class="ex">
-  <div class="ex-head"><h3>Tlak hlavy do dlaní</h3><span class="rx">5 × 10 s</span></div>
-  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span></p>
-  <p class="why"><b>K čemu:</b> Izometricky posiluje šíjové svaly, které drží krk v přirozeném prohnutí. V randomizované studii vrátil tříměsíční domácí program tohoto cviku normální zakřivení krku většině cvičících.</p>
-  <ul class="cues"><li>Sedni si vzpřímeně, propletené dlaně polož na zátylek.</li><li>Zatlač hlavou dozadu do dlaní. Dlaně kladou stejný odpor, takže se hlava nehýbe.</li><li>Tlač zhruba na polovinu síly a dýchej. Mezi opakováními 10 s pauza.</li></ul><p class="err"><strong>Pozor:</strong> Tlačit naplno nebo u toho zaklánět hlavu. Má to být klidná výdrž bez bolesti.</p>
-</article>
-<article class="ex">
-  <div class="ex-head"><h3>Zvedání hlavy na čtyřech</h3><span class="rx">2 × 10</span></div>
-  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span></p>
-  <p class="why"><b>K čemu:</b> Posiluje šíjové svaly v pohybu proti váze hlavy. Podobný cvik ve studii zesílil šíjové svaly a ulevil od bolesti krku.</p>
-  <ul class="cues"><li>Klek na čtyřech, dlaně pod rameny, kolena pod boky, záda rovná.</li><li>Lehce zasuň bradu a pomalu skloň hlavu, pohled ke kolenům.</li><li>Zvedni hlavu jen do prodloužení zad, pohled na zem kousek před dlaně. Nahoře 2 s.</li></ul><p class="err"><strong>Pozor:</strong> Záklon až ke stropu s vystrčenou bradou. Zvedej jen do linie se zády.</p>
-</article>
-</section>
-    <section class="block">
-  <div class="block-head"><span class="block-no">3</span><div><h2>Silová část A</h2><p>3 série, mezi sériemi 60–90 s pauza.</p></div></div>
-  <article class="ex">
   <div class="ex-head"><h3>Goblet dřep</h3><span class="rx">3 × 10</span></div>
   <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
   <div class="tags"><span class="tag">s jednoručkou</span></div>
   <p class="why"><b>K čemu:</b> Základní cvik na stehna a hýždě. Jednoručka před hrudníkem pomáhá držet trup vzpřímeně a učí správný dřep.</p>
   <ul class="cues"><li>Jednoručku drž svisle u hrudníku, lokty míří dolů.</li><li>Sedni si mezi paty, kolena jdou ve směru špiček.</li><li>Paty zůstávají na zemi, hrudník nahoře.</li></ul><p class="err"><strong>Pozor:</strong> Kolena padají dovnitř nebo se zvedají paty.</p>
 </article>
+<article class="ex">
+  <div class="ex-head"><h3>Přítah jednoručky v předklonu</h3><span class="rx">3 × 10 na stranu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">s jednoručkou</span></div>
+  <p class="why"><b>K čemu:</b> Posiluje záda (hlavně široký sval zádový a svaly mezi lopatkami) a biceps. Vyvažuje tlakové cviky a zlepšuje držení těla.</p>
+  <ul class="cues"><li>Ruka a koleno na lavici, záda rovná a souběžně s lavicí.</li><li>Táhni loket k boku, ne ruku k rameni.</li><li>Nahoře stáhni lopatku, dolů pomalu.</li></ul><p class="err"><strong>Pozor:</strong> Trhání trupem a rotace. Zvol lehčí váhu.</p>
+</article>
+</div>
+<div class="pair"><p class="pair-h">Dvojice: série jednoho, hned série druhého, pak pauza</p>
 <article class="ex">
   <div class="ex-head"><h3>Rumunský mrtvý tah na jedné noze</h3><span class="rx">3 × 8 na nohu</span></div>
   <p class="goals">Zlepšuje: <span class="goal weak">Vyrovnané strany</span><span class="goal weak">Rovná pánev</span><span class="goal">Síla a držení těla</span></p>
@@ -420,13 +383,7 @@ footer.store.db i { background: var(--accent); }
   <p class="why"><b>K čemu:</b> Posiluje prsní svaly, přední část ramen a tricepsy. S jednoručkami musí každá ruka pracovat sama, takže silnější strana nepomáhá slabší.</p>
   <ul class="cues"><li>Lopatky stáhni k sobě a dolů, chodidla pevně na zemi.</li><li>Spouštěj jednoručky k hrudníku, lokty asi 45° od těla.</li><li>Vytlač nahoru nad ramena.</li></ul><p class="err"><strong>Pozor:</strong> Lokty roztažené do písmene T nebo odrážení činek od hrudníku.</p>
 </article>
-<article class="ex">
-  <div class="ex-head"><h3>Přítah jednoručky v předklonu</h3><span class="rx">3 × 10 na stranu</span></div>
-  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
-  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">s jednoručkou</span></div>
-  <p class="why"><b>K čemu:</b> Posiluje záda (hlavně široký sval zádový a svaly mezi lopatkami) a biceps. Vyvažuje tlakové cviky a zlepšuje držení těla.</p>
-  <ul class="cues"><li>Ruka a koleno na lavici, záda rovná a souběžně s lavicí.</li><li>Táhni loket k boku, ne ruku k rameni.</li><li>Nahoře stáhni lopatku, dolů pomalu.</li></ul><p class="err"><strong>Pozor:</strong> Trhání trupem a rotace. Zvol lehčí váhu.</p>
-</article>
+</div>
 <article class="ex">
   <div class="ex-head"><h3>Dead bug</h3><span class="rx">3 × 8 na stranu</span></div>
   <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span></p>
@@ -436,20 +393,14 @@ footer.store.db i { background: var(--accent); }
 </article>
 </section>
     <section class="block">
-  <div class="block-head"><span class="block-no">4</span><div><h2>Silová část B</h2><p>3 série, mezi sériemi 60–90 s pauza.</p></div></div>
-  <article class="ex">
+  <div class="block-head"><span class="block-no">3</span><div><h2>Silová část B</h2><p>3 série ve dvojicích: série prvního cviku, hned série druhého, pak 60–90 s pauza a v ní jedna série krku.</p></div></div>
+  <div class="pair"><p class="pair-h">Dvojice: série jednoho, hned série druhého, pak pauza</p>
+<article class="ex">
   <div class="ex-head"><h3>Bulharský dřep</h3><span class="rx">3 × 8 na nohu</span></div>
   <p class="goals">Zlepšuje: <span class="goal weak">Vyrovnané strany</span><span class="goal weak">Rovná pánev</span><span class="goal">Síla a držení těla</span></p>
   <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">s jednoručkou</span></div>
   <p class="why"><b>K čemu:</b> Silný cvik na stehna a hýždě každé nohy zvlášť. Ukáže rozdíl mezi stranami, pomáhá ho vyrovnat a trénuje stabilitu pánve.</p>
   <ul class="cues"><li>Zadní nárt na lavici, přední chodidlo dost daleko vpředu.</li><li>Klesej dolů, ne dopředu. Přední koleno míří nad špičku.</li><li>Pánev drž v rovině, nepadá na stranu.</li></ul><p class="err"><strong>Pozor:</strong> Přední koleno uhýbá dovnitř. První 2 týdny dělej výpad se zadní nohou na zemi.</p>
-</article>
-<article class="ex">
-  <div class="ex-head"><h3>Hip thrust na jedné noze</h3><span class="rx">3 × 10 na nohu</span></div>
-  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span><span class="goal weak">Vyrovnané strany</span><span class="goal weak">Rovná pánev</span></p>
-  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">bez činky</span></div>
-  <p class="why"><b>K čemu:</b> Nejpřímější cvik na velký hýžďový sval, jen bez činky: váhu nese jedna noha, takže je těžký i bez zátěže. Navíc trénuje každou stranu zvlášť a učí udržet pánev rovně.</p>
-  <ul class="cues"><li>Spodní okraj lopatek opři o hranu lavice, chodidlo stojné nohy pod kolenem, druhou nohu pokrč a zvedni.</li><li>Zatlač patou a zvedni boky do vodorovné polohy. Nahoře zatni hýždě a vydrž 1 s.</li><li>Až zvládneš 3 × 15, dej si nahoře 2 s pauzu nebo polož jednoručku na stojnou stranu pánve.</li></ul><p class="err"><strong>Pozor:</strong> Pánev se na straně zvednuté nohy propadá nebo se prohýbáš v bedrech. Žebra drž dole, brada lehce k hrudníku.</p>
 </article>
 <article class="ex">
   <div class="ex-head"><h3>Tlak nad hlavu vsedě</h3><span class="rx">3 × 10</span></div>
@@ -458,18 +409,44 @@ footer.store.db i { background: var(--accent); }
   <p class="why"><b>K čemu:</b> Posiluje ramena a tricepsy. Vsedě s opřenými zády je šetrný k bedrům.</p>
   <ul class="cues"><li>Opěradlo nastav kolmo, záda opřená, břicho zpevněné.</li><li>Začni s jednoručkami u ramen.</li><li>Tlač nad hlavu, dolů pomalu zpátky k ramenům.</li></ul><p class="err"><strong>Pozor:</strong> Záklon v bedrech. Zpevni břicho, případně uber váhu.</p>
 </article>
+</div>
+<div class="pair"><p class="pair-h">Dvojice: série jednoho, hned série druhého, pak pauza</p>
+<article class="ex">
+  <div class="ex-head"><h3>Hip thrust na jedné noze</h3><span class="rx">3 × 10 na nohu</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span><span class="goal weak">Vyrovnané strany</span><span class="goal weak">Rovná pánev</span></p>
+  <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">bez činky</span></div>
+  <p class="why"><b>K čemu:</b> Nejpřímější cvik na velký hýžďový sval, jen bez činky: váhu nese jedna noha, takže je těžký i bez zátěže. Navíc trénuje každou stranu zvlášť a učí udržet pánev rovně.</p>
+  <ul class="cues"><li>Spodní okraj lopatek opři o hranu lavice, chodidlo stojné nohy pod kolenem, druhou nohu pokrč a zvedni.</li><li>Zatlač patou a zvedni boky do vodorovné polohy. Nahoře zatni hýždě a vydrž 1 s.</li><li>Až zvládneš 3 × 15, dej si nahoře 2 s pauzu nebo polož jednoručku na stojnou stranu pánve.</li></ul><p class="err"><strong>Pozor:</strong> Pánev se na straně zvednuté nohy propadá nebo se prohýbáš v bedrech. Žebra drž dole, brada lehce k hrudníku.</p>
+</article>
 <article class="ex">
   <div class="ex-head"><h3>Veslování s gumou</h3><span class="rx">3 × 12</span></div>
   <p class="goals">Zlepšuje: <span class="goal">Síla a držení těla</span><span class="goal">Krční páteř</span></p>
   <p class="why"><b>K čemu:</b> Posiluje svaly mezi lopatkami a zadní část ramen. Působí proti shrbenému držení těla.</p>
   <ul class="cues"><li>Gumu ukotvi ve výšce hrudníku (zavřené dveře, noha stolu).</li><li>Táhni lokty dozadu podél těla, stáhni lopatky.</li><li>Vracej pomalu, guma nesmí cuknout.</li></ul><p class="err"><strong>Pozor:</strong> Krčení ramen k uším.</p>
 </article>
+</div>
 <article class="ex">
   <div class="ex-head"><h3>Nošení kufru</h3><span class="rx">3 × 30 s na stranu</span></div>
   <p class="goals">Zlepšuje: <span class="goal weak">Rovná pánev</span><span class="goal">Síla a držení těla</span></p>
   <div class="tags"><span class="tag">každá strana zvlášť</span><span class="tag">s jednoručkou</span></div>
   <p class="why"><b>K čemu:</b> Svaly na boku trupu musí celou dobu bránit náklonu k zátěži. Trénuje přesně to, abys stál a chodil rovně.</p>
   <ul class="cues"><li>Jednoručku drž jen v jedné ruce podél těla.</li><li>Jdi pomalu a rovně, ramena i pánev vodorovně.</li><li>Nenakláněj se k zátěži ani od ní.</li></ul><p class="err"><strong>Pozor:</strong> Úklon trupu do strany. Přesně proti tomu tenhle cvik trénuje.</p>
+</article>
+</section>
+    <section class="block">
+  <div class="block-head"><span class="block-no">4</span><div><h2>Krk do pauz</h2><p>Žádný čas navíc: v každé pauze silové části jedna série. Zásun brady klidně i přes den u počítače. Pomalu a bez bolesti, při brnění rukou nebo závrati přestaň.</p></div></div>
+  <article class="ex">
+  <div class="ex-head"><h3>Zásun brady s povyrůstáním</h3><span class="rx">2 × 10, každé drž 3 s</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span></p>
+  <div class="tags"><span class="tag">i přes den u počítače</span></div>
+  <p class="why"><b>K čemu:</b> Probouzí hluboké ohybače krku a vrací hlavu nad ramena. Verze s povyrůstáním temenem nezplošťuje horní část krku jako obyčejný zásun brady. Ve studii u lidí s napřímeným krkem zlepšila zakřivení i bolest.</p>
+  <ul class="cues"><li>Sedni si vzpřímeně, ramena volně dole, pohled vodorovně.</li><li>Zasuň bradu vodorovně dozadu („dvojitá brada“) a zároveň temenem povyrůst ke stropu.</li><li>Vydrž 3 s a uvolni. Dělej ho i přes den u počítače, ideálně 10× denně.</li></ul><p class="err"><strong>Pozor:</strong> Kývnutí bradou dolů k hrudníku místo zásunu dozadu. Pohled zůstává vodorovně.</p>
+</article>
+<article class="ex">
+  <div class="ex-head"><h3>Tlak hlavy do dlaní</h3><span class="rx">5 × 10 s</span></div>
+  <p class="goals">Zlepšuje: <span class="goal">Krční páteř</span></p>
+  <p class="why"><b>K čemu:</b> Izometricky posiluje šíjové svaly, které drží krk v přirozeném prohnutí. V randomizované studii vrátil tříměsíční domácí program tohoto cviku normální zakřivení krku většině cvičících.</p>
+  <ul class="cues"><li>Sedni si vzpřímeně, propletené dlaně polož na zátylek.</li><li>Zatlač hlavou dozadu do dlaní. Dlaně kladou stejný odpor, takže se hlava nehýbe.</li><li>Tlač zhruba na polovinu síly a dýchej. Mezi opakováními 10 s pauza.</li></ul><p class="err"><strong>Pozor:</strong> Tlačit naplno nebo u toho zaklánět hlavu. Má to být klidná výdrž bez bolesti.</p>
 </article>
 </section>
     <section class="block">
