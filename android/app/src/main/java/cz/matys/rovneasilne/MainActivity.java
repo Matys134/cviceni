@@ -214,6 +214,9 @@ public class MainActivity extends Activity {
     /* ---------------- Updates from GitHub Releases ---------------- */
 
     private void checkForUpdate(boolean manual) {
+        // With Obtainium on the phone, it installs updates; the app only reports versions when asked.
+        boolean obtainium = obtainiumPresent();
+        if (!manual && obtainium) return;
         SharedPreferences prefs = getSharedPreferences("update", MODE_PRIVATE);
         long now = System.currentTimeMillis();
         if (!manual && now - prefs.getLong("lastCheck", 0) < AUTO_CHECK_MS) return;
@@ -240,13 +243,26 @@ public class MainActivity extends Activity {
                 final String url = apkUrl;
                 boolean newer = compareVersions(tag, BuildConfig.VERSION_NAME) > 0;
                 runOnUiThread(() -> {
-                    if (newer && url != null) showUpdateDialog(tag, notes, url);
+                    if (newer && url != null && obtainium)
+                        toast("Je venku verze " + tag.replaceFirst("^v", "") + ". Nainstaluje ji Obtainium, případně v něm klepni na aktualizaci.");
+                    else if (newer && url != null) showUpdateDialog(tag, notes, url);
                     else if (manual) toast("Máš nejnovější verzi (" + BuildConfig.VERSION_NAME + ").");
                 });
             } catch (Exception e) {
                 if (manual) runOnUiThread(() -> toast("Aktualizaci se nepodařilo zkontrolovat. Jsi připojený k internetu?"));
             }
         }).start();
+    }
+
+    private boolean obtainiumPresent() {
+        for (String pkg : new String[]{"dev.imranr.obtainium", "dev.imranr.obtainium.fdroid"}) {
+            try {
+                getPackageManager().getPackageInfo(pkg, 0);
+                return true;
+            } catch (Exception ignored) {
+            }
+        }
+        return false;
     }
 
     private void showUpdateDialog(String tag, String notes, String apkUrl) {

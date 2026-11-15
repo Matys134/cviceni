@@ -13,7 +13,11 @@ Záznamy se ukládají jen v telefonu. Ven jde jen hledání potravin a čárov�
 
 ## Aktualizace
 
-Aplikace se po spuštění sama podívá, jestli na GitHubu není novější verze (nejvýš jednou za 6 hodin).
+Nejpohodlnější je [Obtainium](https://github.com/ImranR98/Obtainium): přidej do něj adresu
+`https://github.com/Matys134/cviceni` a nové verze bude instalovat samo, i na pozadí. Když je Obtainium
+v telefonu, aplikace vlastní okno s aktualizací neukazuje.
+
+Bez Obtainia se aplikace po spuštění sama podívá, jestli na GitHubu není novější verze (nejvýš jednou za 6 hodin).
 Když je, nabídne **Stáhnout a nainstalovat**. Napoprvé Android jednou požádá o povolení instalovat
 aktualizace z této aplikace. Ručně se dá zkontrolovat dole v aplikaci přes **Zkontrolovat aktualizace**.
 Záznamy při aktualizaci zůstávají.
