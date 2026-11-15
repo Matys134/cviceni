@@ -1,7 +1,9 @@
 # Rovně a silně
 
-Tréninkový plán s animovanými cviky: stabilizace pánve, krční páteř, silový trénink a volitelný okruh.
-Záznamy se ukládají jen v telefonu, nikam se neposílají.
+Tréninkový plán s animovanými cviky (stabilizace pánve, krční páteř, silový trénink, volitelný okruh)
+a jídelníček na hubnutí: kalorie a bílkoviny, rychlé přidávání naposledy jedených potravin, skenování
+čárových kódů přes [Open Food Facts](https://world.openfoodfacts.org), základní tabulka potravin a vlastní potraviny.
+Záznamy se ukládají jen v telefonu. Ven jde jen hledání potravin a čárových kódů v Open Food Facts.
 
 ## Instalace do telefonu (Android 8 a novější)
 

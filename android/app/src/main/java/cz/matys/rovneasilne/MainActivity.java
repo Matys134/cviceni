@@ -26,6 +26,10 @@ import android.widget.Toast;
 
 import androidx.webkit.WebViewAssetLoader;
 
+import com.google.mlkit.vision.barcode.common.Barcode;
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions;
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -36,7 +40,8 @@ import java.net.URL;
 
 /**
  * Shell around the web app in assets (the Rovne-a-silne folder). Adds what a browser tab can't do well:
- * keeping the screen on during timers, the share sheet, and updating itself from GitHub Releases.
+ * keeping the screen on during timers, the share sheet, updating itself from GitHub Releases,
+ * scanning barcodes and fetching Open Food Facts (whose search API doesn't allow browser requests).
  */
 public class MainActivity extends Activity {
     private static final String HOST = "appassets.androidplatform.net";
@@ -62,6 +67,7 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
+        s.setUserAgentString(s.getUserAgentString() + " " + userAgent());
 
         final WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
@@ -158,6 +164,44 @@ public class MainActivity extends Activity {
                         .putExtra(Intent.EXTRA_SUBJECT, "Rovně a silně – záloha")
                         .putExtra(Intent.EXTRA_TEXT, text);
                 startActivity(Intent.createChooser(send, "Uložit zálohu"));
+            });
+        }
+
+        /** GET an Open Food Facts URL; answers window.__native.resolve(cbId, status, body). */
+        @JavascriptInterface
+        public void httpGet(String url, String cbId) {
+            new Thread(() -> {
+                int status = 0;
+                String body = "";
+                try {
+                    URL u = new URL(url);
+                    if (!"https".equals(u.getProtocol()) || !u.getHost().endsWith("openfoodfacts.org")) throw new Exception("host");
+                    HttpURLConnection c = (HttpURLConnection) u.openConnection();
+                    c.setRequestProperty("User-Agent", userAgent());
+                    c.setConnectTimeout(10000);
+                    c.setReadTimeout(15000);
+                    status = c.getResponseCode();
+                    if (status == 200) body = readAll(c.getInputStream());
+                } catch (Exception e) {
+                    status = 0;
+                }
+                resolveJs(cbId, String.valueOf(status), JSONObject.quote(body));
+            }).start();
+        }
+
+        /** Opens Google's barcode scanner (no camera permission needed); answers with the code or null + message. */
+        @JavascriptInterface
+        public void scanBarcode(String cbId) {
+            runOnUiThread(() -> {
+                GmsBarcodeScannerOptions opts = new GmsBarcodeScannerOptions.Builder()
+                        .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_EAN_8, Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E)
+                        .enableAutoZoom()
+                        .build();
+                GmsBarcodeScanning.getClient(MainActivity.this, opts).startScan()
+                        .addOnSuccessListener(b -> resolveJs(cbId, JSONObject.quote(String.valueOf(b.getRawValue())), "null"))
+                        .addOnCanceledListener(() -> resolveJs(cbId, "null", "null"))
+                        .addOnFailureListener(e -> resolveJs(cbId, "null", JSONObject.quote(
+                                "Skener se nepodařilo spustit. Napoprvé se chvíli stahuje, zkus to za minutu znovu.")));
             });
         }
 
@@ -270,6 +314,15 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             if (pendingApkUrl != null) openExternal(Uri.parse(pendingApkUrl));
         }
+    }
+
+    private void resolveJs(String cbId, String a, String b) {
+        String js = "window.__native && window.__native.resolve(" + JSONObject.quote(cbId) + "," + a + "," + b + ")";
+        runOnUiThread(() -> web.evaluateJavascript(js, null));
+    }
+
+    private static String userAgent() {
+        return "RovneASilne/" + BuildConfig.VERSION_NAME + " (github.com/Matys134/cviceni)";
     }
 
     /** Compares "v1.2.3"-style versions numerically; missing parts count as 0. */
