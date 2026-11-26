@@ -10,7 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
 <style>
-/* Layout: one narrow column built for a phone on the floor next to the mat — week strip, then the workout as a stack of exercise cards with a live figure on each. */
+/* Layout: one narrow column built for a phone on the floor next to the mat. Navigation sits at the bottom within thumb reach;
+   the workout is a list of collapsible exercise cards, plus a full-screen step-by-step mode with big buttons and a rest timer. */
 :root {
   --bg: #EFF2F1;
   --surface: #FFFFFF;
@@ -24,24 +25,28 @@
   --weak: #A85F00;
   --weak-soft: #F5E5CC;
   --danger: #B3261E;
-  --fig: #131917;
-  --fig-far: #97A39E;
-  --ghost: #C3CCC8;
+  --fig: #1E2724;
+  --fig-far: #9AA6A1;
+  --ghost: #D2D9D6;
   --floor: #AEB9B4;
   --prop: #7A8883;
   --prop-fill: #CDD5D2;
   --band: #0B7560;
+  --mus: #E2572B;
+  --shadow: rgba(19, 25, 23, .16);
+  --fig-bg: #F6F8F7;
   --f-display: "Archivo", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
   --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --r: 12px;
+  --r: 16px;
+  --nav-h: 68px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0E1312; --surface: #161D1B; --panel: #1C2523; --ink: #E5ECE9; --muted: #98A6A0;
     --line: #2A3532; --accent: #3CC7A2; --accent-ink: #052019; --accent-soft: #15342B;
     --weak: #F0A43C; --weak-soft: #3A2A12; --danger: #F2867E;
-    --fig: #E5ECE9; --fig-far: #5A6762; --ghost: #33403C; --floor: #3B4743;
-    --prop: #7E8C87; --prop-fill: #2B3633; --band: #3CC7A2;
+    --fig: #E5ECE9; --fig-far: #5E6B66; --ghost: #2A3532; --floor: #3B4743;
+    --prop: #7E8C87; --prop-fill: #2B3633; --band: #3CC7A2; --mus: #FF8656; --shadow: rgba(0, 0, 0, .5); --fig-bg: #1F2927;
     color-scheme: dark;
   }
 }
@@ -49,12 +54,12 @@
   --bg: #0E1312; --surface: #161D1B; --panel: #1C2523; --ink: #E5ECE9; --muted: #98A6A0;
   --line: #2A3532; --accent: #3CC7A2; --accent-ink: #052019; --accent-soft: #15342B;
   --weak: #F0A43C; --weak-soft: #3A2A12; --danger: #F2867E;
-  --fig: #E5ECE9; --fig-far: #5A6762; --ghost: #33403C; --floor: #3B4743;
-  --prop: #7E8C87; --prop-fill: #2B3633; --band: #3CC7A2;
+  --fig: #E5ECE9; --fig-far: #5E6B66; --ghost: #2A3532; --floor: #3B4743;
+  --prop: #7E8C87; --prop-fill: #2B3633; --band: #3CC7A2; --mus: #FF8656; --shadow: rgba(0, 0, 0, .5); --fig-bg: #1F2927;
   color-scheme: dark;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
 body {
   background: var(--bg);
@@ -63,76 +68,59 @@ body {
   font-size: 16px;
   line-height: 1.5;
 }
-.wrap { max-width: 780px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; }
+.wrap { max-width: 720px; margin: 0 auto; padding-inline: 16px; padding-block: max(14px, env(safe-area-inset-top)) calc(var(--nav-h) + 32px + env(safe-area-inset-bottom)); }
 h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
 button, input { font: inherit; color: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; touch-action: manipulation; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .num { font-variant-numeric: tabular-nums; }
 
 /* Header */
-.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
-.top h1 {
-  font-size: clamp(30px, 7vw, 44px);
-  font-weight: 800;
-  font-stretch: 72%;
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-  line-height: 0.95;
-}
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 4px 12px; flex-wrap: wrap; }
+.top h1 { font-size: 24px; font-weight: 800; font-stretch: 72%; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1; }
 .top h1 span { color: var(--accent); }
-.phase { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.phase { margin: 0; color: var(--muted); font-size: 14px; }
 .phase b { color: var(--ink); font-family: var(--f-display); font-stretch: 80%; letter-spacing: 0.02em; }
 
-.tabs {
-  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
-  display: flex; gap: 4px; margin: 18px -16px 0; padding: 8px 16px;
-  background: var(--bg); border-bottom: 1px solid var(--line);
+/* Bottom navigation */
+.nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); display: flex; justify-content: center;
 }
-.tabs button {
-  flex: 1 1 0; min-width: 0; border: 0; background: transparent; padding: 9px 6px; border-radius: 8px;
-  font-family: var(--f-display); font-weight: 700; font-stretch: 85%; font-size: 15px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted);
+@supports (backdrop-filter: blur(1px)) { .nav { background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(14px); } }
+.nav-in { display: flex; width: 100%; max-width: 520px; }
+.nav button {
+  flex: 1 1 0; min-width: 0; border: 0; background: none; padding: 4px 0; min-height: 54px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .01em;
 }
-.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.nav .ico { width: 58px; height: 32px; border-radius: 99px; display: grid; place-items: center; transition: background-color .2s; }
+.nav svg { width: 24px; height: 24px; }
+.nav button[aria-selected="true"] { color: var(--ink); }
+.nav button[aria-selected="true"] .ico { background: var(--accent-soft); color: var(--accent); }
 
-section.view { padding-top: 18px; display: flex; flex-direction: column; gap: 22px; }
+section.view { padding-top: 16px; display: flex; flex-direction: column; gap: 20px; }
 
-/* Week strip */
-.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
-.day {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 7px 4px 6px;
-  display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; text-align: center;
-}
-.day.today { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.day.past:not(.today) { background: transparent; }
-.dname { font-family: var(--f-display); font-weight: 700; font-stretch: 80%; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
-.dnum { font-size: 12px; color: var(--muted); line-height: 1; }
-.dplan { font-size: 11px; line-height: 1.15; color: var(--muted); min-height: 26px; display: flex; align-items: center; justify-content: center; hyphens: auto; }
-.chips { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; min-height: 26px; align-items: center; }
-.chip {
-  display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px;
-  background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-weight: 800; font-size: 13px;
-}
-.chip.s { background: var(--accent-soft); color: var(--accent); }
-.walk {
-  width: 30px; height: 26px; border-radius: 7px; border: 1px dashed var(--line); background: transparent;
-  display: grid; place-items: center; color: var(--muted); padding: 0;
-}
-.walk svg { width: 16px; height: 16px; }
-.walk[aria-pressed="true"] { border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); }
-.week-sum { margin: 8px 2px 0; font-size: 14px; color: var(--muted); }
-
-/* Session head */
-.head-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.head-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
-.head-card h2 { font-size: 30px; font-weight: 800; font-stretch: 75%; text-transform: uppercase; letter-spacing: 0.01em; line-height: 1; }
-.seg { display: inline-flex; background: var(--panel); border-radius: 9px; padding: 3px; gap: 2px; flex-wrap: wrap; }
-.seg button { border: 0; background: transparent; padding: 7px 11px; border-radius: 7px; font-size: 14px; font-weight: 700; color: var(--muted); }
-.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
-.seg button:disabled { cursor: not-allowed; opacity: .55; }
+/* Hero: today's session */
+.hero { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.hero-top { display: flex; align-items: center; gap: 14px; }
+.hero-top > div { flex: 1; min-width: 0; }
+.kick { margin: 0 0 2px; font-size: 13px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.hero h2 { font-size: 32px; font-weight: 800; font-stretch: 72%; text-transform: uppercase; letter-spacing: 0.01em; line-height: 1; }
+.meta { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+.ring { width: 76px; height: 76px; flex: none; position: relative; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 8; }
+.ring .bg { stroke: var(--panel); }
+.ring .fg { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+.ring b { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-stretch: 80%; font-size: 20px; }
+.seg { display: flex; background: var(--panel); border-radius: 12px; padding: 3px; gap: 2px; }
+.seg button { flex: 1; border: 0; background: transparent; padding: 9px 8px; border-radius: 9px; font-size: 14px; font-weight: 700; color: var(--muted); min-height: 40px; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
+.seg button:disabled { cursor: not-allowed; opacity: .5; }
 .bar { height: 8px; background: var(--panel); border-radius: 99px; overflow: hidden; }
 .bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s ease; }
-.prog-txt { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
 .note { font-size: 14px; color: var(--muted); margin: 0; }
 .banner {
   background: var(--accent-soft); color: var(--ink); border-radius: var(--r); padding: 12px 14px; font-size: 15px;
@@ -140,53 +128,109 @@ section.view { padding-top: 18px; display: flex; flex-direction: column; gap: 22
 }
 .banner svg { flex: none; width: 22px; height: 22px; color: var(--accent); }
 
-/* Blocks */
-.block { display: flex; flex-direction: column; gap: 12px; }
-.block-head { display: flex; gap: 12px; align-items: baseline; }
-.block-no {
-  font-family: var(--f-display); font-weight: 800; font-stretch: 70%; font-size: 34px; line-height: 1; color: var(--accent);
-  min-width: 22px;
+/* Week strip */
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.day {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 2px 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; text-align: center;
 }
-.block-head h2 { font-size: 22px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: 0.02em; }
+.day.today { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.day.past:not(.today) { background: transparent; }
+.dname { font-family: var(--f-display); font-weight: 700; font-stretch: 80%; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.1; }
+.dnum { font-size: 11px; color: var(--muted); line-height: 1; }
+.dplan { font-size: 10.5px; line-height: 1.1; color: var(--muted); min-height: 24px; display: flex; align-items: center; justify-content: center; hyphens: auto; padding: 0 1px; }
+.chips { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; min-height: 24px; align-items: center; }
+.chip {
+  display: inline-grid; place-items: center; width: 21px; height: 21px; border-radius: 6px;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-weight: 800; font-size: 12px;
+}
+.chip.s { background: var(--accent-soft); color: var(--accent); }
+.walk {
+  width: 100%; max-width: 40px; height: 32px; border-radius: 8px; border: 1px dashed var(--line); background: transparent;
+  display: grid; place-items: center; color: var(--muted); padding: 0;
+}
+.walk svg { width: 16px; height: 16px; }
+.walk[aria-pressed="true"] { border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); }
+.week-sum { margin: 8px 2px 0; font-size: 13px; color: var(--muted); }
+
+/* Blocks */
+.block { display: flex; flex-direction: column; gap: 10px; }
+.block-head { display: flex; gap: 12px; align-items: baseline; }
+.block-no { font-family: var(--f-display); font-weight: 800; font-stretch: 70%; font-size: 30px; line-height: 1; color: var(--accent); min-width: 20px; }
+.block-head h2 { font-size: 21px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: 0.02em; }
 .block-head p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
 
-/* Exercise card */
-.ex {
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px;
-  display: grid; grid-template-columns: 1fr; gap: 12px;
+/* Figure */
+.fig {
+  background: radial-gradient(120% 100% at 50% 0%, var(--fig-bg) 0%, var(--panel) 75%);
+  border-radius: 12px; aspect-ratio: 220 / 140; max-width: 100%; position: relative; overflow: hidden;
 }
-.ex.complete { border-color: var(--accent); }
-@media (min-width: 640px) { .ex { grid-template-columns: 230px minmax(0, 1fr); padding: 14px; gap: 16px; } }
-.fig { background: var(--panel); border-radius: 9px; aspect-ratio: 220 / 140; max-width: 100%; position: relative; overflow: hidden; }
 .fig svg { display: block; width: 100%; height: 100%; }
-.fig[title] { cursor: pointer; }
-.fig.paused::after {
-  content: 'Zastaveno'; position: absolute; right: 8px; top: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--weak); font-family: var(--f-display); font-stretch: 85%;
+.fig .tag {
+  position: absolute; left: 10px; top: 8px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  font-family: var(--f-display); font-weight: 700; font-stretch: 85%;
 }
+.fig .phd { position: absolute; right: 10px; top: 11px; display: flex; gap: 4px; }
+.fig .phd i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background-color .25s, transform .25s; }
+.fig .phd i.on { background: var(--accent); transform: scale(1.25); }
+.figbtn {
+  position: absolute; right: 8px; bottom: 8px; width: 36px; height: 36px; border-radius: 50%; border: 0; padding: 0;
+  background: var(--surface); color: var(--ink); display: grid; place-items: center; box-shadow: 0 1px 4px rgba(0,0,0,.18); opacity: .9;
+}
+.figbtn svg { width: 18px; height: 18px; }
+.fig.paused .figbtn { background: var(--accent); color: var(--accent-ink); opacity: 1; }
+.fig .mv polyline { animation: dash 1s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -11; } }
+.fig.paused .mv polyline { animation-play-state: paused; }
 .figcol { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .cap { margin: 0; font-size: 14px; line-height: 1.3; min-height: 2.6em; display: flex; gap: 8px; align-items: flex-start; }
 .cap b {
   flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; margin-top: -1px;
   background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-size: 12px; font-weight: 800;
 }
-.fig .tag {
-  position: absolute; left: 8px; top: 7px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
-  font-family: var(--f-display); font-weight: 700; font-stretch: 85%;
+.mus-key { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin: 0; }
+.mus-key i { width: 10px; height: 10px; border-radius: 50%; background: var(--mus); flex: none; }
+
+/* Exercise card: collapsed = thumbnail row, open = big figure, logging and how-to */
+.ex { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; transition: border-color .2s; }
+.ex.complete { border-color: var(--accent); }
+.ex-top {
+  display: grid; grid-template-columns: 96px minmax(0, 1fr) 30px; grid-template-areas: "fig tt chev";
+  gap: 12px; align-items: center; padding: 8px 12px 8px 8px; cursor: pointer; user-select: none;
 }
-.ex-body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-.ex-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
-.ex-head h3 { font-size: 21px; font-weight: 750; font-stretch: 85%; line-height: 1.15; }
-.rx { font-family: var(--f-display); font-weight: 800; font-size: 18px; font-stretch: 85%; color: var(--accent); white-space: nowrap; }
-.side { font-size: 13px; color: var(--muted); }
-.badge {
-  font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink);
+.ex-top .figcol { grid-area: fig; }
+.ex-tt { grid-area: tt; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.ex-tt h3 { font-size: 18px; font-weight: 750; font-stretch: 85%; line-height: 1.15; }
+.rx { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: 16px; font-stretch: 85%; color: var(--accent); }
+.rx .side { font-family: var(--f-body); font-weight: 400; font-size: 13px; color: var(--muted); }
+.chev { grid-area: chev; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--panel); }
+.chev::before { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: translateY(-2px) rotate(45deg); transition: transform .2s; }
+.ex.open .chev::before { transform: translateY(2px) rotate(-135deg); }
+.ex.complete .chev { background: var(--accent); }
+.ex.complete .chev::before { width: 6px; height: 11px; border-color: var(--accent-ink); transform: translateY(-1px) rotate(45deg); }
+.ex:not(.open) .ex-top .fig { border-radius: 9px; }
+.ex:not(.open) .cap, .ex:not(.open) .figbtn, .ex:not(.open) .tag, .ex:not(.open) .phd, .ex:not(.open) .mus-key { display: none; }
+.ex.open .ex-top { grid-template-columns: minmax(0, 1fr) 30px; grid-template-areas: "tt chev" "fig fig"; align-items: start; padding: 14px 14px 4px; }
+@media (min-width: 700px) {
+  .ex.open .ex-top { grid-template-columns: 300px minmax(0, 1fr) 30px; grid-template-areas: "fig tt chev"; }
 }
-.cues { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; font-size: 15px; }
+.sdots { display: flex; gap: 4px; align-items: center; margin-top: 2px; }
+.sdots i { width: 16px; height: 6px; border-radius: 99px; background: var(--panel); }
+.sdots i.on { background: var(--accent); }
+.sdots i.x { background: var(--weak-soft); }
+.sdots i.x.on { background: var(--weak); }
+.ex-more { display: none; padding: 6px 14px 16px; flex-direction: column; gap: 12px; }
+.ex.open .ex-more { display: flex; }
+.cues { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
 .cues li::marker { color: var(--accent); }
-.why { margin: 0; font-size: 15px; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; }
+.how { border-top: 1px solid var(--line); padding-top: 10px; }
+.how > summary { cursor: pointer; font-weight: 700; color: var(--accent); list-style: none; display: flex; align-items: center; gap: 6px; min-height: 32px; }
+.how > summary::-webkit-details-marker { display: none; }
+.how > summary::after { content: '▾'; font-size: 13px; }
+.how[open] > summary::after { content: '▴'; }
+.how > div { display: flex; flex-direction: column; gap: 10px; padding-top: 8px; }
+.why { margin: 0; font-size: 15px; background: var(--accent-soft); border-radius: 10px; padding: 9px 11px; }
 .why b { color: var(--accent); }
-.mini .mini-why { color: var(--ink); border-top: 1px solid var(--line); padding-top: 6px; }
 .err { margin: 0; font-size: 14px; color: var(--muted); }
 .err strong { color: var(--danger); font-weight: 700; }
 .weak-note { margin: 0; font-size: 14px; color: var(--weak); font-weight: 700; }
@@ -195,87 +239,181 @@ section.view { padding-top: 18px; display: flex; flex-direction: column; gap: 22
 .goal.weak { background: var(--weak-soft); color: var(--weak); }
 .goal-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
 .goal-list b { font-family: var(--f-display); font-stretch: 85%; }
-.log { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-top: 6px; border-top: 1px solid var(--line); margin-top: 2px; }
-.pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.log { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .pills .lbl { font-size: 13px; color: var(--muted); margin-right: 2px; }
 .pill {
-  min-width: 40px; height: 40px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--surface);
-  font-family: var(--f-display); font-weight: 800; font-size: 16px; padding: 0 10px;
+  min-width: 46px; height: 46px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--surface);
+  font-family: var(--f-display); font-weight: 800; font-size: 17px; padding: 0 12px;
+  transition: background-color .15s, border-color .15s, transform .1s;
 }
+.pill:active { transform: scale(.94); }
 .pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.pill.weak { border-color: var(--weak); color: var(--weak); font-size: 13px; font-stretch: 85%; }
+.pill.weak { border-color: var(--weak); color: var(--weak); font-size: 14px; font-stretch: 85%; }
 .pill.weak[aria-pressed="true"] { background: var(--weak); color: var(--surface); }
-.kg { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
+.kg { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
 .kg input {
-  width: 72px; height: 40px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--surface);
-  padding: 0 8px; font-family: var(--f-display); font-weight: 700; font-size: 17px; color: var(--ink);
+  width: 76px; height: 46px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface);
+  padding: 0 8px; font-family: var(--f-display); font-weight: 700; font-size: 18px; color: var(--ink); text-align: center;
 }
 .btn {
-  height: 40px; border-radius: 99px; border: 1.5px solid var(--ink); background: transparent; padding: 0 14px;
-  font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  min-height: 44px; border-radius: 99px; border: 1.5px solid var(--ink); background: transparent; padding: 0 16px;
+  font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
 }
+.btn svg { width: 18px; height: 18px; }
 .btn.run { background: var(--ink); color: var(--bg); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); height: 46px; padding: 0 22px; font-size: 16px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); min-height: 52px; padding: 0 22px; font-size: 17px; }
 .btn.primary:disabled { opacity: .45; cursor: not-allowed; }
+.btn.wide { width: 100%; border-radius: 14px; }
 .btn.quiet { border-color: var(--line); color: var(--muted); }
 .btn.danger { border-color: var(--danger); color: var(--danger); }
-.up { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: var(--muted); }
-.up input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.badge { font-family: var(--f-body); font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); vertical-align: middle; }
+.up { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); }
+.up input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
+
+.pair { display: flex; flex-direction: column; gap: 8px; border-left: 3px solid var(--accent); padding-left: 10px; }
+.pair-h { margin: 0; font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
 
 /* Circuit */
 .timer {
-  background: var(--ink); color: var(--bg); border-radius: var(--r); padding: 16px;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center;
+  background: var(--ink); color: var(--bg); border-radius: var(--r); padding: 14px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: center;
 }
 .timer .t-phase, .timer .t-name, .timer .t-next { grid-column: 1; }
 .timer .t-phase { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; font-size: 13px; opacity: .75; }
 .timer .t-name { font-family: var(--f-display); font-weight: 800; font-stretch: 80%; font-size: 24px; line-height: 1.1; }
 .timer .t-next { font-size: 14px; opacity: .75; }
-.timer .t-clock { font-family: var(--f-display); font-weight: 800; font-stretch: 75%; font-size: 64px; line-height: 1; grid-column: 2; grid-row: 1 / span 3; }
+.timer .t-clock { font-family: var(--f-display); font-weight: 800; font-stretch: 75%; font-size: 60px; line-height: 1; grid-column: 2; grid-row: 1 / span 3; }
 .timer.rest .t-clock { color: var(--weak); }
 .timer.work .t-clock { color: var(--accent); }
-.timer .t-ctrl { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.timer .t-fig { grid-column: 1 / -1; }
+.timer .t-fig .fig { --fig-bg: #2B3532; --panel: #222B29; --fig: #E5ECE9; --fig-far: #6B7874; --ghost: #33403C; --floor: #4A5652; --prop: #84928D; --prop-fill: #34403C; }
+.timer .t-ctrl { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
 .timer .btn { border-color: var(--bg); color: var(--bg); }
 .timer .btn.run { background: var(--bg); color: var(--ink); }
 .timer .rounds { display: flex; gap: 6px; align-items: center; margin-left: auto; font-size: 13px; }
-.timer .pill { height: 34px; min-width: 34px; background: transparent; color: var(--bg); border-color: rgba(255,255,255,.35); }
+.timer .pill { height: 38px; min-width: 38px; background: transparent; color: var(--bg); border-color: rgba(255,255,255,.35); }
 .timer .pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
-.mini {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
-}
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.mini { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .mini.now { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .mini h3 { font-size: 16px; font-weight: 750; font-stretch: 85%; line-height: 1.15; }
 .mini p { margin: 0; font-size: 13px; color: var(--muted); }
-.mini .fig { border-radius: 7px; }
-
+.mini .fig { border-radius: 8px; }
+.mini .figbtn { width: 30px; height: 30px; }
+.mini .mini-why { color: var(--ink); border-top: 1px solid var(--line); padding-top: 6px; }
 .bonus > summary { list-style: none; cursor: pointer; }
 .bonus > summary::-webkit-details-marker { display: none; }
+.bonus[open] > summary { margin-bottom: 10px; }
 .bonus .tog {
-  display: inline-block; vertical-align: middle; margin-left: 6px; padding: 2px 9px; border-radius: 99px; border: 1.5px solid var(--line);
+  display: inline-block; vertical-align: middle; margin-left: 6px; padding: 2px 10px; border-radius: 99px; border: 1.5px solid var(--line);
   font-family: var(--f-body); font-size: 12px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--muted);
 }
 .bonus .tog::before { content: 'Zobrazit'; }
 .bonus[open] .tog::before { content: 'Skrýt'; }
-.pair { display: flex; flex-direction: column; gap: 10px; border-left: 3px solid var(--accent); padding-left: 10px; }
-.pair-h { margin: 0; font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
-.finish { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.bonus > div { display: flex; flex-direction: column; gap: 10px; }
+.finish { display: flex; flex-direction: column; gap: 10px; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
 .finish .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.finish .row .btn.primary { flex: 1 1 200px; }
+
+/* Step-by-step mode */
+body.noscroll { overflow: hidden; }
+.focus { position: fixed; inset: 0; z-index: 25; background: var(--bg); display: flex; flex-direction: column; }
+.fx-top { padding: max(10px, env(safe-area-inset-top)) 12px 8px; display: flex; align-items: center; gap: 10px; max-width: 680px; width: 100%; margin: 0 auto; }
+.fx-top .bar { flex: 1; }
+.fx-top .fx-count { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.fx-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+.fx-in { max-width: 680px; margin: 0 auto; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.fx-kick { margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--accent); }
+.fx-in h2 { font-size: 30px; font-weight: 800; font-stretch: 78%; line-height: 1.05; }
+.fx-rx { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0; }
+.fx-rx .rx { font-size: 22px; }
+.fx-tabs { display: flex; gap: 6px; }
+.fx-tabs button {
+  flex: 1; min-width: 0; border: 1.5px solid var(--line); background: var(--surface); border-radius: 12px; padding: 8px 10px; text-align: left;
+  display: flex; flex-direction: column; gap: 1px; font-size: 14px; font-weight: 700; line-height: 1.2;
+}
+.fx-tabs button small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.fx-tabs button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.fx-tabs button.done small { color: var(--accent); font-weight: 700; }
+.fx-fig .fig { max-height: 40vh; margin: 0 auto; width: 100%; }
+.fx-sets { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fx-sets .lbl { font-size: 13px; color: var(--muted); margin-right: 4px; }
+.fx-sets i { width: 30px; height: 10px; border-radius: 99px; background: var(--panel); }
+.fx-sets i.on { background: var(--accent); }
+.fx-sets i.x { background: var(--weak-soft); }
+.fx-sets i.x.on { background: var(--weak); }
+.fx-sets .undo { margin-left: auto; }
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper .lbl { font-size: 14px; color: var(--muted); margin-right: 4px; }
+.stepper input {
+  width: 92px; height: 52px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); text-align: center;
+  font-family: var(--f-display); font-weight: 800; font-size: 24px; color: var(--ink);
+}
+.stepper small { color: var(--muted); font-size: 13px; }
+.ibtn {
+  width: 44px; height: 44px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--surface);
+  font-size: 22px; line-height: 1; display: inline-grid; place-items: center; padding: 0; flex: none;
+}
+.ibtn svg { width: 22px; height: 22px; }
+.ibtn:disabled { opacity: .35; cursor: default; }
+.ibtn.lg { width: 56px; height: 56px; border-radius: 16px; }
+.holdbtn {
+  display: flex; align-items: center; gap: 14px; width: 100%; border: 1.5px solid var(--ink); background: transparent; border-radius: 16px;
+  padding: 10px 14px; min-height: 64px; text-align: left;
+}
+.holdbtn b { font-family: var(--f-display); font-weight: 800; font-stretch: 80%; font-size: 34px; line-height: 1; min-width: 70px; }
+.holdbtn span { font-size: 15px; font-weight: 700; }
+.holdbtn small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+.holdbtn.run { background: var(--ink); color: var(--bg); }
+.holdbtn.run small { color: inherit; opacity: .75; }
+.holdbtn.run.prep b { color: var(--weak); }
+.fx-bot { border-top: 1px solid var(--line); background: var(--surface); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+.fx-bot > div { max-width: 680px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
+.fx-bot .btn.primary { flex: 1; min-height: 58px; font-size: 18px; border-radius: 16px; }
+.fx-bot .btn.primary.extra { background: var(--weak); border-color: var(--weak); color: var(--surface); }
+/* Rest screen */
+.rest { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 12px 16px 20px; max-width: 680px; margin: 0 auto; width: 100%; overflow-y: auto; }
+.rest .kick { margin: 8px 0 0; }
+.rest-ring { width: min(62vw, 240px); aspect-ratio: 1; position: relative; flex: none; }
+.rest-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.rest-ring circle { fill: none; stroke-width: 7; }
+.rest-ring .bg { stroke: var(--panel); }
+.rest-ring .fg { stroke: var(--weak); stroke-linecap: round; }
+.rest-ring b { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-stretch: 75%; font-size: 64px; }
+.rest .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.rest-next { margin: 0; font-size: 15px; color: var(--muted); text-align: center; }
+.rest-next b { color: var(--ink); }
+.rest-neck { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; align-items: center; }
+.rest-neck h3 { font-size: 17px; font-weight: 750; font-stretch: 85%; line-height: 1.15; }
+.rest-neck p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.rest-neck .btn { margin-top: 8px; }
+.rest-neck .fig .figbtn, .rest-neck .fig .tag, .rest-neck .fig .phd { display: none; }
+.fx-end { text-align: center; align-items: center; padding-top: 40px; }
+.fx-end .big-ok { width: 88px; height: 88px; color: var(--accent); }
+.fx-end .big-ok svg { width: 100%; height: 100%; }
+.fx-end .btn { width: 100%; max-width: 360px; }
+.fx-end h2 { font-size: 30px; font-weight: 800; font-stretch: 78%; text-transform: uppercase; }
 
 /* Overview */
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
-.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 640px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
 .tile b { display: block; font-family: var(--f-display); font-weight: 800; font-stretch: 80%; font-size: 30px; line-height: 1.05; }
 .tile span { font-size: 13px; color: var(--muted); }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .card .txt { margin: 0; font-size: 15px; }
 .card h2 { font-size: 20px; font-weight: 800; font-stretch: 80%; text-transform: uppercase; letter-spacing: 0.02em; }
+details.card > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::after { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); flex: none; margin-right: 6px; transition: transform .2s; }
+details.card[open] > summary::after { transform: rotate(-135deg); }
 .scroll { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: 15px; }
 th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; }
 td.r, th.r { text-align: right; }
-.cal { max-width: 480px; display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr)); gap: 4px; font-size: 12px; }
+.cal { max-width: 480px; display: grid; grid-template-columns: 46px repeat(7, minmax(0, 1fr)); gap: 4px; font-size: 12px; }
 .cal .h { text-align: center; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
 .cal .wl { color: var(--muted); align-self: center; font-variant-numeric: tabular-nums; }
 .cal .c {
@@ -296,39 +434,36 @@ td.r, th.r { text-align: right; }
 .hrow .when { min-width: 92px; font-variant-numeric: tabular-nums; }
 .hrow .what { font-weight: 700; flex: 1 1 120px; min-width: 0; }
 .hrow .pct { font-variant-numeric: tabular-nums; color: var(--muted); }
-.hrow .btn { height: 32px; font-size: 13px; padding: 0 10px; }
+.hrow .btn { min-height: 36px; font-size: 13px; padding: 0 12px; }
 .empty { color: var(--muted); font-size: 15px; margin: 0; }
 
 /* Weak leg */
 .steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
 .steps li::marker { font-family: var(--f-display); font-weight: 800; color: var(--accent); }
 .choice { display: flex; gap: 8px; flex-wrap: wrap; }
-.choice button { flex: 1 1 120px; height: 52px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; font-size: 16px; }
+.choice button { flex: 1 1 90px; height: 54px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; font-size: 16px; }
 .choice button[aria-pressed="true"] { border-color: var(--weak); background: var(--weak-soft); color: var(--ink); box-shadow: inset 0 0 0 1px var(--weak); }
 .two { display: grid; grid-template-columns: 1fr; gap: 14px; }
 @media (min-width: 640px) { .two { grid-template-columns: 260px minmax(0, 1fr); } }
 .list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
 
-footer.store { margin-top: 28px; font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+footer.store { margin-top: 28px; font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 footer.store i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
 footer.store.db i { background: var(--accent); }
-footer.store { flex-wrap: wrap; }
 footer.store .link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 700; text-decoration: underline; }
 .card .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 textarea.bk {
-  width: 100%; border: 1.5px solid var(--line); border-radius: 9px; background: var(--bg); color: var(--ink);
+  width: 100%; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink);
   padding: 8px 10px; font: 13px/1.4 ui-monospace, monospace; resize: vertical;
 }
 
-@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
-/* Food tab */
-body.noscroll { overflow: hidden; }
-.ibtn {
-  width: 40px; height: 40px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--surface);
-  font-size: 22px; line-height: 1; display: inline-grid; place-items: center; padding: 0; flex: none;
+@media (prefers-reduced-motion: reduce) {
+  .bar i, .ring .fg, .pill, .chev::before { transition: none; }
+  .fig .mv polyline { animation: none; }
 }
-.ibtn:disabled { opacity: .35; cursor: default; }
-.btn.sm { height: 34px; font-size: 13px; padding: 0 12px; }
+
+/* Food tab */
+.btn.sm { min-height: 38px; font-size: 14px; padding: 0 14px; }
 .link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 700; text-decoration: underline; font-size: inherit; }
 .fday { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .fday h2 { font-size: 26px; font-weight: 800; font-stretch: 75%; text-transform: uppercase; letter-spacing: .01em; }
@@ -348,7 +483,7 @@ body.noscroll { overflow: hidden; }
 .meal-h .num { color: var(--muted); font-size: 14px; flex: 1; }
 .frow, .fpick {
   display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; text-align: left;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 52px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 56px;
 }
 .fn { min-width: 0; display: flex; flex-direction: column; font-weight: 700; overflow-wrap: anywhere; }
 .fn small, .fk small { font-weight: 400; font-size: 13px; color: var(--muted); }
@@ -356,8 +491,6 @@ body.noscroll { overflow: hidden; }
 .meal > .btn { align-self: flex-start; }
 .fset summary { cursor: pointer; list-style: none; }
 .fset summary::-webkit-details-marker { display: none; }
-.fset > summary h2::after { content: ' ▾'; color: var(--muted); }
-.fset[open] > summary h2::after { content: ' ▴'; }
 .fgrid, .sh-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .fgrid label, .sh-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 700; }
 .fgrid .wide, .sh-form .wide { grid-column: 1 / -1; }
@@ -403,7 +536,7 @@ body.noscroll { overflow: hidden; }
 .chip-u[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
 .amt-prev { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: 20px; font-stretch: 85%; color: var(--accent); }
 .toast {
-  position: fixed; left: 50%; transform: translateX(-50%); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 40;
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--nav-h) + 12px + env(safe-area-inset-bottom)); z-index: 40;
   background: var(--ink); color: var(--bg); border-radius: 12px; padding: 12px 16px; display: flex; gap: 16px; align-items: center;
   max-width: calc(100vw - 32px); box-shadow: 0 6px 24px rgba(0,0,0,.25); font-size: 15px;
 }
@@ -412,23 +545,22 @@ body.noscroll { overflow: hidden; }
 
 <div class="wrap" lang="cs">
   <header class="top">
-    <div>
-      <h1>Rovně <span>a</span> silně</h1>
-      <p class="phase" id="phase"></p>
-    </div>
+    <h1>Rovně <span>a</span> silně</h1>
+    <p class="phase" id="phase"></p>
   </header>
-  <nav class="tabs" role="tablist" aria-label="Sekce">
-    <button role="tab" id="tab-today" data-tab="today" aria-selected="true" aria-controls="v-today">Trénink</button>
-    <button role="tab" id="tab-food" data-tab="food" aria-selected="false" aria-controls="v-food">Jídlo</button>
-    <button role="tab" id="tab-log" data-tab="log" aria-selected="false" aria-controls="v-log">Přehled</button>
-    <button role="tab" id="tab-weak" data-tab="weak" aria-selected="false" aria-controls="v-weak">Noha</button>
-  </nav>
   <section class="view" id="v-today" role="tabpanel" aria-labelledby="tab-today"></section>
   <section class="view" id="v-food" role="tabpanel" aria-labelledby="tab-food" hidden></section>
   <section class="view" id="v-log" role="tabpanel" aria-labelledby="tab-log" hidden></section>
   <section class="view" id="v-weak" role="tabpanel" aria-labelledby="tab-weak" hidden></section>
   <footer class="store" id="store"><i></i><span>Záznamy se ukládají v tomto prohlížeči.</span></footer>
 </div>
+<nav class="nav" aria-label="Sekce"><div class="nav-in tabs" role="tablist">
+  <button role="tab" id="tab-today" data-tab="today" aria-selected="true" aria-controls="v-today"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 9.5v5M21.5 9.5v5M5 7v10M19 7v10M8 12h8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Trénink</button>
+  <button role="tab" id="tab-food" data-tab="food" aria-selected="false" aria-controls="v-food"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M4.5 3v5.5A2.5 2.5 0 0 0 7 11a2.5 2.5 0 0 0 2.5-2.5V3M7 11v10M17 21V3c-2.5 1-4 3.8-4 7.5V13h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Jídlo</button>
+  <button role="tab" id="tab-log" data-tab="log" aria-selected="false" aria-controls="v-log"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span>Přehled</button>
+  <button role="tab" id="tab-weak" data-tab="weak" aria-selected="false" aria-controls="v-weak"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2.5v8.5l-1.5 6.5a2 2 0 0 0 2 2.5H18a2 2 0 0 0 .4-4l-4.4-1V2.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Noha</button>
+</div></nav>
+<div id="focus" class="focus" role="dialog" aria-modal="true" aria-label="Trénink krok za krokem" hidden></div>
 <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Přidat jídlo" hidden></div>
 <div id="toast" class="toast" role="status" hidden></div>
 
@@ -501,7 +633,10 @@ const EX = {
   ohp: { name: 'Tlak nad hlavu vsedě', why: 'Posiluje ramena a tricepsy. Vsedě s opřenými zády je šetrný k bedrům.', rx: '3 × 10', sets: 3, kg: true,
     cues: ['Opěradlo nastav kolmo, záda opřená, břicho zpevněné.', 'Začni s jednoručkami u ramen.', 'Tlač nad hlavu, dolů pomalu zpátky k ramenům.'],
     err: 'Záklon v bedrech. Zpevni břicho, případně uber váhu.' },
-  bandrow: { name: 'Veslování s gumou', why: 'Posiluje svaly mezi lopatkami a zadní část ramen. Působí proti shrbenému držení těla.', rx: '3 × 12', sets: 3,
+  facepull: { name: 'Face pull s gumou', why: 'Posiluje zadní část ramen, dolní a střední trapéz a zevní rotátory ramene. Ty táhnou ramena dozadu a hlavu nad trup, takže působí přímo proti předsunuté hlavě a shrbeným zádům. Na držení těla dělá víc než obyčejné veslování.', rx: '3 × 12', sets: 3,
+    cues: ['Gumu ukotvi ve výšce obličeje (zavřené dveře, kování okna). Uchop ji palci nahoru a ustup, ať je napnutá.', 'Táhni k čelu, lokty jdou do stran a nahoru. Na konci rozevři ruce, ať jsou pěsti vedle uší a palce míří dozadu.', 'Nahoře 1 s stáhni lopatky dozadu a dolů, brada zasunutá. Vracej pomalu.'],
+    err: 'Krčení ramen k uším, záklon hlavy nebo tahání lokty dolů k bokům. Pak z toho je obyčejné veslování.' },
+  bandrow: { retired: true, name: 'Veslování s gumou', why:'Posiluje svaly mezi lopatkami a zadní část ramen. Působí proti shrbenému držení těla.', rx: '3 × 12', sets: 3,
     cues: ['Gumu ukotvi ve výšce hrudníku (zavřené dveře, noha stolu).', 'Táhni lokty dozadu podél těla, stáhni lopatky.', 'Vracej pomalu, guma nesmí cuknout.'],
     err: 'Krčení ramen k uším.' },
   carry: { name: 'Nošení kufru', why: 'Svaly na boku trupu musí celou dobu bránit náklonu k zátěži. Trénuje přesně to, abys stál a chodil rovně.', rx: '3 × 30 s', side: 'na stranu', sets: 3, hold: 30, kg: true, uni: true,
@@ -523,16 +658,18 @@ const PLAN = {
   neckV1: ['chintuck', 'retract', 'isoext', 'quadneck'],
   // Strength in pairs (see PAIR): a set of one, straight into a set of the other, then rest.
   A: ['goblet', 'dbrow', 'slrdl', 'dbbench', 'deadbug'],
-  B: ['split', 'ohp', 'sltrust', 'bandrow', 'carry'],
+  B: ['split', 'ohp', 'sltrust', 'facepull', 'carry'],
   BV1: ['split', 'hipthrust', 'ohp', 'bandrow', 'carry'],
   circ: ['c_squat', 'c_pushup', 'c_climber', 'c_lunge', 'c_plank'],
 };
 // Strength pairs that don't tire the same muscles, so they can be alternated with one rest per round.
-const PAIR = { goblet: 'dbrow', slrdl: 'dbbench', split: 'ohp', sltrust: 'bandrow' };
+const PAIR = { goblet: 'dbrow', slrdl: 'dbbench', split: 'ohp', sltrust: 'facepull', abd: 'sideplank' };
+// Pairs done back to back without a rest (the warm-up alternates its two exercises).
+const NO_REST = { abd: true };
 const GOALS = {
   panev: { name: 'Rovná pánev', weak: true, what: 'Pánev a trup se ve stoji a při chůzi nepřesouvají do strany (vyosení). Posiluje se hlavně střední hýžďový sval a boční svaly trupu.', where: 'Rozcvička (upažování a boční plank), cviky na jednu nohu, nošení kufru' },
   strany: { name: 'Vyrovnané strany', weak: true, what: 'Slabší noha dožene silnější. Pomáhá jí série navíc a to, že se jí vždy začíná.', where: 'Mrtvý tah na jedné noze, bulharský dřep, hip thrust na jedné noze' },
-  krk: { name: 'Krční páteř', what: 'Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Posilují se hluboké ohybače krku a šíjové svaly.', where: 'Krk v pauzách silové části, veslování s gumou' },
+  krk: { name: 'Krční páteř', what: 'Vrátit krku přirozené prohnutí (lordózu) a nosit hlavu nad rameny, ne vysunutou dopředu. Posilují se hluboké ohybače krku a šíjové svaly.', where: 'Krk v pauzách silové části, face pull s gumou' },
   sila: { name: 'Síla a držení těla', what: 'Silnější nohy, hýždě, záda, hrudník, ramena a střed těla. Vzpřímené držení bez hrbení.', where: 'Silová část A a B' },
   kondice: { name: 'Kondice a hubnutí', what: 'Víc spálené energie a lepší kondice. Nejvíc tu udělá denní chůze. Na hubnutí má ale největší vliv strava: mírný kalorický deficit a dost bílkovin.', where: 'Denní chůze, bonusový okruh' },
 };
@@ -540,7 +677,7 @@ const EX_GOALS = {
   stoj1: ['panev', 'strany'], slsit: ['panev', 'strany'], pelvdrop: ['panev', 'strany'], clam: ['panev'], abd: ['panev'], sideplank: ['panev'], bridge: ['sila', 'panev'],
   chintuck: ['krk'], retract: ['krk', 'sila'], isoext: ['krk'], quadneck: ['krk'],
   goblet: ['sila'], slrdl: ['strany', 'panev', 'sila'], dbbench: ['sila'], dbrow: ['sila'], deadbug: ['sila'],
-  split: ['strany', 'panev', 'sila'], sltrust: ['sila', 'strany', 'panev'], hipthrust: ['sila'], ohp: ['sila'], bandrow: ['sila', 'krk'], carry: ['panev', 'sila'],
+  split: ['strany', 'panev', 'sila'], sltrust: ['sila', 'strany', 'panev'], hipthrust: ['sila'], ohp: ['sila'], bandrow: ['sila', 'krk'], facepull: ['krk', 'sila'], carry: ['panev', 'sila'],
 };
 const TYPE_NAME = { A: 'Trénink A', B: 'Trénink B', S: 'Pánev a krk' };
 const WEEK_PLAN = ['trénink', 'chůze', 'trénink', 'chůze + stab.', 'trénink', 'chůze', 'volno'];
@@ -555,136 +692,141 @@ const BASE_L = { thN: 26, shN: 26, thF: 26, shF: 26, uaN: 20, faN: 19, uaF: 20, 
 const DEF_POSE = { h: 0, hx: [0, 0], ho: [0, 0], so: [0, 0], kN: 1, kF: 1, eN: -1, eF: -1, toeN: 90, toeF: 90, dbo: 0 };
 
 const FIGS = {
-  stoj1: { cap: ['Stoj na obou nohou, ruce v bok', 'Zvedni nohu, pánev drž na čárkované linii'], arrow: [{at: 'kneeF', o: [-12, 0]}],
+  stoj1: { mus: ['glN'], cap: ['Stoj na obou nohou, ruce v bok', 'Zvedni nohu, pánev drž na čárkované linii'], arrow: [{at: 'kneeF', o: [-12, 0]}],
     front: true, foot: 6, tag: 'Zepředu', guide: { at: 'hip', x1: 82, x2: 138 }, hold: [700, 1600], keys: [
     { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [103, 101], fF: [103, 127], hN: [119, 73], hF: [101, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
     { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [102, 92], fF: [104, 113], hN: [119, 73], hF: [101, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
   ] },
-  slsit: { cap: ['Vstaň přes patu stojné nohy, koleno nad špičkou', 'Pomalu si sedni na kraj lavice, pánev drž rovně'], arrow: [{at: 'hip', o: [-14, 0]}],
+  slsit: { mus: ['thN', 'glN'], tr: [1600, 900], cap: ['Vstaň přes patu stojné nohy, koleno nad špičkou', 'Pomalu si sedni na kraj lavice, pánev drž rovně'], arrow: [{at: 'hip', o: [-14, 0]}],
     tag: 'Zboku', props: [{ k: 'bench', x: 46, y: 98, w: 40 }], hold: [500, 600], keys: [
     { hip: [100, 75], t: 180, fN: [102, 126], KF: [110, 99], fF: [128, 112], toeF: 60, hN: [136, 46], hF: [134, 47] },
     { hip: [80, 95], t: 155, h: -8, fN: [102, 126], KF: [105, 90], fF: [130, 101], toeF: 60, hN: [131, 63], hF: [129, 64] },
   ] },
-  pelvdrop: { cap: ['Bokem stojné nohy zvedni pánev zpátky do roviny', 'Pomalu spusť volnou stranu pánve dolů, stojná noha rovná'], arrow: [{at: 'footF', o: [-12, 0]}],
+  pelvdrop: { mus: ['glN'], cap: ['Bokem stojné nohy zvedni pánev zpátky do roviny', 'Pomalu spusť volnou stranu pánve dolů, stojná noha rovná'], arrow: [{at: 'footF', o: [-12, 0]}],
     front: true, foot: 6, tag: 'Zepředu', guide: { at: 'hip', x1: 82, x2: 138 }, props: [{ k: 'step', x: 108, y: 116, w: 24 }], hold: [900, 900], keys: [
     { hip: [110, 62], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 88], fN: [117, 114], KF: [103, 90], fF: [103, 117], hN: [119, 60], hF: [101, 60], eN: 1, eF: -1, toeN: 75, toeF: -75 },
     { hip: [110, 66], t: 180, ho: [7, -4], so: [11, 0], KN: [117, 88], fN: [117, 114], KF: [103, 98], fF: [103, 125], hN: [119, 60], hF: [101, 64], eN: 1, eF: -1, toeN: 75, toeF: -75 },
   ] },
-  clam: { cap: ['Leh na boku, kolena pokrčená a u sebe', 'Otevři horní koleno, chodidla zůstávají u sebe'], arrow: [{at: 'kneeN', o: [0, -6], bend: -0.3}],
+  clam: { mus: ['glN'], tr: [800, 1200], cap: ['Leh na boku, kolena pokrčená a u sebe', 'Otevři horní koleno, chodidla zůstávají u sebe'], arrow: [{at: 'kneeN', o: [0, -6], bend: -0.3}],
     lying: true, foot: 6, tag: 'Vleže na boku', hold: [500, 700], keys: [
     { hip: [128, 119], t: -90, ho: [0, -3], so: [0, -3], KN: [149, 122], fN: [171, 113], KF: [150, 126], fF: [172, 118], hN: [108, 126], hF: [58, 124], EN: [99, 117], EF: [72, 126], toeN: 120, toeF: 120 },
     { hip: [128, 119], t: -90, ho: [0, -3], so: [0, -3], KN: [143, 97], fN: [171, 112], KF: [150, 126], fF: [172, 118], hN: [108, 126], hF: [58, 124], EN: [99, 117], EF: [72, 126], toeN: 120, toeF: 120 },
   ] },
-  abd: { cap: ['Leh na boku, horní noha natažená', 'Zvedni horní nohu, špička míří dopředu'], arrow: [{at: 'footN', o: [6, -4], bend: -0.25}],
+  abd: { mus: ['glN'], tr: [900, 1300], cap: ['Leh na boku, horní noha natažená', 'Zvedni horní nohu, špička míří dopředu'], arrow: [{at: 'footN', o: [6, -4], bend: -0.25}],
     lying: true, foot: 7, tag: 'Vleže na boku', hold: [500, 800], keys: [
     { hip: [128, 119], t: -90, ho: [0, -3], so: [0, -3], KN: [154, 116], fN: [179, 116], KF: [146, 125], fF: [166, 125], hN: [108, 126], hF: [58, 124], EN: [99, 117], EF: [72, 126], toeN: 90, toeF: 90 },
     { hip: [128, 119], t: -90, ho: [0, -3], so: [0, -3], KN: [152, 106], fN: [175, 94], KF: [146, 125], fF: [166, 125], hN: [108, 126], hF: [58, 124], EN: [99, 117], EF: [72, 126], toeN: 115, toeF: 90 },
   ] },
-  sideplank: { cap: ['Opři se o loket, boky na zemi', 'Zvedni boky, tělo v jedné rovné linii'], arrow: [{at: 'hip', o: [6, 0]}],
+  sideplank: { mus: ['abs', 'glN'], tr: [900, 1100], cap: ['Opři se o loket, boky na zemi', 'Zvedni boky, tělo v jedné rovné linii'], arrow: [{at: 'hip', o: [6, 0]}],
     lying: true, foot: 6, tag: 'Zepředu', hold: [600, 1500], keys: [
     { hip: [119, 123], t: -113, ho: [0, -2.5], so: [0, -2.5], fN: [170, 121], fF: [170, 125], EF: [84, 127], hF: [100, 127], EN: [101, 108], hN: [117, 117] },
     { hip: [119, 111], t: -100, ho: [0, -2.5], so: [0, -2.5], fN: [170, 121], fF: [170, 125], EF: [82, 127], hF: [98, 127], EN: [100, 101], hN: [117, 106] },
   ] },
-  bridge: { cap: ['Leh na zádech, chodidla blízko zadku', 'Zatni hýždě a zvedni pánev'], arrow: [{at: 'hip', o: [0, -6]}],
+  bridge: { mus: ['glN', 'thN'], tr: [900, 1300], cap: ['Leh na zádech, chodidla blízko zadku', 'Zatni hýždě a zvedni pánev'], arrow: [{at: 'hip', o: [0, -6]}],
     lying: true, tag: 'Zboku', hold: [500, 1200], keys: [
     { hip: [112, 122], t: -90, h: 0, fN: [150, 126], fF: [147, 126], EN: [92, 126], hN: [110, 127], EF: [90, 126], hF: [108, 127] },
     { hip: [108, 102], t: -61, h: -29, fN: [150, 126], fF: [147, 126], EN: [92, 126], hN: [110, 127], EF: [90, 126], hF: [108, 127] },
   ] },
-  chintuck: { cap: ['Hlava vysunutá dopředu (tak to nechceme)', 'Zasuň bradu dozadu a temenem povyrůst'], arrow: [{at: 'head', o: [0, -14]}],
+  chintuck: { mus: ['neck'], tr: [1000, 900], cap: ['Hlava vysunutá dopředu (tak to nechceme)', 'Zasuň bradu dozadu a temenem povyrůst'], arrow: [{at: 'head', o: [0, -14]}],
     tag: 'Zboku', face: true, props: [{ k: 'bench', x: 64, y: 100, w: 50 }], hold: [600, 1600], keys: [
     { hip: [80, 95], t: 176, h: -14, hx: [6, 3], fN: [120, 126], fF: [117, 126], hN: [101, 93], hF: [99, 94] },
     { hip: [80, 95], t: 178, h: 3, hx: [-2, -2], fN: [120, 126], fF: [117, 126], hN: [101, 93], hF: [99, 94] },
   ] },
-  retract: { cap: ['Shrbený, hlava vpředu', 'Lopatky dozadu a dolů, hrudník nahoru, hlava nad tělem'], arrow: [{at: 'head', o: [0, -14]}],
+  retract: { mus: ['neck', 'back'], tr: [1100, 1000], cap: ['Shrbený, hlava vpředu', 'Lopatky dozadu a dolů, hrudník nahoru, hlava nad tělem'], arrow: [{at: 'head', o: [0, -14]}],
     tag: 'Zboku', face: true, hold: [600, 1800], keys: [
     { hip: [90, 76], t: 172, h: -12, hx: [4, 2], fN: [100, 126], fF: [84, 126], hN: [104, 75], hF: [102, 76] },
     { hip: [90, 76], t: 181, h: 7, hx: [-2, -2], fN: [100, 126], fF: [84, 126], hN: [83, 75], hF: [81, 76] },
   ] },
-  isoext: { cap: ['Dlaně na zátylku', 'Tlač hlavou dozadu do dlaní, hlava se nehýbe'],
+  isoext: { mus: ['neck'], cap: ['Dlaně na zátylku', 'Tlač hlavou dozadu do dlaní, hlava se nehýbe'],
     tag: 'Zboku', face: true, props: [{ k: 'bench', x: 64, y: 100, w: 50 }], hold: [900, 2200], trans: 500, keys: [
     { hip: [80, 95], t: 178, fN: [120, 126], fF: [117, 126], EN: [100, 50], hN: [75, 41], EF: [98, 51], hF: [74, 42] },
     { hip: [80, 95], t: 178, hx: [-1, 0], fN: [120, 126], fF: [117, 126], EN: [99, 50], hN: [74, 41], EF: [97, 51], hF: [73, 42] },
   ] },
-  quadneck: { cap: ['Na čtyřech, hlava dolů, pohled ke kolenům', 'Zvedni hlavu jen do linie se zády'], arrow: [{at: 'head', o: [12, 0], bend: -0.3}],
+  quadneck: { mus: ['neck'], tr: [1000, 1300], cap: ['Na čtyřech, hlava dolů, pohled ke kolenům', 'Zvedni hlavu jen do linie se zády'], arrow: [{at: 'head', o: [12, 0], bend: -0.3}],
     lying: true, face: true, foot: 6, tag: 'Zboku', hold: [600, 1400], keys: [
     { hip: [82, 102], t: 100, h: -50, KN: [84, 127], fN: [60, 127], KF: [80, 127], fF: [56, 127], toeN: -95, toeF: -95, EN: [120, 111], hN: [121, 127], EF: [118, 111], hF: [119, 127] },
     { hip: [82, 102], t: 100, h: 6, KN: [84, 127], fN: [60, 127], KF: [80, 127], fF: [56, 127], toeN: -95, toeF: -95, EN: [120, 111], hN: [121, 127], EF: [118, 111], hF: [119, 127] },
   ] },
-  goblet: { cap: ['Stoj, jednoručka u hrudníku', 'Sedni si mezi paty, hrudník nahoře'], arrow: [{at: 'hip', o: [-14, 0]}],
+  goblet: { mus: ['thN', 'glN'], tr: [1500, 1000], cap: ['Stoj, jednoručka u hrudníku', 'Sedni si mezi paty, hrudník nahoře'], arrow: [{at: 'hip', o: [-14, 0]}],
     tag: 'Zboku', db: [{ at: 'hN', o: 90 }], hold: [400, 500], keys: [
     { hip: [100, 75], t: 180, fN: [104, 126], fF: [100, 126], hN: [112, 54], hF: [110, 55] },
     { hip: [80, 100], t: 160, h: -14, fN: [104, 126], fF: [100, 126], hN: [106, 76], hF: [104, 77] },
   ] },
-  slrdl: { cap: ['Stoj na jedné noze, činka v ruce', 'Předkloň se v kyčli, volná noha jde dozadu'], arrow: [{at: 'footF', bend: 0.25}],
+  slrdl: { mus: ['glN', 'thN'], tr: [1500, 1100], cap: ['Stoj na jedné noze, činka v ruce', 'Předkloň se v kyčli, volná noha jde dozadu'], arrow: [{at: 'footF', bend: 0.25}],
     tag: 'Zboku', db: [{ at: 'hF' }], hold: [500, 600], keys: [
     { hip: [100, 75], t: 180, fN: [102, 126], fF: [92, 121], toeF: 55, hN: [102, 76], hF: [100, 76] },
     { hip: [96, 78], t: 100, h: -18, fN: [102, 126], fF: [46, 88], toeF: 5, hN: [135, 110], hF: [133, 110] },
   ] },
-  dbbench: { cap: ['Leh na lavici, činky u hrudníku', 'Vytlač činky nad ramena'], arrow: [{at: 'handN', o: [10, 0]}],
+  dbbench: { mus: ['chest', 'uaN'], tr: [900, 1400], cap: ['Leh na lavici, činky u hrudníku', 'Vytlač činky nad ramena'], arrow: [{at: 'handN', o: [10, 0]}],
     tag: 'Zboku', props: [{ k: 'bench', x: 44, y: 101, w: 100 }], db: [{ at: 'hN' }, { at: 'hF' }], hold: [400, 500], keys: [
     { hip: [118, 96], t: -90, fN: [148, 126], fF: [144, 126], hN: [88, 80], hF: [86, 81] },
     { hip: [118, 96], t: -90, fN: [148, 126], fF: [144, 126], hN: [82, 58], hF: [80, 59] },
   ] },
-  dbrow: { cap: ['Ruka a koleno na lavici, činka visí', 'Přitáhni loket k boku'], arrow: [{at: 'handN', o: [10, 0]}],
+  dbrow: { mus: ['back', 'uaN'], tr: [900, 1400], cap: ['Ruka a koleno na lavici, činka visí', 'Přitáhni loket k boku'], arrow: [{at: 'handN', o: [10, 0]}],
     tag: 'Zboku', props: [{ k: 'bench', x: 34, y: 104, w: 94 }], db: [{ at: 'hN' }], hold: [400, 600], keys: [
     { hip: [78, 78], t: 110, h: 14, KF: [78, 103], fF: [52, 102], toeF: -95, fN: [90, 126], hN: [114, 101], hF: [114.5, 103.5], eF: 1 },
     { hip: [78, 78], t: 110, h: 14, KF: [78, 103], fF: [52, 102], toeF: -95, fN: [90, 126], hN: [98, 84], hF: [114.5, 103.5], eF: 1 },
   ] },
-  deadbug: { cap: ['Leh na zádech, ruce nahoru, kolena nad boky', 'Natáhni opačnou ruku a nohu, bedra na zemi'], arrow: [{at: 'handN', o: [0, -6], bend: 0.25}, {at: 'footF', o: [0, -8]}],
+  deadbug: { mus: ['abs'], tr: [1300, 1000], cap: ['Leh na zádech, ruce nahoru, kolena nad boky', 'Natáhni opačnou ruku a nohu, bedra na zemi'], arrow: [{at: 'handN', o: [0, -6], bend: 0.25}, {at: 'footF', o: [0, -8]}],
     lying: true, tag: 'Zboku', hold: [500, 700], keys: [
     { hip: [114, 122], t: -90, KN: [114, 96], fN: [140, 96], KF: [112, 97], fF: [138, 97], hN: [79, 84], hF: [77, 85], toeN: 150, toeF: 150 },
     { hip: [114, 122], t: -90, KN: [114, 96], fN: [140, 96], KF: [139, 116], fF: [165, 110], hN: [40, 114], hF: [77, 85], toeN: 150, toeF: 100 },
   ] },
-  split: { cap: ['Zadní nárt na lavici', 'Klesni rovně dolů, přední koleno nad špičkou'], arrow: [{at: 'hip', o: [-12, 0]}],
+  split: { mus: ['thN', 'glN'], tr: [1500, 1000], cap: ['Zadní nárt na lavici', 'Klesni rovně dolů, přední koleno nad špičkou'], arrow: [{at: 'hip', o: [-12, 0]}],
     tag: 'Zboku', props: [{ k: 'bench', x: 20, y: 103, w: 50 }], db: [{ at: 'hN', o: 0 }, { at: 'hF', o: 0 }], hold: [400, 500], keys: [
     { hip: [100, 75], t: 174, fN: [114, 126], fF: [64, 99], toeF: -100, hN: [105, 76], hF: [103, 76] },
     { hip: [92, 100], t: 168, fN: [114, 126], fF: [64, 99], toeF: -100, hN: [101, 101], hF: [99, 101] },
   ] },
-  sltrust: { cap: ['Lopatky o lavici, jedna noha nahoře, boky dole', 'Zatlač patou a zvedni boky do roviny, pánev nepadá'], arrow: [{at: 'hip', o: [0, -8]}],
+  sltrust: { mus: ['glN'], tr: [900, 1300], cap: ['Lopatky o lavici, jedna noha nahoře, boky dole', 'Zatlač patou a zvedni boky do roviny, pánev nepadá'], arrow: [{at: 'hip', o: [0, -8]}],
     tag: 'Zboku', props: [{ k: 'bench', x: 18, y: 102, w: 60 }], hold: [400, 900], keys: [
     { hip: [105, 121], t: -126, h: 16, fN: [148, 126], KF: [119, 100], fF: [143, 109], toeF: 60, EN: [70, 104], hN: [88, 104], EF: [68, 104], hF: [86, 104] },
     { hip: [112, 99], t: -90, h: -20, fN: [148, 126], KF: [124, 76], fF: [149, 84], toeF: 70, EN: [70, 104], hN: [88, 104], EF: [68, 104], hF: [86, 104] },
   ] },
-  hipthrust: { cap: ['Lopatky o lavici, boky dole', 'Zvedni boky do vodorovné polohy'], arrow: [{at: 'hip', o: [0, -6]}],
+  hipthrust: { mus: ['glN'], tr: [900, 1300], cap: ['Lopatky o lavici, boky dole', 'Zvedni boky do vodorovné polohy'], arrow: [{at: 'hip', o: [0, -6]}],
     tag: 'Zboku', props: [{ k: 'bench', x: 18, y: 102, w: 60 }], db: [{ at: 'hN' }], hold: [400, 900], keys: [
     { hip: [105, 121], t: -126, h: 16, fN: [148, 126], fF: [145, 126], hN: [105, 114], hF: [103, 114] },
     { hip: [112, 99], t: -90, h: -20, fN: [148, 126], fF: [145, 126], hN: [112, 92], hF: [110, 92] },
   ] },
-  ohp: { cap: ['Vsedě, činky u ramen', 'Vytlač činky nad hlavu'], arrow: [{at: 'handN', o: [12, 0]}],
+  ohp: { mus: ['uaN'], tr: [900, 1400], cap: ['Vsedě, činky u ramen', 'Vytlač činky nad hlavu'], arrow: [{at: 'handN', o: [12, 0]}],
     tag: 'Zboku', props: [{ k: 'bench', x: 64, y: 100, w: 50 }, { k: 'back', x1: 70, y1: 100, x2: 66, y2: 44 }], db: [{ at: 'hN' }, { at: 'hF' }], hold: [400, 500], keys: [
     { hip: [80, 95], t: 178, fN: [120, 126], fF: [117, 126], hN: [92, 55], hF: [90, 56] },
     { hip: [80, 95], t: 178, fN: [120, 126], fF: [117, 126], hN: [86, 20], hF: [84, 21] },
   ] },
-  bandrow: { cap: ['Ruce natažené, guma napnutá', 'Přitáhni lokty dozadu, stáhni lopatky'], arrow: [{at: 'handN', o: [0, -10]}],
+  bandrow: { mus: ['back', 'uaN'], tr: [900, 1300], cap: ['Ruce natažené, guma napnutá', 'Přitáhni lokty dozadu, stáhni lopatky'], arrow: [{at: 'handN', o: [0, -10]}],
     tag: 'Zboku', props: [{ k: 'door', x: 202 }], band: [202, 62], hold: [400, 600], keys: [
     { hip: [90, 76], t: 180, fN: [100, 126], fF: [84, 126], hN: [127, 58], hF: [125, 59] },
     { hip: [90, 76], t: 180, fN: [100, 126], fF: [84, 126], hN: [104, 66], hF: [102, 67] },
   ] },
-  carry: { cap: ['Jdi pomalu s činkou v jedné ruce, ramena vodorovně'],
+  facepull: { mus: ['back', 'uaN'], tr: [900, 1300], cap: ['Ruce před sebou ve výšce obličeje, guma napnutá', 'Táhni k čelu, lokty do stran a nahoru, pěsti vedle uší'], arrow: [{at: 'handN', o: [0, -8], bend: 0.15}],
+    tag: 'Zboku', face: true, props: [{ k: 'door', x: 202 }], band: [202, 30], hold: [400, 700], keys: [
+    { hip: [90, 76], t: 180, fN: [100, 126], fF: [84, 126], EN: [109, 37], hN: [128, 34], EF: [107, 38], hF: [126, 35] },
+    { hip: [90, 76], t: 181, h: 4, fN: [100, 126], fF: [84, 126], EN: [74, 30], hN: [92, 22], EF: [72, 31], hF: [90, 23] },
+  ] },
+  carry: { mus: ['abs'], steady: true, cap: ['Jdi pomalu s činkou v jedné ruce, ramena vodorovně'],
     front: true, foot: 6, tag: 'Zepředu', guide: { at: 'sh', x1: 84, x2: 136 }, db: [{ at: 'hN', o: 0 }], hold: [250, 250, 250, 250], trans: 600, keys: [
     { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [103, 101], fF: [103, 127], hN: [128, 74], hF: [94, 74], eN: 1, eF: -1, toeN: 75, toeF: -75 },
     { hip: [110, 74], t: 180, ho: [7, 0], so: [11, 0], KN: [118, 95], fN: [118, 117], KF: [103, 100], fF: [103, 126], hN: [128, 73], hF: [94, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
     { hip: [110, 75], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 101], fN: [117, 127], KF: [103, 101], fF: [103, 127], hN: [128, 74], hF: [94, 74], eN: 1, eF: -1, toeN: 75, toeF: -75 },
     { hip: [110, 74], t: 180, ho: [7, 0], so: [11, 0], KN: [117, 100], fN: [117, 126], KF: [102, 95], fF: [102, 117], hN: [128, 73], hF: [94, 73], eN: 1, eF: -1, toeN: 75, toeF: -75 },
   ] },
-  c_pushup: { cap: ['Ruce na lavici, tělo rovně', 'Spusť hrudník k lavici'],
+  c_pushup: { mus: ['chest', 'uaN'], tr: [800, 650], cap: ['Ruce na lavici, tělo rovně', 'Spusť hrudník k lavici'],
     tag: 'Zboku', props: [{ k: 'bench', x: 138, y: 104, w: 64 }], hold: [300, 300], keys: [
     { hip: [119.3, 90.9], t: 131, h: -10, fN: [80, 125], fF: [77, 125], toeN: 60, toeF: 60, hN: [150, 103], hF: [147, 103] },
     { hip: [125.1, 99.1], t: 120, h: -10, fN: [80, 125], fF: [77, 125], toeN: 60, toeF: 60, hN: [150, 103], hF: [147, 103] },
   ] },
-  c_climber: { cap: ['Střídej kolena k hrudníku'],
+  c_climber: { mus: ['abs', 'thN'], steady: true, cap: ['Střídej kolena k hrudníku'],
     tag: 'Zboku', hold: [80, 80, 80, 80], trans: 380, keys: [
     { hip: [115.2, 103.2], t: 113.6, h: -15, fN: [67.6, 124], fF: [65, 124], toeN: 55, toeF: 55, hN: [150, 127], hF: [147, 127] },
     { hip: [115.2, 101.2], t: 113.6, h: -15, fN: [120, 118], fF: [65, 124], toeN: 55, toeF: 55, hN: [150, 127], hF: [147, 127] },
     { hip: [115.2, 103.2], t: 113.6, h: -15, fN: [67.6, 124], fF: [65, 124], toeN: 55, toeF: 55, hN: [150, 127], hF: [147, 127] },
     { hip: [115.2, 101.2], t: 113.6, h: -15, fN: [67.6, 124], fF: [118, 118], toeN: 55, toeF: 55, hN: [150, 127], hF: [147, 127] },
   ] },
-  c_lunge: { cap: ['Stoj', 'Krok vzad, obě kolena do pravého úhlu'],
+  c_lunge: { mus: ['thF', 'glF'], tr: [900, 800], cap: ['Stoj', 'Krok vzad, obě kolena do pravého úhlu'],
     tag: 'Zboku', hold: [400, 500], keys: [
     { hip: [100, 75], t: 180, fN: [100, 126], fF: [104, 126], toeN: 90, hN: [103, 76], hF: [101, 76] },
     { hip: [90, 102], t: 178, fN: [58, 121], fF: [112, 126], toeN: 35, hN: [94, 103], hF: [92, 103] },
   ] },
-  c_plank: { cap: ['Drž tělo v rovné linii'],
+  c_plank: { mus: ['abs'], steady: true, cap: ['Drž tělo v rovné linii'],
     tag: 'Zboku', hold: [1200, 1200], trans: 1400, keys: [
     { hip: [112.8, 114.6], t: 101.5, h: -12, fN: [62, 124], fF: [59, 124], toeN: 40, toeF: 40, EN: [150, 127], hN: [168, 127], EF: [148, 127], hF: [166, 127] },
     { hip: [112.8, 113.2], t: 101.5, h: -12, fN: [62, 124], fF: [59, 124], toeN: 40, toeF: 40, EN: [150, 127], hN: [168, 127], EF: [148, 127], hF: [166, 127] },
@@ -747,7 +889,8 @@ function solve(p) {
     return [sh, el, h];
   };
   return {
-    neck, head, hipN, hipF, shN, shF, face: dirv(p.t + p.h - 90),
+    neck, head, hipN, hipF, shN, shF, face: dirv(p.t + p.h - 90), fwd: dirv(p.t - 90),
+    hipMid: [(hipN[0] + hipF[0]) / 2, (hipN[1] + hipF[1]) / 2],
     legN: leg(hipN, p.fN, p.KN, L.thN, L.shN, p.kN, p.toeN),
     legF: leg(hipF, p.fF, p.KF, L.thF, L.shF, p.kF, p.toeF),
     armN: arm(shN, p.hN, p.EN, L.uaN, L.faN, p.eN),
@@ -784,56 +927,90 @@ function drawProps(svg, def) {
   mk('line', { x1: 6, y1: FLOOR + 1.5, x2: 214, y2: FLOOR + 1.5, stroke: 'var(--floor)', 'stroke-width': 2, 'stroke-linecap': 'round' }, g);
 }
 
+// Body drawn from tapered capsules, so limbs read as limbs and joints stay round.
+// Radii are [start, end] of each segment in figure units (a thigh is 26 long).
+const R = { th: [4.1, 3.0], sh: [3.0, 2.1], ft: [2.1, 1.4], ua: [2.8, 2.2], fa: [2.2, 1.6], hand: 2.3, torso: [5.0, 6.0], neck: 2.5, head: 7.6, pelvis: 4.2, shoulders: 3.6 };
+const f1 = v => v.toFixed(1);
+function capsule(a, b, ra, rb) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 0.001, nx = -dy / L, ny = dx / L;
+  return `M${f1(a[0] + nx * ra)},${f1(a[1] + ny * ra)}L${f1(b[0] + nx * rb)},${f1(b[1] + ny * rb)}A${rb},${rb} 0 0 0 ${f1(b[0] - nx * rb)},${f1(b[1] - ny * rb)}L${f1(a[0] - nx * ra)},${f1(a[1] - ny * ra)}A${ra},${ra} 0 0 0 ${f1(a[0] + nx * ra)},${f1(a[1] + ny * ra)}Z`;
+}
+const dot = (c, r) => capsule(c, [c[0] + 0.01, c[1]], r, r);
+const along = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+const legPath = l => capsule(l[0], l[1], R.th[0], R.th[1]) + capsule(l[1], l[2], R.sh[0], R.sh[1]) + capsule(l[2], l[3], R.ft[0], R.ft[1]);
+const armPath = a => capsule(a[0], a[1], R.ua[0], R.ua[1]) + capsule(a[1], a[2], R.fa[0], R.fa[1]) + dot(a[2], R.hand);
+
+// Working muscles, highlighted on top of the body; they glow stronger the closer the pose is to the effort (second) key.
+const MUS = {
+  thN: s => capsule(along(s.legN[0], s.legN[1], 0.1), along(s.legN[0], s.legN[1], 0.85), 3.3, 2.5),
+  thF: s => capsule(along(s.legF[0], s.legF[1], 0.1), along(s.legF[0], s.legF[1], 0.85), 3.3, 2.5),
+  glN: (s, def) => dot(gluteAt(s, def, s.hipN, s.hipF), 4.4),
+  glF: (s, def) => dot(gluteAt(s, def, s.hipF, s.hipN), 4.4),
+  abs: s => { const h = s.hipMid, n = s.neck; return capsule(along(h, n, 0.12), along(h, n, 0.55), 4.1, 4.4); },
+  chest: s => { const o = [s.fwd[0] * 2.6, s.fwd[1] * 2.6]; return capsule(add(along(s.hipMid, s.neck, 0.55), o), add(along(s.hipMid, s.neck, 0.88), o), 2.8, 3.4); },
+  back: s => { const o = [-s.fwd[0] * 2.6, -s.fwd[1] * 2.6]; return capsule(add(along(s.hipMid, s.neck, 0.42), o), add(along(s.hipMid, s.neck, 0.9), o), 2.8, 3.4); },
+  neck: s => capsule(s.neck, along(s.neck, s.head, 0.5), 2.6, 2.6),
+  uaN: s => capsule(along(s.armN[0], s.armN[1], 0.05), along(s.armN[0], s.armN[1], 0.9), 2.4, 1.9),
+};
+function gluteAt(s, def, hip, other) {
+  if (def.front) { const d = sub(hip, other), l = Math.hypot(d[0], d[1]) || 1; return add(hip, [d[0] / l * 1.6, d[1] / l * 1.6 + 1]); }
+  return add(hip, [-s.fwd[0] * 2.4, -s.fwd[1] * 2.4]);
+}
+
 function buildBody(svg, def, ghost) {
-  const g = mk('g', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, svg);
+  const g = mk('g', { class: ghost ? 'ghost' : 'body' }, svg);
   const near = ghost ? 'var(--ghost)' : 'var(--fig)';
   const far = ghost ? 'var(--ghost)' : (def.front ? 'var(--fig)' : 'var(--fig-far)');
-  const el = {};
+  const el = { mus: [] };
   if (def.band && !ghost) {
-    el.bandF = mk('line', { stroke: 'var(--band)', 'stroke-width': 1.8 }, g);
-    el.bandN = mk('line', { stroke: 'var(--band)', 'stroke-width': 1.8 }, g);
+    el.bandF = mk('line', { stroke: 'var(--band)', 'stroke-width': 1.6, 'stroke-linecap': 'round', opacity: 0.7 }, g);
+    el.bandN = mk('line', { stroke: 'var(--band)', 'stroke-width': 1.8, 'stroke-linecap': 'round' }, g);
   }
-  el.legF = mk('polyline', { stroke: far, 'stroke-width': 5.5 }, g);
-  el.armF = mk('polyline', { stroke: far, 'stroke-width': 4.8 }, g);
+  const musLayer = keys => { if (ghost) return; for (const k of def.mus || []) if (keys.includes(k)) el.mus.push({ k, el: mk('path', { fill: 'var(--mus)', opacity: 0.4 }, g) }); };
+  el.legF = mk('path', { fill: far }, g);
+  el.armF = mk('path', { fill: far }, g);
+  musLayer(['thF', 'glF']);
   const dbs = [];
   for (const d of def.db || []) if (d.at === 'hF') dbs.push(Object.assign({ el: mkDb(g, ghost) }, d));
-  el.torso = mk('line', { stroke: near, 'stroke-width': 7 }, g);
-  if (def.front) {
-    el.pelvis = mk('line', { stroke: near, 'stroke-width': 6 }, g);
-    el.shoulders = mk('line', { stroke: near, 'stroke-width': 6 }, g);
-  }
-  el.legN = mk('polyline', { stroke: near, 'stroke-width': 5.5 }, g);
-  el.armN = mk('polyline', { stroke: near, 'stroke-width': 4.8 }, g);
+  el.torso = mk('path', { fill: near }, g);
+  if (def.front) el.girdle = mk('path', { fill: near }, g);
+  el.legN = mk('path', { fill: near }, g);
+  musLayer(['thN', 'glN', 'abs', 'chest', 'back']);
+  el.head = mk('path', { fill: near }, g);
+  musLayer(['neck']);
+  el.armN = mk('path', { fill: near }, g);
+  musLayer(['uaN']);
   for (const d of def.db || []) if (d.at === 'hN') dbs.push(Object.assign({ el: mkDb(g, ghost) }, d));
-  el.head = mk('circle', { r: 8, fill: near, stroke: 'none' }, g);
-  if (def.face) el.face = mk('line', { stroke: near, 'stroke-width': 3.2 }, g);
   if (def.guide && !ghost) el.guide = mk('line', { stroke: 'var(--accent)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4' }, g);
   el.dbs = dbs;
   return el;
 }
 function mkDb(parent, ghost) {
   const g = mk('g', { fill: ghost ? 'var(--ghost)' : 'var(--prop)', stroke: 'none' }, parent);
-  mk('rect', { x: -7, y: -1.5, width: 14, height: 3, rx: 1.5 }, g);
-  mk('rect', { x: -10, y: -5.5, width: 4.5, height: 11, rx: 1.5 }, g);
-  mk('rect', { x: 5.5, y: -5.5, width: 4.5, height: 11, rx: 1.5 }, g);
+  mk('rect', { x: -7, y: -1.4, width: 14, height: 2.8, rx: 1.4 }, g);
+  mk('rect', { x: -10.5, y: -5.5, width: 5, height: 11, rx: 2 }, g);
+  mk('rect', { x: 5.5, y: -5.5, width: 5, height: 11, rx: 2 }, g);
   return g;
 }
 
-function paint(el, def, s) {
-  el.legN.setAttribute('points', pts(s.legN));
-  el.legF.setAttribute('points', pts(s.legF));
-  el.armN.setAttribute('points', pts(s.armN));
-  el.armF.setAttribute('points', pts(s.armF));
-  const hipMid = [(s.hipN[0] + s.hipF[0]) / 2, (s.hipN[1] + s.hipF[1]) / 2];
-  setLine(el.torso, hipMid, s.neck);
-  if (el.pelvis) { setLine(el.pelvis, s.hipF, s.hipN); setLine(el.shoulders, s.shF, s.shN); }
-  el.head.setAttribute('cx', s.head[0].toFixed(1));
-  el.head.setAttribute('cy', s.head[1].toFixed(1));
-  if (el.face) setLine(el.face, add(s.head, [s.face[0] * 6, s.face[1] * 6]), add(s.head, [s.face[0] * 10.5, s.face[1] * 10.5]));
+function paint(el, def, s, effort) {
+  el.legN.setAttribute('d', legPath(s.legN));
+  el.legF.setAttribute('d', legPath(s.legF));
+  el.armN.setAttribute('d', armPath(s.armN));
+  el.armF.setAttribute('d', armPath(s.armF));
+  el.torso.setAttribute('d', capsule(s.hipMid, s.neck, R.torso[0], R.torso[1]));
+  if (el.girdle) el.girdle.setAttribute('d', capsule(s.hipF, s.hipN, R.pelvis, R.pelvis) + capsule(s.shF, s.shN, R.shoulders, R.shoulders));
+  let head = capsule(s.neck, along(s.neck, s.head, 0.6), R.neck, R.neck) + dot(s.head, R.head);
+  if (def.face) head += capsule(add(s.head, [s.face[0] * 5, s.face[1] * 5]), add(s.head, [s.face[0] * 9.6, s.face[1] * 9.6]), 2.4, 1.3);
+  el.head.setAttribute('d', head);
+  for (const m of el.mus) {
+    m.el.setAttribute('d', MUS[m.k](s, def));
+    m.el.setAttribute('opacity', (0.28 + 0.62 * effort).toFixed(2));
+  }
   for (const d of el.dbs) {
     const hand = d.at === 'hN' ? s.armN[2] : s.armF[2];
     const o = d.o != null ? d.o : s.dbo;
-    d.el.setAttribute('transform', `translate(${hand[0].toFixed(1)} ${hand[1].toFixed(1)}) rotate(${o})`);
+    d.el.setAttribute('transform', `translate(${f1(hand[0])} ${f1(hand[1])}) rotate(${o})`);
   }
   if (el.bandN) {
     setLine(el.bandN, def.band, s.armN[2]);
@@ -842,22 +1019,29 @@ function paint(el, def, s) {
   if (el.guide) {
     const y = def.guide.at === 'sh' ? (s.shN[1] + s.shF[1]) / 2 : (s.hipN[1] + s.hipF[1]) / 2;
     el.guide.setAttribute('x1', def.guide.x1); el.guide.setAttribute('x2', def.guide.x2);
-    el.guide.setAttribute('y1', y.toFixed(1)); el.guide.setAttribute('y2', y.toFixed(1));
+    el.guide.setAttribute('y1', f1(y)); el.guide.setAttribute('y2', f1(y));
   }
 }
 function setLine(l, a, b) {
-  l.setAttribute('x1', a[0].toFixed(1)); l.setAttribute('y1', a[1].toFixed(1));
-  l.setAttribute('x2', b[0].toFixed(1)); l.setAttribute('y2', b[1].toFixed(1));
+  l.setAttribute('x1', f1(a[0])); l.setAttribute('y1', f1(a[1]));
+  l.setAttribute('x2', f1(b[0])); l.setAttribute('y2', f1(b[1]));
+}
+// Soft contact shadow under the figure, wider for lying poses.
+function placeShadow(sh, s) {
+  const xs = [...s.legN, ...s.legF, s.head, s.hipMid].map(p => p[0]);
+  const lo = Math.min(...xs), hi = Math.max(...xs);
+  sh.setAttribute('cx', f1((lo + hi) / 2)); sh.setAttribute('rx', f1(Math.max(12, (hi - lo) / 2 + 3)));
 }
 
-// Dashed arrow along the main movement (start pose -> end pose), drawn behind the figure.
+// Dashed arrow along the main movement (start pose -> end pose), drawn behind the figure; the dashes march.
 const JOINT = {
-  hip: s => [(s.hipN[0] + s.hipF[0]) / 2, (s.hipN[1] + s.hipF[1]) / 2], hipF: s => s.hipF, head: s => s.head,
+  hip: s => s.hipMid, hipF: s => s.hipF, head: s => s.head,
   handN: s => s.armN[2], handF: s => s.armF[2], kneeN: s => s.legN[1], kneeF: s => s.legF[1], footN: s => s.legN[2], footF: s => s.legF[2],
 };
 function drawArrows(svg, def, keys) {
-  if (!def.arrow || keys.length < 2) return;
+  if (!def.arrow || keys.length < 2) return null;
   const s0 = solve(keys[0]), s1 = solve(keys[1]);
+  const g = mk('g', { class: 'mv', fill: 'var(--accent)' }, svg);
   for (const a of def.arrow) {
     const p0 = add(JOINT[a.at](s0), a.o || [0, 0]), p1 = add(JOINT[a.at](s1), a.o || [0, 0]);
     const d = sub(p1, p0), bend = a.bend || 0;
@@ -867,28 +1051,34 @@ function drawArrows(svg, def, keys) {
     const line = [];
     for (let t = 0.12; t < 0.9; t += 0.06) line.push(B(t));
     const e = B(0.88), u = sub(e, B(0.8)), ul = Math.hypot(u[0], u[1]) || 1, ux = u[0] / ul, uy = u[1] / ul;
-    const g = mk('g', { fill: 'var(--accent)' }, svg);
     mk('polyline', { points: pts(line), fill: 'none', stroke: 'var(--accent)', 'stroke-width': 1.7, 'stroke-dasharray': '3 2.5', 'stroke-linecap': 'round' }, g);
-    mk('path', { d: `M${(e[0] + ux * 4.5).toFixed(1)},${(e[1] + uy * 4.5).toFixed(1)} L${(e[0] - uy * 3.2).toFixed(1)},${(e[1] + ux * 3.2).toFixed(1)} L${(e[0] + uy * 3.2).toFixed(1)},${(e[1] - ux * 3.2).toFixed(1)}Z` }, g);
+    mk('path', { d: `M${f1(e[0] + ux * 4.5)},${f1(e[1] + uy * 4.5)} L${f1(e[0] - uy * 3.2)},${f1(e[1] + ux * 3.2)} L${f1(e[0] + uy * 3.2)},${f1(e[1] - ux * 3.2)}Z` }, g);
   }
+  return g;
 }
 
-const ease = t => 0.5 - 0.5 * Math.cos(Math.PI * t);
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 const SLOW = 1.35;
-// Returns [pose, phase]; phase is the key being held or moved towards, so its caption describes what is happening now.
+// Returns [pose, phase, effort]. Phase is the key being held or moved towards (its caption describes what happens now);
+// effort runs 0..1 towards the second key and drives the muscle highlight. `tr` gives each move its own tempo,
+// so lowering can be slower than lifting.
 function poseAt(def, ms) {
   const keys = normalize(def), n = keys.length;
-  const trans = (def.trans || 950) * SLOW;
+  const trans = keys.map((_, i) => def.tr && def.tr[i] != null ? def.tr[i] : (def.trans || 950) * SLOW);
   const holds = keys.map((_, i) => ((def.hold && def.hold[i] != null) ? def.hold[i] : 450) * SLOW);
-  const total = holds.reduce((a, h) => a + h + trans, 0);
+  const total = holds.reduce((a, h, i) => a + h + trans[i], 0);
+  const eff = i => def.steady || n !== 2 ? 1 : i;
   let t = ms % total;
   for (let i = 0; i < n; i++) {
-    if (t < holds[i]) return [keys[i], i];
+    if (t < holds[i]) return [keys[i], i, eff(i)];
     t -= holds[i];
-    if (t < trans) return [lerpPose(keys[i], keys[(i + 1) % n], ease(t / trans)), (i + 1) % n];
-    t -= trans;
+    if (t < trans[i]) {
+      const k = ease(t / trans[i]), j = (i + 1) % n;
+      return [lerpPose(keys[i], keys[j], k), j, eff(i) + (eff(j) - eff(i)) * k];
+    }
+    t -= trans[i];
   }
-  return [keys[0], 0];
+  return [keys[0], 0, eff(0)];
 }
 
 const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
@@ -896,24 +1086,35 @@ const liveFigs = new Set();
 const io = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
   for (const en of entries) if (en.target._fig) en.target._fig.visible = en.isIntersecting;
 }, { rootMargin: '80px' }) : null;
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="1.2" fill="currentColor"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.2" fill="currentColor"/></svg>';
+const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="currentColor"/></svg>';
 
 function mountFig(host, figId) {
   const def = FIGS[figId];
   if (!def) return;
+  if (host._fig) liveFigs.delete(host._fig);
   host.textContent = '';
-  const svg = mk('svg', { viewBox: def.lying ? '22 33 176 112' : '0 0 220 140', 'aria-hidden': 'true', focusable: 'false' }, host);
+  const svg = mk('svg', { viewBox: def.lying ? '22 33 176 112' : '0 0 220 140', role: 'img', focusable: 'false' }, host);
+  if (host.dataset.label) svg.setAttribute('aria-label', host.dataset.label);
   drawProps(svg, def);
   const keys = normalize(def);
-  drawArrows(svg, def, keys);
   const peakI = Math.min(1, keys.length - 1);
-  if (reduceMotion.matches) {
-    const gh = buildBody(svg, def, true);
-    paint(gh, def, solve(keys[peakI]));
-  }
+  const shadow = mk('ellipse', { cy: FLOOR + 1, ry: 2.6, fill: 'var(--shadow)' }, svg);
+  // Faint target pose: where the movement is heading.
+  if (keys.length === 2 && !def.steady) { const gh = buildBody(svg, def, true); paint(gh, def, solve(keys[peakI]), 0); }
+  drawArrows(svg, def, keys);
   const body = buildBody(svg, def, false);
-  paint(body, def, solve(keys[0]));
+  const still = reduceMotion.matches;
+  const s0 = solve(keys[0]);
+  paint(body, def, s0, still ? 1 : 0); placeShadow(shadow, s0);
   if (def.tag) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = def.tag; host.appendChild(t); }
-  // Step caption lives under the figure (only on full exercise cards, which wrap the figure in .figcol).
+  // Step dots and caption: the caption lives under the figure (only where the figure sits in a .figcol).
+  let dots = null;
+  if (def.cap && def.cap.length > 1) {
+    dots = document.createElement('span'); dots.className = 'phd'; dots.setAttribute('aria-hidden', 'true');
+    dots.innerHTML = def.cap.map(() => '<i></i>').join('');
+    host.appendChild(dots);
+  }
   const col = host.closest('.figcol');
   let cap = null;
   if (col && def.cap) {
@@ -922,19 +1123,23 @@ function mountFig(host, figId) {
     cap.setAttribute('aria-live', 'off');
   }
   const setCap = i => {
+    if (dots) dots.querySelectorAll('i').forEach((d, k) => d.classList.toggle('on', k === i));
     if (!cap) return;
     const txt = def.cap[i] || def.cap[0];
     cap.innerHTML = def.cap.length > 1 ? `<b>${i + 1}</b><span>${txt}</span>` : `<span>${txt}</span>`;
   };
-  setCap(reduceMotion.matches ? peakI : 0);
-  if (!reduceMotion.matches) {
-    const f = { host, def, body, visible: !io, clock: 0, phase: 0, paused: false, setCap };
-    host._fig = f;
-    host.title = 'Klepnutím animaci zastavíš nebo znovu spustíš';
-    host.onclick = () => { f.paused = !f.paused; host.classList.toggle('paused', f.paused); };
-    liveFigs.add(f);
-    if (io) io.observe(host);
-  }
+  setCap(still ? peakI : 0);
+  if (still) return;
+  const f = { host, def, body, shadow, visible: !io, clock: 0, phase: 0, paused: false, setCap };
+  host._fig = f;
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'figbtn';
+  const paintBtn = () => { btn.innerHTML = f.paused ? ICON_PLAY : ICON_PAUSE; btn.setAttribute('aria-label', f.paused ? 'Spustit animaci' : 'Zastavit animaci'); host.classList.toggle('paused', f.paused); };
+  btn.addEventListener('click', ev => { ev.stopPropagation(); f.paused = !f.paused; paintBtn(); });
+  paintBtn();
+  host.appendChild(btn);
+  liveFigs.add(f);
+  if (io) io.observe(host);
 }
 let lastTs = null;
 function loop(ts) {
@@ -944,8 +1149,10 @@ function loop(ts) {
     if (!f.host.isConnected) { liveFigs.delete(f); if (io) io.unobserve(f.host); continue; }
     if (!f.visible || f.paused) continue;
     f.clock += dt;
-    const [p, i] = poseAt(f.def, f.clock);
-    paint(f.body, f.def, solve(p));
+    const [p, i, e] = poseAt(f.def, f.clock);
+    const s = solve(p);
+    paint(f.body, f.def, s, e);
+    placeShadow(f.shadow, s);
     if (i !== f.phase) { f.phase = i; f.setCap(i); }
   }
   requestAnimationFrame(loop);
@@ -1140,9 +1347,9 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 /* ================= Header ================= */
 function renderHeader() {
   const n = weekNo();
-  const txt = n <= 2 ? 'Učíš se techniku. Nech si 2–3 opakování v záloze.'
-    : n === 3 ? 'Přidávej opakování, a když zvládneš o 2 víc, přidej váhu.'
-    : 'Opakování nahoru, pak váha. Bonusový okruh má teď 3 kola.';
+  const txt = n <= 2 ? 'Učíš se techniku, nech si 2–3 opakování v záloze.'
+    : n === 3 ? 'Přidávej opakování, pak váhu.'
+    : 'Opakování nahoru, pak váha. Okruh má 3 kola.';
   document.getElementById('phase').innerHTML = `<b>Týden ${n}</b> · ${txt}`;
 }
 
@@ -1162,37 +1369,52 @@ function weekStripHTML() {
       <button class="walk" data-act="walk" data-d="${d}" aria-pressed="${!!state.walks[d]}" aria-label="Chůze ${DN[i]} ${fmtShort(d)}" title="Chůze">${ICON_WALK}</button>
     </div>`;
   }
-  return `<div><div class="week">${cells}</div>
-    <p class="week-sum">Tento týden: <b class="num">${trainings}/3</b> tréninků · chůze <b class="num">${walks}×</b>. Ikonou chodidel si označ dny s chůzí.</p></div>`;
+  return `<div class="weekwrap"><div class="week">${cells}</div>
+    <p class="week-sum">Tento týden <b class="num">${trainings}/3</b> tréninky · chůze <b class="num">${walks}×</b> · chůzi si odklikni ikonou chodidel.</p></div>`;
 }
 
+// Weak-side extra set applies to single-leg exercises once the weak leg is known.
+const needExtra = id => !!state.settings.weak && !!EX[id].weak;
+const exDone = (s, id) => (s.sets[id] || 0) >= EX[id].sets && (!needExtra(id) || !!s.extra[id]);
+function sideNoteHTML(id) {
+  const e = EX[id], ww = weakWord();
+  if (!e.uni) return '';
+  return needExtra(id) ? `<p class="weak-note">Začni ${ww} (slabší) stranou a přidej jí jednu sérii navíc.</p>`
+    : ww ? `<p class="note">Začni ${ww} stranou, ať jsou obě strany stejně.</p>`
+    : `<p class="note">Začni levou stranou, dokud nevíš, která je slabší.</p>`;
+}
+function howHTML(id) {
+  const e = EX[id];
+  return `${EX_GOALS[id] ? `<p class="goals">Zlepšuje: ${EX_GOALS[id].map(g => `<span class="goal${GOALS[g].weak ? ' weak' : ''}">${GOALS[g].name}</span>`).join('')}</p>` : ''}
+    <p class="why"><b>K čemu:</b> ${e.why}</p>
+    <p class="err"><strong>Pozor:</strong> ${e.err}</p>`;
+}
+const musKey = id => (FIGS[EX[id].fig || id] || {}).mus ? '<p class="mus-key"><i></i>Oranžově svaly, které cvik posiluje</p>' : '';
+
+const openCards = new Set();   // exercise cards expanded in the list (this page view only)
 function exCardHTML(id) {
-  const e = EX[id], last = lastInfo(id), ww = weakWord();
-  const weakOn = !!state.settings.weak && e.weak;
-  let sideNote = '';
-  if (e.uni) {
-    sideNote = weakOn ? `<p class="weak-note">Začni ${ww} (slabší) stranou a přidej jí jednu sérii navíc.</p>`
-      : ww ? `<p class="note">Začni ${ww} stranou, ať jsou obě strany stejně.</p>`
-      : `<p class="note">Začni levou stranou, dokud nevíš, která je slabší.</p>`;
-  }
+  const e = EX[id], last = lastInfo(id);
   let pills = '<span class="lbl">Série</span>';
   for (let i = 0; i < e.sets; i++) pills += `<button class="pill" data-act="set" data-ex="${id}" data-i="${i}" aria-pressed="false" aria-label="Série ${i + 1}">${i + 1}</button>`;
-  if (weakOn) pills += `<button class="pill weak" data-act="extra" data-ex="${id}" aria-pressed="false" aria-label="Série navíc pro slabší stranu">+1 slabší</button>`;
+  if (needExtra(id)) pills += `<button class="pill weak" data-act="extra" data-ex="${id}" aria-pressed="false" aria-label="Série navíc pro slabší stranu">+1 slabší</button>`;
   const kg = e.kg ? `<label class="kg">Váha <input id="kg-${id}" data-kg="${id}" inputmode="decimal" type="text" placeholder="kg" value="${cur.w[id] != null ? fmtKg(cur.w[id]) : last ? fmtKg(last.kg) : ''}"> kg${last ? `<span>· minule ${fmtKg(last.kg)}</span>` : ''}</label>` : '';
   const hold = e.hold ? `<button class="btn" data-act="hold" data-sec="${e.hold}">Odpočet ${e.hold} s</button>` : '';
   const up = e.kg ? `<label class="up"><input type="checkbox" id="up-${id}" data-up="${id}"> Šlo to ve všech sériích o 2 opakování víc. Příště přidej váhu.</label>` : '';
-  const badge = last && last.up ? '<span class="badge">Přidej váhu</span>' : '';
-  return `<article class="ex" id="ex-${id}">
-    <div class="figcol"><div class="fig" data-fig="${e.fig || id}" role="img" aria-label="Animace cviku ${esc(e.name)}"></div></div>
-    <div class="ex-body">
-      <div class="ex-head"><h3>${e.name}</h3><span class="rx">${e.rx}</span>${e.side ? `<span class="side">${e.side}</span>` : ''}${badge}</div>
-      ${EX_GOALS[id] ? `<p class="goals">Zlepšuje: ${EX_GOALS[id].map(g => `<span class="goal${GOALS[g].weak ? ' weak' : ''}">${GOALS[g].name}</span>`).join('')}</p>` : ''}
-      <p class="why"><b>K čemu:</b> ${e.why}</p>
+  const badge = last && last.up ? ' <span class="badge">Přidej váhu</span>' : '';
+  const open = openCards.has(id);
+  return `<article class="ex${open ? ' open' : ''}" id="ex-${id}">
+    <div class="ex-top" data-act="toggle" data-ex="${id}" role="button" tabindex="0" aria-expanded="${open}" aria-controls="more-${id}">
+      <div class="figcol"><div class="fig" data-fig="${e.fig || id}" data-label="Animace cviku ${esc(e.name)}"></div></div>
+      <div class="ex-tt"><h3>${e.name}</h3><p class="rx">${e.rx}${e.side ? ` <span class="side">${e.side}</span>` : ''}${badge}</p><span class="sdots" id="sd-${id}"></span></div>
+      <span class="chev" aria-hidden="true"></span>
+    </div>
+    <div class="ex-more" id="more-${id}">
+      ${musKey(id)}
       <ul class="cues">${e.cues.map(c => `<li>${c}</li>`).join('')}</ul>
-      <p class="err"><strong>Pozor:</strong> ${e.err}</p>
-      ${sideNote}
+      ${sideNoteHTML(id)}
       <div class="log"><div class="pills">${pills}</div>${kg}${hold}</div>
       ${up}
+      <details class="how"><summary>Proč a na co si dát pozor</summary><div>${howHTML(id)}</div></details>
     </div>
   </article>`;
 }
@@ -1202,8 +1424,8 @@ function blockHTML(no, title, sub, ids) {
   let cards = '', pairNo = 0;
   for (let i = 0; i < ids.length; i++) {
     if (PAIR[ids[i]] && ids[i + 1] === PAIR[ids[i]]) {
-      pairNo++;
-      cards += `<div class="pair"><p class="pair-h">Dvojice ${pairNo}: série jednoho, hned série druhého, pak pauza</p>${exCardHTML(ids[i])}${exCardHTML(ids[i + 1])}</div>`;
+      const h = NO_REST[ids[i]] ? 'Střídej: série jednoho, hned série druhého' : `Dvojice ${++pairNo}: série jednoho, hned série druhého, pak pauza`;
+      cards += `<div class="pair"><p class="pair-h">${h}</p>${exCardHTML(ids[i])}${exCardHTML(ids[i + 1])}</div>`;
       i++;
     } else cards += exCardHTML(ids[i]);
   }
@@ -1218,13 +1440,15 @@ function circuitHTML() {
   const rt = cur.rt || roundsTarget();
   let rp = '';
   for (let i = 0; i < rt; i++) rp += `<button class="pill" data-act="round" data-i="${i}" aria-pressed="false" aria-label="Kolo ${i + 1}">${i + 1}</button>`;
-  return `<details class="block bonus"${(cur.rounds || 0) > 0 ? ' open' : ''}>
-    <summary class="block-head"><span class="block-no">+</span><div><h2>Bonus: okruh <span class="tog"></span></h2><p>Volitelný, do procent se nepočítá. Dej si ho, jen když máš energii. ${WORK} s cvičíš, ${REST} s pauza, ${rt} kola, asi ${rt * 5} min.</p></div></summary>
+  return `<details class="block bonus" id="bonus"${(cur.rounds || 0) > 0 ? ' open' : ''}>
+    <summary class="block-head"><span class="block-no">+</span><div><h2>Bonus: okruh <span class="tog"></span></h2><p>Volitelný, do procent se nepočítá. ${WORK} s cvičíš, ${REST} s pauza, ${rt} kola, asi ${rt * 5} min.</p></div></summary>
+    <div>
     <div class="timer" id="timer">
       <span class="t-phase" id="t-phase">Připraveno</span>
       <span class="t-name" id="t-name">${EX[PLAN.circ[0]].name}</span>
       <span class="t-next" id="t-next">Kolo 1 z ${rt} · cvik 1 z 5</span>
       <span class="t-clock num" id="t-clock">0:40</span>
+      <div class="t-fig" id="t-fig" hidden></div>
       <div class="t-ctrl">
         <button class="btn run" data-act="c-start" id="c-start">Spustit okruh</button>
         <button class="btn" data-act="c-reset">Od začátku</button>
@@ -1233,12 +1457,18 @@ function circuitHTML() {
     </div>
     <div class="mini-grid">
       ${PLAN.circ.map((id, i) => `<div class="mini" id="mini-${i}">
-        <div class="fig" data-fig="${EX[id].fig || id}" role="img" aria-label="Animace cviku ${esc(EX[id].name)}"></div>
+        <div class="fig" data-fig="${EX[id].fig || id}" data-label="Animace cviku ${esc(EX[id].name)}"></div>
         <h3>${EX[id].name}</h3><p>${EX[id].cue}</p><p class="mini-why">${EX[id].why}</p></div>`).join('')}
+    </div>
     </div>
   </details>`;
 }
 
+function estTime(s) {
+  const rt = (s.rt || roundsTarget()) * 5;
+  if (s.type === 'S') return s.pv >= 3 ? 'asi 8 min' : s.neck ? 'asi 17 min' : 'asi 10 min';
+  return s.pv >= 3 ? `asi 35 min (s okruhem +${rt})` : s.opt ? `asi 45 min (s okruhem +${rt})` : (s.neck ? 'asi 55 min' : 'asi 45–50 min');
+}
 let finishConfirm = false;
 function renderToday() {
   ensureCur();
@@ -1248,14 +1478,18 @@ function renderToday() {
   const doneToday = state.sessions.filter(s => s.d === td && s.done);
   const banner = doneToday.length ? `<div class="banner">${ICON_OK}<span>Dnes hotovo: ${doneToday.map(s => `${TYPE_NAME[s.type]} (${prog(s).pct} %)`).join(', ')}. Další na řadě je ${TYPE_NAME[nextType()]}.</span></div>` : '';
   const locked = hasProgress(cur);
-  const seg = ['A', 'B', 'S'].map(t => `<button data-act="type" data-type="${t}" aria-pressed="${cur.type === t}" ${locked && cur.type !== t ? 'disabled' : ''}>${t === 'S' ? 'Krátký' : t}</button>`).join('');
-  let html = weekStripHTML() + banner + `
-    <section class="head-card">
-      <div class="head-row"><h2 id="sess-title">${TYPE_NAME[cur.type]}</h2><div class="seg" role="group" aria-label="Typ tréninku">${seg}</div></div>
-      <div class="bar"><i id="bar"></i></div>
-      <div class="prog-txt"><span id="prog-txt"></span><span>${cur.type === 'S' ? (cur.pv >= 3 ? 'asi 8 min' : cur.neck ? 'asi 17 min' : 'asi 10 min') : cur.pv >= 3 ? `asi 35 min, s okruhem +${(cur.rt || roundsTarget()) * 5} min` : cur.opt ? `asi 45 min, s okruhem +${(cur.rt || roundsTarget()) * 5} min` : (cur.neck ? 'asi 55 min' : 'asi 45–50 min')}</span></div>
-      <p class="note">${locked ? 'Typ tréninku se dá změnit jen před první odškrtnutou sérií.' : `Navrženo podle posledního tréninku. ${cur.type === 'S' ? 'Krátká verze na dny s chůzí.' : 'Odškrtávej série, jak je děláš.'}`}</p>
-    </section>`;
+  const seg = ['A', 'B', 'S'].map(t => `<button data-act="type" data-type="${t}" aria-pressed="${cur.type === t}" ${locked && cur.type !== t ? 'disabled' : ''}>${t === 'S' ? 'Krátký' : 'Trénink ' + t}</button>`).join('');
+  let html = banner + `
+    <section class="hero">
+      <div class="hero-top">
+        <div><p class="kick">Dnes · ${fmtDay(td)}</p><h2 id="sess-title">${TYPE_NAME[cur.type]}</h2>
+          <p class="meta"><span id="prog-txt"></span> · ${estTime(cur)}</p></div>
+        <div class="ring" aria-hidden="true"><svg viewBox="0 0 80 80"><circle class="bg" cx="40" cy="40" r="34"/><circle class="fg" id="ring" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6"/></svg><b id="ring-t">0 %</b></div>
+      </div>
+      <div class="seg" role="group" aria-label="Typ tréninku">${seg}</div>
+      <button class="btn primary wide" data-act="focus" id="focus-btn">${ICON_PLAY}<span>Začít trénink</span></button>
+      <p class="note">${locked ? 'Typ tréninku se dá změnit jen před první odškrtnutou sérií.' : `Navrženo podle posledního tréninku. ${cur.type === 'S' ? 'Krátká verze na dny s chůzí.' : 'Krok za krokem tě provede cviky, pauzami i krkem v pauzách. Nebo si cviky odklikávej níž.'}`}</p>
+    </section>` + weekStripHTML();
   let no = 1;
   const list = exList(cur);
   const stabIds = list.filter(id => STAB_ALL.includes(id));
@@ -1263,15 +1497,15 @@ function renderToday() {
   const mainIds = list.filter(id => !STAB_ALL.includes(id) && !NECK_ALL.includes(id));
   const v3 = cur.pv >= 3;
   html += v3
-    ? blockHTML(no++, 'Rozcvička: pánev', 'Asi 5 min. Dva cviky, které podle studií nejvíc zapojí střední hýžďový sval. Střídej je: upažování, plank, druhá strana, a ještě jednou.', stabIds)
+    ? blockHTML(no++, 'Rozcvička: pánev', 'Asi 5 min. Dva cviky, které podle studií nejvíc zapojí střední hýžďový sval.', stabIds)
     : blockHTML(no++, 'Stabilizace', 'Na začátku každého tréninku, asi 10 min. Hlavní práce na vyosení, nepřeskakuj ji.', stabIds);
   const neckBlock = () => v3
-    ? blockHTML(no++, cur.type === 'S' ? 'Krk' : 'Krk do pauz', cur.type === 'S' ? 'Asi 3 min. Zásun brady klidně dělej i přes den u počítače.' : 'Žádný čas navíc: v každé pauze silové části udělej jednu sérii krku. Zásun brady klidně i přes den u počítače.', neckIds)
+    ? blockHTML(no++, cur.type === 'S' ? 'Krk' : 'Krk do pauz', cur.type === 'S' ? 'Asi 3 min. Zásun brady klidně dělej i přes den u počítače.' : 'Žádný čas navíc: v každé pauze silové části jedna série krku. Při brnění rukou nebo závrati přestaň.', neckIds)
     : blockHTML(no++, 'Krk', 'Asi 7 min, na napřímenou krční páteř. Pomalu a bez bolesti. Při brnění rukou nebo závrati přestaň.', neckIds);
   if (cur.type === 'S') { if (neckIds.length) html += neckBlock(); }
   else {
     html += blockHTML(no++, cur.type === 'A' ? 'Silová část A' : 'Silová část B', v3
-      ? '3 série. Cviky jdou ve dvojicích: série prvního, hned série druhého, pak 60–90 s pauza a v ní jedna série krku. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.'
+      ? '3 série ve dvojicích, mezi koly 60–90 s pauza. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.'
       : '3 série, mezi sériemi 60–90 s pauza. Váhu vol tak, aby poslední 2 opakování byla těžká, ale čistá.', mainIds);
     if (neckIds.length) html += neckBlock();
     html += circuitHTML();
@@ -1282,13 +1516,27 @@ function renderToday() {
   updateToday();
 }
 
+function setDotsHTML(s, id) {
+  const e = EX[id], n = s.sets[id] || 0;
+  let h = '';
+  for (let i = 0; i < e.sets; i++) h += `<i class="${i < n ? 'on' : ''}"></i>`;
+  if (needExtra(id)) h += `<i class="x${s.extra[id] ? ' on' : ''}"></i>`;
+  return h;
+}
 function updateToday() {
   const v = document.getElementById('v-today');
   const p = prog(cur);
-  const bar = document.getElementById('bar');
-  if (bar) bar.style.width = p.pct + '%';
+  const ring = document.getElementById('ring');
+  if (ring) ring.setAttribute('stroke-dashoffset', (213.6 * (1 - p.pct / 100)).toFixed(1));
+  const rt = document.getElementById('ring-t');
+  if (rt) rt.textContent = p.pct + ' %';
   const pt = document.getElementById('prog-txt');
-  if (pt) pt.textContent = `${p.done} z ${p.total} ${cur.opt || cur.type === 'S' ? 'sérií' : 'sérií a kol'} · ${p.pct} %`;
+  if (pt) pt.textContent = `${p.done} z ${p.total} ${cur.opt || cur.type === 'S' ? 'sérií' : 'sérií a kol'}`;
+  const fb = document.getElementById('focus-btn');
+  if (fb) {
+    const all = exList(cur).every(id => exDone(cur, id));
+    fb.querySelector('span').textContent = all ? 'Všechno hotovo, projít znovu' : p.done ? 'Pokračovat krok za krokem' : 'Začít trénink';
+  }
   for (const id of exList(cur)) {
     const n = cur.sets[id] || 0;
     const card = document.getElementById('ex-' + id);
@@ -1298,9 +1546,9 @@ function updateToday() {
     if (ex) ex.setAttribute('aria-pressed', String(!!cur.extra[id]));
     const upEl = card.querySelector('[data-up]');
     if (upEl) upEl.checked = !!cur.up[id];
-    const e = EX[id];
-    const full = n >= e.sets && (!(state.settings.weak && e.weak) || cur.extra[id]);
-    card.classList.toggle('complete', full);
+    const sd = document.getElementById('sd-' + id);
+    if (sd) sd.innerHTML = setDotsHTML(cur, id);
+    card.classList.toggle('complete', exDone(cur, id));
   }
   v.querySelectorAll('[data-act="round"]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i < (cur.rounds || 0))));
   const f = document.getElementById('finish');
@@ -1313,6 +1561,31 @@ function updateToday() {
         <div class="row"><button class="btn primary" data-act="finish" ${p.done ? '' : 'disabled'}>Dokončit trénink</button>${hasProgress(cur) ? '<button class="btn quiet" data-act="discard">Zahodit záznam</button>' : ''}</div>`;
     }
   }
+}
+// After the last set of a card, fold it and open the next unfinished one, so the list walks you through the workout.
+function advanceCard(id) {
+  const list = [...document.querySelectorAll('#v-today .ex')].map(c => c.id.slice(3));
+  const next = list.slice(list.indexOf(id) + 1).find(x => !exDone(cur, x));
+  setCardOpen(id, false);
+  if (next) {
+    setCardOpen(next, true);
+    const el = document.getElementById('ex-' + next);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' }), 60);
+  }
+}
+function setCardOpen(id, on) {
+  const card = document.getElementById('ex-' + id);
+  if (!card) return;
+  if (on) openCards.add(id); else openCards.delete(id);
+  card.classList.toggle('open', on);
+  card.querySelector('.ex-top').setAttribute('aria-expanded', String(on));
+}
+function finishSession() {
+  for (const ex of exList(cur)) if (EX[ex].kg && (cur.sets[ex] || 0) > 0 && cur.w[ex] == null) { const l = lastInfo(ex); if (l) cur.w[ex] = l.kg; }
+  cur.done = true; touch();
+  cur = null; finishConfirm = false; openCards.clear();
+  renderAll();
+  window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 }
 
 /* ---- hold countdown ---- */
@@ -1374,6 +1647,16 @@ function ctPaint() {
     document.getElementById('t-phase').textContent = CT.running ? 'Odpočinek' : 'Pauza (zastaveno)';
     document.getElementById('t-name').textContent = 'Další: ' + EX[PLAN.circ[CT.idx]].name;
     document.getElementById('t-next').textContent = `Kolo ${CT.round + 1} z ${rt}`;
+  }
+  // While the circuit runs, the current exercise is shown big inside the timer.
+  const tf = document.getElementById('t-fig');
+  if (tf) {
+    const show = !!CT.started && !CT.finished;
+    tf.hidden = !show;
+    if (show && tf.dataset.i !== String(CT.idx)) {
+      tf.dataset.i = CT.idx; tf.innerHTML = '<div class="fig"></div>';
+      const cid = PLAN.circ[CT.idx]; mountFig(tf.firstChild, EX[cid].fig || cid);
+    }
   }
   const sb = document.getElementById('c-start');
   if (sb) sb.textContent = CT.finished ? 'Znovu' : CT.running ? 'Zastavit' : CT.started ? 'Pokračovat' : 'Spustit okruh';
@@ -1442,18 +1725,24 @@ vToday.addEventListener('click', ev => {
   const b = ev.target.closest('[data-act]');
   if (!b || b.disabled) return;
   const act = b.dataset.act, id = b.dataset.ex;
-  if (act === 'set') {
-    const i = +b.dataset.i, n = cur.sets[id] || 0;
-    cur.sets[id] = n === i + 1 ? i : i + 1;
+  if (act === 'toggle') {
+    // In an open card the figure has its own pause button; taps on it shouldn't fold the card.
+    if (openCards.has(id) && ev.target.closest('.fig')) return;
+    setCardOpen(id, !openCards.has(id));
+  } else if (act === 'set' || act === 'extra') {
+    const was = exDone(cur, id);
+    if (act === 'set') { const i = +b.dataset.i, n = cur.sets[id] || 0; cur.sets[id] = n === i + 1 ? i : i + 1; }
+    else cur.extra[id] = !cur.extra[id];
     touch(); updateToday(); refreshTypeLock();
-  } else if (act === 'extra') {
-    cur.extra[id] = !cur.extra[id]; touch(); updateToday(); refreshTypeLock();
+    if (!was && exDone(cur, id)) setTimeout(() => advanceCard(id), 450);
+  } else if (act === 'focus') {
+    openFocus();
   } else if (act === 'round') {
     const i = +b.dataset.i, n = cur.rounds || 0;
     cur.rounds = n === i + 1 ? i : i + 1; touch(); updateToday(); refreshTypeLock();
   } else if (act === 'type') {
     if (hasProgress(cur)) return;
-    cur.type = b.dataset.type; renderToday();
+    cur.type = b.dataset.type; openCards.clear(); renderToday();
   } else if (act === 'walk') {
     const d = b.dataset.d;
     if (state.walks[d]) delete state.walks[d]; else state.walks[d] = true;
@@ -1468,11 +1757,7 @@ vToday.addEventListener('click', ev => {
   } else if (act === 'c-reset') {
     resetCircuit();
   } else if (act === 'finish') {
-    for (const ex of exList(cur)) if (EX[ex].kg && (cur.sets[ex] || 0) > 0 && cur.w[ex] == null) { const l = lastInfo(ex); if (l) cur.w[ex] = l.kg; }
-    cur.done = true; touch();
-    cur = null; finishConfirm = false;
-    renderAll();
-    window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    finishSession();
   } else if (act === 'discard') {
     finishConfirm = true; updateToday();
   } else if (act === 'discard-no') {
@@ -1483,6 +1768,10 @@ vToday.addEventListener('click', ev => {
     if (!state.sessions.length) state.settings.start = null;
     renderAll();
   }
+});
+vToday.addEventListener('keydown', ev => {
+  const t = ev.target;
+  if ((ev.key === 'Enter' || ev.key === ' ') && t.classList && t.classList.contains('ex-top')) { ev.preventDefault(); setCardOpen(t.dataset.ex, !openCards.has(t.dataset.ex)); }
 });
 function refreshTypeLock() {
   const locked = hasProgress(cur);
@@ -1498,6 +1787,260 @@ vToday.addEventListener('change', ev => {
     cur.up[t.dataset.up] = t.checked; if (!t.checked) delete cur.up[t.dataset.up];
     touch(); updateToday(); refreshTypeLock();
   }
+});
+
+/* ================= Step by step: one exercise at a time, full screen ================= */
+// Units are what you do in one go: a single exercise or a pair you alternate. Order: warm-up, strength, neck
+// (in a full workout the neck sets are offered in the rests, its unit at the end only catches what's left).
+const REST_MAIN = 75;
+const FX = { open: false, u: 0, k: 0, rest: null, hold: null, iv: null, pushed: false, end: false, units: [] };
+const focusEl = document.getElementById('focus');
+const ICON_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+const ICON_PREV = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_NEXT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const UNIT_KIND = { warm: 'Rozcvička', main: 'Silová část', neck: 'Krk' };
+
+function unitsOf(s) {
+  const list = exList(s), out = [];
+  const group = (ids, kind) => {
+    for (let i = 0; i < ids.length; i++) {
+      if (PAIR[ids[i]] && ids[i + 1] === PAIR[ids[i]]) { out.push({ ids: [ids[i], ids[i + 1]], kind }); i++; }
+      else out.push({ ids: [ids[i]], kind });
+    }
+  };
+  group(list.filter(id => STAB_ALL.includes(id)), 'warm');
+  if (s.type !== 'S') group(list.filter(id => !STAB_ALL.includes(id) && !NECK_ALL.includes(id)), 'main');
+  group(list.filter(id => NECK_ALL.includes(id)), 'neck');
+  return out;
+}
+const unitDone = u => u.ids.every(id => exDone(cur, id));
+const firstOpenK = u => Math.max(0, u.ids.findIndex(id => !exDone(cur, id)));
+function nextOpenUnit(from) {
+  const n = FX.units.length;
+  for (let i = 1; i <= n; i++) { const j = (from + i) % n; if (!unitDone(FX.units[j])) return j; }
+  return -1;
+}
+// The neck exercise to slot into a rest of the strength part.
+const restNeck = () => cur.type === 'S' ? null : exList(cur).find(id => NECK_ALL.includes(id) && !exDone(cur, id)) || null;
+
+function openFocus() {
+  ensureCur();
+  FX.units = unitsOf(cur);
+  const i = FX.units.findIndex(u => !unitDone(u));
+  FX.u = i < 0 ? 0 : i; FX.k = firstOpenK(FX.units[FX.u]);
+  FX.rest = null; FX.hold = null; FX.end = false; FX.open = true;
+  if (!FX.pushed) { try { history.pushState({ focus: 1 }, ''); FX.pushed = true; } catch (e) {} }
+  focusEl.hidden = false; document.body.classList.add('noscroll');
+  keepAwake(true);
+  renderFocus();
+}
+function closeFocus(fromPop) {
+  if (!FX.open) return;
+  if (!fromPop && FX.pushed) { FX.pushed = false; history.back(); return; } // popstate finishes the close
+  FX.pushed = false; FX.open = false; FX.rest = null; FX.hold = null;
+  clearInterval(FX.iv); FX.iv = null;
+  focusEl.hidden = true; focusEl.innerHTML = '';
+  if (!sheet) document.body.classList.remove('noscroll');
+  keepAwake(false);
+  if (cur) updateToday();
+}
+window.addEventListener('popstate', () => { if (FX.open) closeFocus(true); });
+
+const clock = sec => Math.floor(sec / 60) + ':' + pad(sec % 60);
+function topHTML() {
+  const p = prog(cur);
+  return `<div class="fx-top"><button class="ibtn" data-fx="close" aria-label="Zavřít">${ICON_X}</button>
+    <div class="bar"><i style="width:${p.pct}%"></i></div><span class="fx-count num">${p.pct} %</span></div>`;
+}
+function renderFocus() {
+  if (!FX.open) return;
+  if (FX.end) return renderFocusEnd();
+  if (FX.rest) return renderRest();
+  const u = FX.units[FX.u], id = u.ids[FX.k], e = EX[id], last = lastInfo(id);
+  const n = cur.sets[id] || 0, extraNow = n >= e.sets && needExtra(id) && !cur.extra[id];
+  const tabs = u.ids.length > 1 ? `<div class="fx-tabs" role="group" aria-label="Dvojice">${u.ids.map((x, k) =>
+    `<button data-fx="k" data-k="${k}" aria-pressed="${k === FX.k}" class="${exDone(cur, x) ? 'done' : ''}">${EX[x].name}<small>${exDone(cur, x) ? 'Hotovo' : `Série ${Math.min((cur.sets[x] || 0) + 1, EX[x].sets)} z ${EX[x].sets}`}</small></button>`).join('')}</div>` : '';
+  let dots = '';
+  for (let i = 0; i < e.sets; i++) dots += `<i class="${i < n ? 'on' : ''}"></i>`;
+  if (needExtra(id)) dots += `<i class="x${cur.extra[id] ? ' on' : ''}"></i>`;
+  const kgVal = cur.w[id] != null ? cur.w[id] : last ? last.kg : null;
+  const kg = e.kg ? `<div class="stepper"><span class="lbl">Váha</span><button class="ibtn" data-fx="kg" data-d="-1" aria-label="O kilo méně">−</button>
+      <input id="fx-kg" inputmode="decimal" value="${kgVal != null ? fmtKg(kgVal) : ''}" placeholder="kg" aria-label="Váha v kg">
+      <button class="ibtn" data-fx="kg" data-d="1" aria-label="O kilo víc">+</button><small>kg${last ? `<br>minule ${fmtKg(last.kg)}` : ''}</small></div>` : '';
+  const hold = e.hold ? holdBtnHTML(id) : '';
+  const done = exDone(cur, id);
+  const pairNote = u.ids.length > 1 ? `<p class="note">${NO_REST[u.ids[0]] ? 'Střídej je bez pauzy: série jednoho, hned série druhého.' : 'Série jednoho, hned série druhého, pak pauza. Do pauzy ti nabídnu sérii krku.'}</p>` : '';
+  const label = done ? (nextOpenUnit(FX.u) < 0 ? 'Všechno hotovo' : 'Další cvik') : extraNow ? 'Série navíc pro slabší hotová' : `Série ${n + 1} z ${e.sets} hotová`;
+  focusEl.innerHTML = topHTML() + `<div class="fx-body"><div class="fx-in">
+      <p class="fx-kick">${UNIT_KIND[u.kind]} · krok ${FX.u + 1} z ${FX.units.length}</p>
+      ${tabs}
+      <h2>${e.name}</h2>
+      <p class="fx-rx"><span class="rx">${e.rx}</span>${e.side ? `<span class="side note">${e.side}</span>` : ''}</p>
+      <div class="fx-fig figcol"><div class="fig" data-fig="${e.fig || id}" data-label="Animace cviku ${esc(e.name)}"></div></div>
+      ${musKey(id)}
+      <div class="fx-sets"><span class="lbl">Série</span>${dots}${n || cur.extra[id] ? '<button class="btn quiet sm undo" data-fx="undo">Vrátit sérii</button>' : ''}</div>
+      ${hold}${kg}
+      ${sideNoteHTML(id)}${pairNote}
+      <ul class="cues">${e.cues.map(c => `<li>${c}</li>`).join('')}</ul>
+      <details class="how"><summary>Proč a na co si dát pozor</summary><div>${howHTML(id)}</div></details>
+    </div></div>
+    <div class="fx-bot"><div>
+      <button class="ibtn lg" data-fx="prev" aria-label="Předchozí cvik" ${FX.u === 0 ? 'disabled' : ''}>${ICON_PREV}</button>
+      <button class="btn primary${extraNow ? ' extra' : ''}" data-fx="${done ? 'next' : 'done'}">${done ? '' : ICON_CHECK}${label}</button>
+      <button class="ibtn lg" data-fx="next" aria-label="Další cvik" ${FX.u >= FX.units.length - 1 ? 'disabled' : ''}>${ICON_NEXT}</button>
+    </div></div>`;
+  mountAll(focusEl);
+  focusEl.querySelector('.fx-body').scrollTop = 0;
+}
+function holdBtnHTML(id) {
+  const e = EX[id], h = FX.hold && FX.hold.id === id ? FX.hold : null;
+  const sideTxt = e.uni ? (h && h.side === 2 ? 'Druhá strana' : 'První strana') : 'Výdrž';
+  const t = h ? holdLeft(h) : e.hold;
+  return `<button class="holdbtn${h ? ' run' + (h.prepEnd ? ' prep' : '') : ''}" data-fx="hold" id="fx-hold"><b class="num" id="fx-hold-t">${h && h.prepEnd ? t : clock(t)}</b>
+    <span id="fx-hold-l">${h ? (h.prepEnd ? 'Připrav se…' : sideTxt) : `Spustit odpočet ${e.hold} s`}<small>${h ? 'Klepnutím zastavíš' : e.uni ? 'Po první straně se sám spustí druhá a série se odškrtne' : 'Na konci se série odškrtne sama'}</small></span></button>`;
+}
+const holdLeft = h => h.prepEnd ? Math.max(1, Math.ceil((h.prepEnd - Date.now()) / 1000)) : Math.max(0, Math.ceil((h.endAt - Date.now()) / 1000));
+
+function renderRest() {
+  const r = FX.rest, left = Math.max(0, Math.ceil((r.endAt - Date.now()) / 1000));
+  const nu = FX.units[FX.u], nextId = nu && nu.ids[FX.k];
+  const nk = restNeck();
+  const neck = nk ? `<div class="rest-neck"><div class="fig" data-fig="${EX[nk].fig || nk}" data-label="Animace cviku ${esc(EX[nk].name)}"></div>
+      <div><p class="fx-kick">Do pauzy krk</p><h3>${EX[nk].name}</h3><p>Teď jedna série (${EX[nk].rx}${EX[nk].side ? ', ' + EX[nk].side : ''}). Máš ${cur.sets[nk] || 0} z ${EX[nk].sets}.</p>
+      <button class="btn sm" data-fx="neck" data-ex="${nk}">${ICON_CHECK}Série krku hotová</button></div></div>` : '';
+  focusEl.innerHTML = topHTML() + `<div class="rest">
+      <p class="kick">Pauza</p>
+      <div class="rest-ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="45"/><circle class="fg" id="rest-fg" cx="50" cy="50" r="45" stroke-dasharray="282.7" stroke-dashoffset="${(282.7 * (1 - left / r.total)).toFixed(1)}"/></svg><b class="num" id="rest-t">${clock(left)}</b></div>
+      <div class="row"><button class="btn" data-fx="rest-add">+15 s</button><button class="btn run" data-fx="rest-skip">Pokračovat</button></div>
+      ${nextId ? `<p class="rest-next">Další: <b>${EX[nextId].name}</b>${nu.ids.length > 1 || (cur.sets[nextId] || 0) ? `, série ${Math.min((cur.sets[nextId] || 0) + 1, EX[nextId].sets)} z ${EX[nextId].sets}` : ''}</p>` : ''}
+      ${neck}
+    </div>`;
+  mountAll(focusEl);
+}
+function renderFocusEnd() {
+  const p = prog(cur);
+  focusEl.innerHTML = topHTML() + `<div class="rest fx-end">
+      <div class="big-ok">${ICON_OK}</div>
+      <h2>Hotovo, ${p.pct} %</h2>
+      <p class="note">Všechny cviky máš odškrtnuté. Ulož trénink, ať se příště nabídne ten další.</p>
+      <button class="btn primary" data-fx="finish">Dokončit a uložit trénink</button>
+      ${cur.type !== 'S' ? '<button class="btn" data-fx="bonus">Ještě bonusový okruh</button>' : ''}
+      <button class="btn quiet" data-fx="close">Zpátky na přehled cviků</button>
+    </div>`;
+}
+
+function fxTick() {
+  const now = Date.now();
+  if (FX.rest) {
+    const left = Math.max(0, Math.ceil((FX.rest.endAt - now) / 1000));
+    if (left <= 3 && left >= 1 && left !== FX.rest.beep) { FX.rest.beep = left; beep(520, 0.08, 0.1); }
+    if (left <= 0) { FX.rest = null; beep(880, 0.4, 0.2); renderFocus(); }
+    else {
+      const t = document.getElementById('rest-t'), fg = document.getElementById('rest-fg');
+      if (t) t.textContent = clock(left);
+      if (fg) fg.setAttribute('stroke-dashoffset', (282.7 * (1 - left / FX.rest.total)).toFixed(1));
+    }
+  }
+  const h = FX.hold;
+  if (h) {
+    if (h.prepEnd) {
+      const p = Math.ceil((h.prepEnd - now) / 1000);
+      if (p > 0) { if (p !== h.beep) { h.beep = p; beep(520, 0.08, 0.1); } }
+      else { h.prepEnd = 0; h.endAt = now + h.sec * 1000; h.beep = -1; beep(880, 0.3); paintHold(); }
+    } else if (now >= h.endAt) {
+      beep(880, 0.5, 0.2);
+      if (EX[h.id].uni && h.side === 1) { h.side = 2; h.prepEnd = now + PREP * 1000; h.beep = -1; paintHold(); }
+      else { FX.hold = null; fxDone(); return; }
+    }
+    const t = document.getElementById('fx-hold-t');
+    if (t && FX.hold) t.textContent = h.prepEnd ? holdLeft(h) : clock(holdLeft(h));
+  }
+  if (!FX.rest && !FX.hold) { clearInterval(FX.iv); FX.iv = null; }
+}
+function paintHold() {
+  const b = document.getElementById('fx-hold');
+  if (b) b.outerHTML = holdBtnHTML(FX.hold ? FX.hold.id : FX.units[FX.u].ids[FX.k]);
+}
+const runTicker = () => { if (!FX.iv) FX.iv = setInterval(fxTick, 200); };
+
+// Logs one set of the exercise on screen, then moves on: to the pair partner, to a rest, or to the next unit.
+function fxDone() {
+  const u = FX.units[FX.u], id = u.ids[FX.k], e = EX[id], wasK = FX.k;
+  const n = cur.sets[id] || 0;
+  if (n < e.sets) cur.sets[id] = n + 1;
+  else if (needExtra(id) && !cur.extra[id]) cur.extra[id] = true;
+  else return fxNext();
+  fxSaveKg(id);
+  touch();
+  const partner = u.ids.length > 1 ? 1 - wasK : -1;
+  const partnerOpen = partner >= 0 && !exDone(cur, u.ids[partner]);
+  const rest = u.kind === 'main' && !NO_REST[u.ids[0]] && (!partnerOpen || wasK === 1);
+  if (unitDone(u)) {
+    const j = nextOpenUnit(FX.u);
+    if (j < 0) { FX.end = true; renderFocus(); return; }
+    FX.u = j; FX.k = firstOpenK(FX.units[j]);
+  } else if (partnerOpen) FX.k = partner;
+  if (rest) startRest(REST_MAIN);
+  renderFocus();
+}
+function startRest(sec) {
+  FX.rest = { endAt: Date.now() + sec * 1000, total: sec, beep: -1 };
+  beep(440, 0.3);
+  runTicker();
+}
+function fxNext() {
+  if (FX.u < FX.units.length - 1) { FX.u++; FX.k = firstOpenK(FX.units[FX.u]); }
+  else if (nextOpenUnit(FX.u) < 0) FX.end = true;
+  FX.hold = null; renderFocus();
+}
+function fxSaveKg(id) {
+  const inp = document.getElementById('fx-kg');
+  if (!inp || !EX[id].kg) return;
+  const v = parseFloat(String(inp.value).replace(',', '.'));
+  if (!isNaN(v) && v >= 0) cur.w[id] = Math.round(v * 10) / 10;
+}
+
+focusEl.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-fx]');
+  if (!b || b.disabled) return;
+  const a = b.dataset.fx, u = FX.units[FX.u], id = u && u.ids[FX.k];
+  if (a === 'close') closeFocus();
+  else if (a === 'done') fxDone();
+  else if (a === 'next') fxNext();
+  else if (a === 'prev') { if (FX.u > 0) { FX.u--; FX.k = firstOpenK(FX.units[FX.u]); FX.hold = null; renderFocus(); } }
+  else if (a === 'k') { FX.k = +b.dataset.k; FX.hold = null; renderFocus(); }
+  else if (a === 'undo') {
+    if (cur.extra[id]) delete cur.extra[id]; else if (cur.sets[id]) cur.sets[id]--;
+    touch(); renderFocus();
+  } else if (a === 'kg') {
+    const inp = document.getElementById('fx-kg');
+    const v = parseFloat(String(inp.value).replace(',', '.'));
+    const nv = Math.max(0, (isNaN(v) ? 0 : v) + +b.dataset.d);
+    inp.value = fmtKg(nv); cur.w[id] = nv; touch();
+  } else if (a === 'hold') {
+    if (FX.hold) { FX.hold = null; paintHold(); return; }
+    FX.hold = { id, sec: EX[id].hold, side: 1, prepEnd: Date.now() + PREP * 1000, endAt: 0, beep: -1 };
+    paintHold(); runTicker(); fxTick();
+  } else if (a === 'rest-add') { FX.rest.endAt += 15000; FX.rest.total += 15; fxTick(); }
+  else if (a === 'rest-skip') { FX.rest = null; renderFocus(); }
+  else if (a === 'neck') {
+    const nk = b.dataset.ex;
+    cur.sets[nk] = Math.min(EX[nk].sets, (cur.sets[nk] || 0) + 1); touch();
+    renderFocus();
+    toast(`${EX[nk].name}: série ${cur.sets[nk]} z ${EX[nk].sets}`);
+  } else if (a === 'finish') { closeFocus(); finishSession(); }
+  else if (a === 'bonus') {
+    closeFocus();
+    setTimeout(() => { const d = document.getElementById('bonus'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, 80);
+  }
+});
+focusEl.addEventListener('change', ev => {
+  if (ev.target.id !== 'fx-kg') return;
+  const id = FX.units[FX.u].ids[FX.k];
+  const v = parseFloat(String(ev.target.value).replace(',', '.'));
+  if (isNaN(v) || v < 0) delete cur.w[id]; else cur.w[id] = Math.round(v * 10) / 10;
+  touch();
 });
 
 /* ================= Overview ================= */
@@ -1542,13 +2085,13 @@ function renderLog() {
     const conf = delConfirm === s.id;
     return `<div class="hrow"><span class="when">${fmtDay(s.d)}</span><span class="what">${TYPE_NAME[s.type]}${s.opt && s.rounds ? ' + okruh' : ''}${s.done ? '' : ' · rozdělaný'}</span><span class="pct">${p.pct} %</span>
       ${conf ? `<button class="btn danger" data-del-yes="${s.id}">Smazat</button><button class="btn quiet" data-del-no="1">Zpět</button>` : `<button class="btn quiet" data-del="${s.id}" aria-label="Smazat záznam ${fmtDay(s.d)}">Smazat</button>`}</div>`;
-  }).join('') : '<p class="empty">Zatím tu nic není. Jakmile v záložce Dnes odškrtneš první sérii, trénink se tu objeví.</p>';
+  }).join('') : '<p class="empty">Zatím tu nic není. Jakmile v záložce Trénink odškrtneš první sérii, trénink se tu objeví.</p>';
 
-  const goals = `<section class="card"><h2>Co plánem zlepšujeme</h2>
+  const goals = `<details class="card"><summary><h2>Co plánem zlepšujeme</h2></summary>
       <ul class="goal-list">${Object.values(GOALS).map(g => `<li><span class="goal${g.weak ? ' weak' : ''}">${g.name}</span> ${g.what} <span class="note">Kde: ${g.where}.</span></li>`).join('')}</ul>
-      <p class="note">U každého cviku v záložce Dnes je napsané, který z cílů zlepšuje.</p>
-    </section>`;
-  const neck = `<section class="card"><h2>Napřímená krční páteř</h2>
+      <p class="note">U každého cviku v záložce Trénink je pod „Proč a na co si dát pozor“, který z cílů zlepšuje.</p>
+    </details>`;
+  const neck = `<details class="card"><summary><h2>Napřímená krční páteř</h2></summary>
       <p class="txt">Zdravý krk je při pohledu z boku mírně prohnutý dopředu (lordóza). Když je napřímený, hlava často ujíždí dopředu a šíjové svaly jsou přetížené a zároveň slabé. Plán proto posiluje hluboké ohybače krku (zásun brady) a šíjové svaly (tlak hlavy do dlaní), tedy dva cviky, které ve studiích zakřivení zlepšovaly nejvíc. Děláš je v pauzách silové části, takže nezaberou čas navíc. Výsledek se ve studiích ukázal až po 3 měsících pravidelného cvičení.</p>
       <p class="txt">Napřímený krk často vůbec nebolí a tvar na rentgenu sám o bolesti moc neříká. Když ti ho našel lékař, ukaž mu tyhle cviky, ať je případně upraví.</p>
       <p class="txt"><b>K lékaři nebo fyzioterapeutovi hned, když:</b></p>
@@ -1558,13 +2101,13 @@ function renderLog() {
         <li>krk začal bolet po úrazu (pád, autonehoda),</li>
         <li>se bolest po 2 týdnech cvičení zhoršuje.</li>
       </ul>
-    </section>`;
-  v.innerHTML = tiles + goals + neck + `
+    </details>`;
+  v.innerHTML = tiles + `
     <section class="card"><h2>Posledních 8 týdnů</h2>
       <div class="scroll">${cal}</div>
       <div class="legend"><span><i style="background:var(--accent)"></i>Trénink A nebo B</span><span><i style="background:var(--accent-soft)"></i>Stabilizace a krk</span><span><i style="background:var(--weak);border-radius:50%"></i>Chůze</span></div>
     </section>
-    <section class="card"><h2>Rozvrh týdne</h2>
+    <details class="card"><summary><h2>Rozvrh týdne</h2></summary>
       <div class="scroll"><table><thead><tr><th>Den</th><th>Plán</th></tr></thead><tbody>
         <tr><td>Pondělí</td><td>Trénink (A a B se střídají)</td></tr>
         <tr><td>Úterý</td><td>Chůze</td></tr>
@@ -1575,12 +2118,12 @@ function renderLog() {
         <tr><td>Neděle</td><td>Volno</td></tr>
       </tbody></table></div>
       <p class="note">Dny si klidně posuň, jen mezi silovými tréninky nech aspoň den pauzu. Cíl pro chůzi: 8–10 tisíc kroků denně.</p>
-    </section>
+    </details>
     <section class="card"><h2>Aktuální váhy</h2>
       <div class="scroll"><table><thead><tr><th>Cvik</th><th class="r">Naposledy</th><th>Kdy</th><th></th></tr></thead><tbody>${wRows}</tbody></table></div>
       <p class="note">Jakmile zvládneš všechny série o 2 opakování víc, přidej váhu a vrať se na původní počet opakování.</p>
     </section>
-    <section class="card"><h2>Historie</h2><div class="hist">${rows}</div></section>` + backupHTML();
+    <section class="card"><h2>Historie</h2><div class="hist">${rows}</div></section>` + goals + neck + backupHTML();
 }
 
 /* ---- backup: copy all records as text between devices ---- */
@@ -1648,7 +2191,7 @@ function renderWeak() {
     <section class="card">
       <h2>Která noha je slabší?</h2>
       <div class="two">
-        <div class="fig" data-fig="stoj1" role="img" aria-label="Animace stoje na jedné noze zepředu, pánev zůstává ve vodorovné linii"></div>
+        <div class="fig" data-fig="stoj1" data-label="Animace stoje na jedné noze zepředu, pánev zůstává ve vodorovné linii"></div>
         <ol class="steps">
           <li>Postav se naboso před zrcadlo, ruce v bok.</li>
           <li>Zvedni jednu nohu a vydrž 30 s. Sleduj, jestli se pánev drží na čárkované linii, nebo se boky přesouvají do strany.</li>
